@@ -3,7 +3,7 @@ import XCTest
 
 final class HARTests: XCTestCase {
     func testCodable() {
-        XCTAssertEqual(fixtures.count, 1)
+        XCTAssertEqual(fixtures.count, 2)
     }
 
     var fixtureURL: URL {
