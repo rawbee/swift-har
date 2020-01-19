@@ -77,6 +77,14 @@ public struct HAR: Codable, Equatable {
     public struct Cookie: Codable, Equatable {
         public var name: String
         public var value: String
+        public var path: String?
+        public var domain: String?
+        public var expires: String?
+        public var httpOnly: Bool?
+        public var secure: Bool?
+
+        // Non-standard
+        public var sameSite: String?
     }
 
     public struct Header: Codable, Equatable {
@@ -104,7 +112,8 @@ public struct HAR: Codable, Equatable {
         public var size: Int
         public var compression: Int?
         public var mimeType: String?
-        public var text: String
+        public var text: String?
+        public var encoding: String?
     }
 
     public struct Cache: Codable, Equatable {}
