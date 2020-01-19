@@ -24,5 +24,4 @@ let package = Package(
         .testTarget(
             name: "HARTests",
             dependencies: ["HAR"]),
-    ]
-)
+    ])

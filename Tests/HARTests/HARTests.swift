@@ -1,5 +1,5 @@
-import XCTest
 @testable import HAR
+import XCTest
 
 final class HARTests: XCTestCase {
     func testExample() {
