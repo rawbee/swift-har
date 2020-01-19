@@ -1,0 +1,35 @@
+name: Swift
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Build
+        run: swift build -v
+
+      - name: Run tests
+        run: swift test -v
+
+  lint:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v2
+        with:
+          path: Project
+
+      - name: Checkout SwiftFormat
+        uses: actions/checkout@v2
+        with:
+          repository: nicklockwood/SwiftFormat
+          ref: 0.44.0
+          path: SwiftFormat
+
+      - name: Run linter
+        run: ./SwiftFormat/CommandLineTool/swiftformat --lint ./Project
