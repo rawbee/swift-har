@@ -15,7 +15,7 @@ public struct HAR: Codable, Equatable {
         public var creator: Creator
         public var browser: Browser?
         public var pages: [Page]?
-        public var entries: [Entry]
+        public var entries: [Entry] = []
     }
 
     public struct Creator: Codable, Equatable {
@@ -56,9 +56,9 @@ public struct HAR: Codable, Equatable {
         public var method: String
         public var url: String
         public var httpVersion: String
-        public var cookies: [Cookie]
-        public var headers: [Header]
-        public var queryString: [QueryString]
+        public var cookies: [Cookie] = []
+        public var headers: [Header] = []
+        public var queryString: [QueryString] = []
         public var postData: PostData?
         public var headersSize: Int = -1
         public var bodySize: Int = -1
@@ -68,8 +68,8 @@ public struct HAR: Codable, Equatable {
         public var status: Int
         public var statusText: String
         public var httpVersion: String
-        public var cookies: [Cookie]
-        public var headers: [Header]
+        public var cookies: [Cookie] = []
+        public var headers: [Header] = []
         public var content: Content
         public var redirectURL: String
         public var headersSize: Int
@@ -172,7 +172,6 @@ extension HAR.Request {
         // TODO:
         cookies = []
 
-        headers = []
         if let headers = request.allHTTPHeaderFields {
             for (name, value) in headers {
                 self.headers.append(HAR.Header(name: name, value: value))
