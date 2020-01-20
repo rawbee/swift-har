@@ -145,8 +145,7 @@ public struct HAR: Codable, Equatable {
 
 extension HAR {
     init(data: Data) throws {
-        let har = try JSONDecoder().decode(HAR.self, from: data)
-        log = har.log
+        self = try JSONDecoder().decode(HAR.self, from: data)
     }
 
     init(contentsOf url: URL) throws {
