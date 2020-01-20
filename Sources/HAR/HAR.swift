@@ -376,10 +376,10 @@ public struct HAR: Codable, Equatable {
     /// This objects contains info about a request coming from browser cache.
     public struct Cache: Codable, Equatable {
         // State of a cache entry before the request. Leave out this field if the information is not available.
-        public var beforeRequest: CacheObject?
+        public var beforeRequest: CacheEntry?
 
         /// State of a cache entry after the request. Leave out this field if the information is not available.
-        public var afterRequest: CacheObject?
+        public var afterRequest: CacheEntry?
 
         /// A comment provided by the user or the application.
         ///
@@ -387,7 +387,7 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
-    public struct CacheObject: Codable, Equatable {
+    public struct CacheEntry: Codable, Equatable {
         /// Expiration time of the cache entry.
         public var expires: String?
 
