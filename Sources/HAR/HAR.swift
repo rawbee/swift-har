@@ -52,8 +52,20 @@ public struct HAR: Codable, Equatable {
         public var connection: String?
     }
 
+    public enum HTTPMethod: String, Codable {
+        case get = "GET"
+        case head = "HEAD"
+        case post = "POST"
+        case put = "PUT"
+        case delete = "DELETE"
+        case connect = "CONNECT"
+        case options = "OPTIONS"
+        case trace = "TRACE"
+        case patch = "PATCH"
+    }
+
     public struct Request: Codable, Equatable {
-        public var method: String
+        public var method: HTTPMethod
         public var url: String
         public var httpVersion: String
         public var cookies: [Cookie] = []
@@ -145,7 +157,7 @@ extension URLRequest {
     init(har: HAR.Request) {
         let url = URL(string: har.url)! // FIXME:
         self.init(url: url)
-        httpMethod = har.method
+        httpMethod = har.method.rawValue
         for header in har.headers {
             setValue(header.value, forHTTPHeaderField: header.name)
         }
@@ -157,8 +169,8 @@ extension URLRequest {
 
 extension HAR.Request {
     init(request: URLRequest) {
-        method = "GET"
-        if let method = request.httpMethod {
+        method = .get
+        if let httpMethod = request.httpMethod, let method = HAR.HTTPMethod(rawValue: httpMethod) {
             self.method = method
         }
 

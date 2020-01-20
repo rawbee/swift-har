@@ -84,7 +84,7 @@ final class HARTests: XCTestCase {
             request.setValue("session=123", forHTTPHeaderField: "Cookie")
 
             let harRequest = HAR.Request(request: request)
-            XCTAssertEqual(harRequest.method, "GET")
+            XCTAssertEqual(harRequest.method, .get)
             XCTAssertEqual(harRequest.url, "http://example.com")
             XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
             XCTAssert(harRequest.cookies.contains(HAR.Cookie(name: "session", value: "123")))
@@ -99,7 +99,7 @@ final class HARTests: XCTestCase {
             request.httpBody = "foo=bar".data(using: .utf8)
 
             let harRequest = HAR.Request(request: request)
-            XCTAssertEqual(harRequest.method, "POST")
+            XCTAssertEqual(harRequest.method, .post)
             XCTAssertEqual(harRequest.url, "http://example.com")
             XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
             XCTAssertEqual(harRequest.queryString, [])
