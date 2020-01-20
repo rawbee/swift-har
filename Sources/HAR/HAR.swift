@@ -5,6 +5,8 @@
 //  MIT license, see LICENSE file for details.
 //
 
+import Foundation
+
 public struct HAR: Codable, Equatable {
     public var log: Log
 
@@ -60,6 +62,40 @@ public struct HAR: Codable, Equatable {
         public var postData: PostData?
         public var headersSize: Int
         public var bodySize: Int
+
+        init(_ request: URLRequest) {
+            method = "GET"
+            if let method = request.httpMethod {
+                self.method = method
+            }
+
+            url = "about:blank"
+            if let url = request.url {
+                self.url = url.absoluteString
+            }
+
+            httpVersion = "HTTP/1.1"
+
+            // TODO:
+            cookies = []
+
+            headers = []
+            if let headers = request.allHTTPHeaderFields {
+                for (name, value) in headers {
+                    self.headers.append(Header(name: name, value: value))
+                }
+            }
+
+            // TODO:
+            queryString = []
+
+            // TODO:
+            postData = nil
+
+            // TODO:
+            headersSize = -1
+            bodySize = -1
+        }
     }
 
     public struct Response: Codable, Equatable {
