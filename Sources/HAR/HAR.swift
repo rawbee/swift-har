@@ -439,22 +439,33 @@ public struct HAR: Codable, Equatable {
 }
 
 extension HAR {
+    /// Creates a `HAR` from JSON `Data`.
+    ///
+    /// - Parameter data: UTF-8 JSON data.
     init(data: Data) throws {
         self = try JSONDecoder().decode(HAR.self, from: data)
     }
 
+    /// Creates a `HAR` from the contents of a file URL.
+    ///
+    /// - Parameter url: Path to `.har` file.
     init(contentsOf url: URL) throws {
         try self.init(data: try Data(contentsOf: url))
     }
 
+    /// Returns a HAR encoded as JSON `Data`.
     func encoded() throws -> Data {
         try JSONEncoder().encode(self)
     }
 }
 
 extension URLRequest {
+    /// Creates a URL Request from a `HAR.Request`.
+    ///
+    /// - Parameter har: A `HAR.Request`.
     init(har: HAR.Request) {
-        let url = URL(string: har.url)! // FIXME:
+        // FIXME: Do not force unwrap URL.
+        let url = URL(string: har.url)!
         self.init(url: url)
         httpMethod = har.method.rawValue
         for header in har.headers {
@@ -467,6 +478,9 @@ extension URLRequest {
 }
 
 extension HAR.Request {
+    /// Creates a HAR Request from a URL Request.
+    ///
+    /// - Parameter request: A URL Request.
     init(request: URLRequest) {
         method = .get
         if let httpMethod = request.httpMethod, let method = HAR.HTTPMethod(rawValue: httpMethod) {
@@ -498,7 +512,7 @@ extension HAR.Request {
         if let data = request.httpBody {
             let mimeType = request.value(forHTTPHeaderField: "Content-Type") ?? "application/x-www-form-urlencoded; charset=UTF-8"
             let text = String(bytes: data, encoding: .utf8)! // FIXME:
-            postData = HAR.PostData(mimeType: mimeType, text: text)
+            postData = HAR.PostData(text: text, mimeType: mimeType)
         }
     }
 }
@@ -510,6 +524,7 @@ internal func parseFormUrlEncoded(_ str: String) -> [(key: String, value: String
 }
 
 extension HAR.Param {
+    /// Create HAR Param from `(key, value)` tuple.
     init(_ pair: (key: String, value: String?)) {
         name = pair.key
         value = pair.value
@@ -517,7 +532,8 @@ extension HAR.Param {
 }
 
 extension HAR.PostData {
-    init(mimeType: String, text: String) {
+    /// Create HAR PostData from plain text.
+    init(text: String, mimeType: String) {
         self.mimeType = mimeType
         self.text = text
 

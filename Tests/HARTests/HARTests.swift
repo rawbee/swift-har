@@ -125,7 +125,7 @@ final class HARTests: XCTestCase {
     }
 
     func testPostData() throws {
-        let postData = HAR.PostData(mimeType: "application/x-www-form-urlencoded", text: "foo=1&bar=2")
+        let postData = HAR.PostData(text: "foo=1&bar=2", mimeType: "application/x-www-form-urlencoded")
         XCTAssertEqual(
             postData.params,
             [
