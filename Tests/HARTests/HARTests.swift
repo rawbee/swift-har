@@ -67,8 +67,7 @@ final class HARTests: XCTestCase {
     }
 
     func testDecodable() throws {
-        let data = fixture(name: "Safari example.com.har")
-        let har = try HAR.decode(data: data)
+        let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har"))
 
         XCTAssertEqual(har.log.version, "1.2")
         XCTAssertEqual(har.log.creator.name, "WebKit Web Inspector")
@@ -108,7 +107,7 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.postData?.params.first, HAR.Param(name: "foo", value: "bar"))
         }
 
-        if let harRequest = try HAR.decode(data: fixture(name: "Safari example.com.har")).log.entries.first?.request {
+        if let harRequest = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har")).log.entries.first?.request {
             let request = URLRequest(har: harRequest)
             XCTAssertEqual(request.httpMethod, "GET")
             XCTAssertEqual(request.url?.absoluteString, "http://example.com/")
@@ -116,7 +115,7 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(request.value(forHTTPHeaderField: "User-Agent"), "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")
         }
 
-        if let harRequest = (try HAR.decode(data: fixture(name: "Safari jsbin.com.har"))).log.entries[25...].first?.request {
+        if let harRequest = (try HAR(contentsOf: fixtureURL(name: "Safari jsbin.com.har"))).log.entries[25...].first?.request {
             let request = URLRequest(har: harRequest)
             XCTAssertEqual(request.httpMethod, "POST")
             XCTAssertEqual(request.url?.absoluteString, "https://jsbin.com/save")
@@ -142,16 +141,16 @@ final class HARTests: XCTestCase {
         return url
     }
 
+    func fixtureURL(name: String) -> URL {
+        fixtureURL.appendingPathComponent(name)
+    }
+
     var fixtures: [String: Data] {
         var fixtures: [String: Data] = [:]
         for name in try! FileManager.default.contentsOfDirectory(atPath: fixtureURL.path) {
-            fixtures[name] = fixture(name: name)
+            fixtures[name] = try! Data(contentsOf: fixtureURL(name: name))
         }
         return fixtures
-    }
-
-    func fixture(name: String) -> Data {
-        try! Data(contentsOf: fixtureURL.appendingPathComponent(name))
     }
 
     static var allTests = [
