@@ -101,6 +101,14 @@ final class HARTests: XCTestCase {
             XCTAssertNil(request.httpBody)
             XCTAssertEqual(request.value(forHTTPHeaderField: "User-Agent"), "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")
         }
+
+        if let harRequest = (try HAR.decode(data: fixture(name: "Safari jsbin.com.har"))).log.entries[25...].first?.request {
+            let request = URLRequest(har: harRequest)
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.url?.absoluteString, "https://jsbin.com/save")
+            XCTAssertEqual(request.httpBody?.count, 531)
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/x-www-form-urlencoded; charset=UTF-8")
+        }
     }
 
     var fixtureURL: URL {

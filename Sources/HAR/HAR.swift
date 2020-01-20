@@ -173,8 +173,12 @@ extension URLRequest {
     init(har: HAR.Request) {
         let url = URL(string: har.url)!
         self.init(url: url)
+        httpMethod = har.method
         for header in har.headers {
             setValue(header.value, forHTTPHeaderField: header.name)
+        }
+        if let postData = har.postData {
+            httpBody = postData.text.data(using: .utf8)
         }
     }
 }
