@@ -81,14 +81,14 @@ final class HARTests: XCTestCase {
         if let url = URL(string: "http://example.com") {
             var request = URLRequest(url: url)
             request.setValue("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forHTTPHeaderField: "Accept")
-            request.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15", forHTTPHeaderField: "User-Agent")
+            request.setValue("session=123", forHTTPHeaderField: "Cookie")
 
             let harRequest = HAR.Request(request: request)
             XCTAssertEqual(harRequest.method, "GET")
             XCTAssertEqual(harRequest.url, "http://example.com")
             XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
+            XCTAssert(harRequest.cookies.contains(HAR.Cookie(name: "session", value: "123")))
             XCTAssert(harRequest.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
-            XCTAssert(harRequest.headers.contains(HAR.Header(name: "User-Agent", value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")))
             XCTAssertNil(harRequest.postData)
         }
 

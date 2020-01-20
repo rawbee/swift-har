@@ -169,8 +169,11 @@ extension HAR.Request {
 
         httpVersion = "HTTP/1.1"
 
-        // TODO:
-        cookies = []
+        if let cookie = request.value(forHTTPHeaderField: "Cookie") {
+            cookies = parseFormUrlEncoded(cookie).map {
+                HAR.Cookie(name: $0.key, value: $0.value ?? "")
+            }
+        }
 
         if let headers = request.allHTTPHeaderFields {
             for (name, value) in headers {
@@ -189,22 +192,33 @@ extension HAR.Request {
     }
 }
 
+internal func parseFormUrlEncoded(_ str: String) -> [(key: String, value: String?)] {
+    var components = URLComponents()
+    components.query = str
+    return components.queryItems?.map { ($0.name, $0.value) } ?? []
+}
+
+extension HAR.Param {
+    init(_ pair: (key: String, value: String?)) {
+        name = pair.key
+        value = pair.value
+    }
+}
+
 extension HAR.PostData {
     init(mimeType: String, text: String) {
         self.mimeType = mimeType
         self.text = text
 
         if mimeType.hasPrefix("application/x-www-form-urlencoded") {
-            var components = URLComponents()
-            components.query = text
-            params = components.queryItems?.map { HAR.Param(queryItem: $0) } ?? []
+            params = parseFormUrlEncoded(text).map { HAR.Param($0) }
         }
     }
 }
 
-extension HAR.Param {
-    init(queryItem: URLQueryItem) {
-        name = queryItem.name
-        value = queryItem.value
+extension HAR.Cookie {
+    init(name: String, value: String) {
+        self.name = name
+        self.value = value
     }
 }
