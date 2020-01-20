@@ -91,14 +91,14 @@ public struct HAR: Codable, Equatable {
     public struct Cookie: Codable, Equatable {
         public var name: String
         public var value: String
-        public var path: String?
-        public var domain: String?
-        public var expires: String?
-        public var httpOnly: Bool?
-        public var secure: Bool?
+        public var path: String? = nil
+        public var domain: String? = nil
+        public var expires: String? = nil
+        public var httpOnly: Bool? = nil
+        public var secure: Bool? = nil
 
         // Non-standard
-        public var sameSite: String?
+        public var sameSite: String? = nil
     }
 
     public struct Header: Codable, Equatable {
@@ -225,12 +225,5 @@ extension HAR.PostData {
         if mimeType.hasPrefix("application/x-www-form-urlencoded") {
             params = parseFormUrlEncoded(text).map { HAR.Param($0) }
         }
-    }
-}
-
-extension HAR.Cookie {
-    init(name: String, value: String) {
-        self.name = name
-        self.value = value
     }
 }
