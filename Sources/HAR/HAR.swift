@@ -62,36 +62,6 @@ public struct HAR: Codable, Equatable {
         public var postData: PostData?
         public var headersSize: Int = -1
         public var bodySize: Int = -1
-
-        init(request: URLRequest) {
-            method = "GET"
-            if let method = request.httpMethod {
-                self.method = method
-            }
-
-            url = "about:blank"
-            if let url = request.url {
-                self.url = url.absoluteString
-            }
-
-            httpVersion = "HTTP/1.1"
-
-            // TODO:
-            cookies = []
-
-            headers = []
-            if let headers = request.allHTTPHeaderFields {
-                for (name, value) in headers {
-                    self.headers.append(Header(name: name, value: value))
-                }
-            }
-
-            // TODO:
-            queryString = []
-
-            // TODO:
-            postData = nil
-        }
     }
 
     public struct Response: Codable, Equatable {
@@ -131,7 +101,7 @@ public struct HAR: Codable, Equatable {
 
     public struct PostData: Codable, Equatable {
         public var mimeType: String
-        public var params: [Param]
+        public var params: [Param] = []
         public var text: String
     }
 
@@ -159,7 +129,9 @@ public struct HAR: Codable, Equatable {
         public var receive: Double
         public var ssl: Double
     }
+}
 
+extension HAR {
     static func decode(data: Data) throws -> HAR {
         try JSONDecoder().decode(HAR.self, from: data)
     }
@@ -171,7 +143,7 @@ public struct HAR: Codable, Equatable {
 
 extension URLRequest {
     init(har: HAR.Request) {
-        let url = URL(string: har.url)!
+        let url = URL(string: har.url)! // FIXME:
         self.init(url: url)
         httpMethod = har.method
         for header in har.headers {
@@ -180,5 +152,60 @@ extension URLRequest {
         if let postData = har.postData {
             httpBody = postData.text.data(using: .utf8)
         }
+    }
+}
+
+extension HAR.Request {
+    init(request: URLRequest) {
+        method = "GET"
+        if let method = request.httpMethod {
+            self.method = method
+        }
+
+        url = "about:blank"
+        if let url = request.url {
+            self.url = url.absoluteString
+        }
+
+        httpVersion = "HTTP/1.1"
+
+        // TODO:
+        cookies = []
+
+        headers = []
+        if let headers = request.allHTTPHeaderFields {
+            for (name, value) in headers {
+                self.headers.append(HAR.Header(name: name, value: value))
+            }
+        }
+
+        // TODO:
+        queryString = []
+
+        if let data = request.httpBody {
+            let mimeType = request.value(forHTTPHeaderField: "Content-Type") ?? "application/x-www-form-urlencoded; charset=UTF-8"
+            let text = String(bytes: data, encoding: .utf8)! // FIXME:
+            postData = HAR.PostData(mimeType: mimeType, text: text)
+        }
+    }
+}
+
+extension HAR.PostData {
+    init(mimeType: String, text: String) {
+        self.mimeType = mimeType
+        self.text = text
+
+        if mimeType.hasPrefix("application/x-www-form-urlencoded") {
+            var components = URLComponents()
+            components.query = text
+            params = components.queryItems?.map { HAR.Param(queryItem: $0) } ?? []
+        }
+    }
+}
+
+extension HAR.Param {
+    init(queryItem: URLQueryItem) {
+        name = queryItem.name
+        value = queryItem.value
     }
 }

@@ -87,11 +87,25 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.method, "GET")
             XCTAssertEqual(harRequest.url, "http://example.com")
             XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
-            XCTAssertEqual(harRequest.cookies, [])
             XCTAssert(harRequest.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
             XCTAssert(harRequest.headers.contains(HAR.Header(name: "User-Agent", value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")))
-            XCTAssertEqual(harRequest.queryString, [])
             XCTAssertNil(harRequest.postData)
+        }
+
+        if let url = URL(string: "http://example.com") {
+            var request = URLRequest(url: url)
+            request.setValue("Content-Type", forHTTPHeaderField: "application/x-www-form-urlencoded; charset=UTF-8")
+            request.httpMethod = "POST"
+            request.httpBody = "foo=bar".data(using: .utf8)
+
+            let harRequest = HAR.Request(request: request)
+            XCTAssertEqual(harRequest.method, "POST")
+            XCTAssertEqual(harRequest.url, "http://example.com")
+            XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
+            XCTAssertEqual(harRequest.queryString, [])
+            XCTAssertEqual(harRequest.postData?.mimeType, "application/x-www-form-urlencoded; charset=UTF-8")
+            XCTAssertEqual(harRequest.postData?.text, "foo=bar")
+            XCTAssertEqual(harRequest.postData?.params.first, HAR.Param(name: "foo", value: "bar"))
         }
 
         if let harRequest = try HAR.decode(data: fixture(name: "Safari example.com.har")).log.entries.first?.request {
@@ -109,6 +123,16 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(request.httpBody?.count, 531)
             XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/x-www-form-urlencoded; charset=UTF-8")
         }
+    }
+
+    func testPostData() throws {
+        let postData = HAR.PostData(mimeType: "application/x-www-form-urlencoded", text: "foo=1&bar=2")
+        XCTAssertEqual(
+            postData.params,
+            [
+                HAR.Param(name: "foo", value: "1"),
+                HAR.Param(name: "bar", value: "2"),
+            ])
     }
 
     var fixtureURL: URL {
