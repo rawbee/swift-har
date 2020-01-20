@@ -60,10 +60,10 @@ public struct HAR: Codable, Equatable {
         public var headers: [Header]
         public var queryString: [QueryString]
         public var postData: PostData?
-        public var headersSize: Int
-        public var bodySize: Int
+        public var headersSize: Int = -1
+        public var bodySize: Int = -1
 
-        init(_ request: URLRequest) {
+        init(request: URLRequest) {
             method = "GET"
             if let method = request.httpMethod {
                 self.method = method
@@ -91,10 +91,6 @@ public struct HAR: Codable, Equatable {
 
             // TODO:
             postData = nil
-
-            // TODO:
-            headersSize = -1
-            bodySize = -1
         }
     }
 
@@ -164,7 +160,21 @@ public struct HAR: Codable, Equatable {
         public var ssl: Double
     }
 
+    static func decode(data: Data) throws -> HAR {
+        try JSONDecoder().decode(HAR.self, from: data)
+    }
+
     func encoded() throws -> Data {
         try JSONEncoder().encode(self)
+    }
+}
+
+extension URLRequest {
+    init(har: HAR.Request) {
+        let url = URL(string: har.url)!
+        self.init(url: url)
+        for header in har.headers {
+            setValue(header.value, forHTTPHeaderField: header.name)
+        }
     }
 }

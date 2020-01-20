@@ -68,9 +68,7 @@ final class HARTests: XCTestCase {
 
     func testDecodable() throws {
         let data = fixture(name: "Safari example.com.har")
-
-        let decoder = JSONDecoder()
-        let har = try decoder.decode(HAR.self, from: data)
+        let har = try HAR.decode(data: data)
 
         XCTAssertEqual(har.log.version, "1.2")
         XCTAssertEqual(har.log.creator.name, "WebKit Web Inspector")
@@ -80,22 +78,29 @@ final class HARTests: XCTestCase {
     }
 
     func testURLRequest() throws {
-        let url = URL(string: "http://example.com")!
-        var request = URLRequest(url: url)
-        request.setValue("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forHTTPHeaderField: "Accept")
-        request.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15", forHTTPHeaderField: "User-Agent")
+        if let url = URL(string: "http://example.com") {
+            var request = URLRequest(url: url)
+            request.setValue("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forHTTPHeaderField: "Accept")
+            request.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15", forHTTPHeaderField: "User-Agent")
 
-        let harRequest = HAR.Request(request)
-        XCTAssertEqual(harRequest.method, "GET")
-        XCTAssertEqual(harRequest.url, "http://example.com")
-        XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
-        XCTAssertEqual(harRequest.cookies, [])
-        XCTAssert(harRequest.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
-        XCTAssert(harRequest.headers.contains(HAR.Header(name: "User-Agent", value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")))
-        XCTAssertEqual(harRequest.queryString, [])
-        XCTAssertEqual(harRequest.postData, nil)
-        XCTAssertEqual(harRequest.headersSize, -1) // TODO:
-        XCTAssertEqual(harRequest.bodySize, -1) // TODO:
+            let harRequest = HAR.Request(request: request)
+            XCTAssertEqual(harRequest.method, "GET")
+            XCTAssertEqual(harRequest.url, "http://example.com")
+            XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
+            XCTAssertEqual(harRequest.cookies, [])
+            XCTAssert(harRequest.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
+            XCTAssert(harRequest.headers.contains(HAR.Header(name: "User-Agent", value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")))
+            XCTAssertEqual(harRequest.queryString, [])
+            XCTAssertNil(harRequest.postData)
+        }
+
+        if let harRequest = try HAR.decode(data: fixture(name: "Safari example.com.har")).log.entries.first?.request {
+            let request = URLRequest(har: harRequest)
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.absoluteString, "http://example.com/")
+            XCTAssertNil(request.httpBody)
+            XCTAssertEqual(request.value(forHTTPHeaderField: "User-Agent"), "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")
+        }
     }
 
     var fixtureURL: URL {
