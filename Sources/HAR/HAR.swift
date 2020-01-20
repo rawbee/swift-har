@@ -163,4 +163,8 @@ public struct HAR: Codable, Equatable {
         public var receive: Double
         public var ssl: Double
     }
+
+    func encoded() throws -> Data {
+        try JSONEncoder().encode(self)
+    }
 }
