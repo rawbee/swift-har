@@ -181,10 +181,19 @@ public struct HAR: Codable, Equatable {
         public var method: HTTPMethod
 
         /// Absolute URL of the request (fragments are not included).
-        public var url: String
+        public var url: URL {
+            didSet {
+                if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
+                    queryString = queryItems.map {
+                        // TODO: Refactor URI decoding logic
+                        HAR.QueryString(name: $0.name, value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
+                    }
+                }
+            }
+        }
 
         /// Request HTTP Version.
-        public var httpVersion: String
+        public var httpVersion: String = "HTTP/1.1"
 
         /// List of cookie objects.
         public var cookies: [Cookie] = []
@@ -216,6 +225,18 @@ public struct HAR: Codable, Equatable {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        init(method: HTTPMethod, url: URL) {
+            self.method = method
+            self.url = url
+
+            // Run didSet hooks
+            defer {
+                self.url = self.url
+                headers = headers
+                postData = postData
+            }
+        }
     }
 
     /// This object contains detailed info about the response.
@@ -516,7 +537,7 @@ extension URLRequest {
     /// - Parameter har: A `HAR.Request`.
     init(har: HAR.Request) {
         // FIXME: Do not force unwrap URL.
-        let url = URL(string: har.url)!
+        let url = har.url
         self.init(url: url)
         httpMethod = har.method.rawValue
         for header in har.headers {
@@ -533,17 +554,14 @@ extension HAR.Request {
     ///
     /// - Parameter request: A URL Request.
     init(request: URLRequest) {
-        method = .get
+        // FIXME: Do not force unwrap URL
+        let url = request.url!
+
+        self.init(method: .get, url: url)
+
         if let httpMethod = request.httpMethod, let method = HAR.HTTPMethod(rawValue: httpMethod) {
             self.method = method
         }
-
-        url = "about:blank"
-        if let url = request.url {
-            self.url = url.absoluteString
-        }
-
-        httpVersion = "HTTP/1.1"
 
         if let cookie = request.value(forHTTPHeaderField: "Cookie") {
             cookies = parseFormUrlEncoded(cookie).map {
@@ -557,18 +575,14 @@ extension HAR.Request {
             }
         }
 
-        // TODO: Don't force unwrap
-        let components = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
-        queryString = components.queryItems?.map {
-            HAR.QueryString(name: $0.name, value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
-        } ?? []
-
         if let data = request.httpBody {
             let mimeType = request.value(forHTTPHeaderField: "Content-Type") ?? "application/x-www-form-urlencoded; charset=UTF-8"
-            let text = String(bytes: data, encoding: .utf8)! // FIXME:
+            // FIXME: Do not force unwrap URL
+            let text = String(bytes: data, encoding: .utf8)!
             postData = HAR.PostData(text: text, mimeType: mimeType)
         }
 
+        // Run didSet hooks
         defer {
             self.postData = self.postData
             self.headers = self.headers
@@ -618,6 +632,7 @@ extension HAR.Content {
         self.encoding = encoding
         self.mimeType = mimeType
 
+        // Run didSet hooks
         defer {
             self.text = text
         }

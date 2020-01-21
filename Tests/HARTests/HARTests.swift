@@ -24,8 +24,44 @@ final class HARTests: XCTestCase {
         XCTAssertEqual(har.log.version, "1.2")
         XCTAssertEqual(har.log.creator.name, "WebKit Web Inspector")
         XCTAssertEqual(har.log.pages?.first?.title, "http://example.com/")
-        XCTAssertEqual(har.log.entries.first?.request.url, "http://example.com/")
+        XCTAssertEqual(har.log.entries.first?.request.url.absoluteString, "http://example.com/")
         XCTAssertEqual(har.log.entries.first?.response.statusText, "OK")
+    }
+
+    func testRequest() throws {
+        do {
+            let url = try unwrap(URL(string: "http://example.com/path?a=b"))
+            let url2 = try unwrap(URL(string: "http://example.com/path?c=d"))
+
+            var request = HAR.Request(method: .get, url: url)
+
+            XCTAssertEqual(request.method, .get)
+            XCTAssertEqual(request.url.absoluteString, "http://example.com/path?a=b")
+            XCTAssertEqual(request.httpVersion, "HTTP/1.1")
+            XCTAssertEqual(request.queryString, [HAR.QueryString(name: "a", value: "b")])
+            XCTAssertEqual(request.headers, [])
+            XCTAssertNil(request.postData)
+            XCTAssertEqual(request.headersSize, 44)
+            XCTAssertEqual(request.bodySize, -1)
+
+            request.url = url2
+            XCTAssertEqual(request.queryString, [HAR.QueryString(name: "c", value: "d")])
+        }
+
+        do {
+            let url = try unwrap(URL(string: "http://example.com/path?a=b"))
+
+            var request = HAR.Request(method: .post, url: url)
+            request.postData = HAR.PostData(text: "b=c", mimeType: "application/x-www-form-urlencoded")
+
+            XCTAssertEqual(request.method, .post)
+            XCTAssertEqual(request.url.absoluteString, "http://example.com/path?a=b")
+            XCTAssertEqual(request.httpVersion, "HTTP/1.1")
+            XCTAssertEqual(request.queryString, [HAR.QueryString(name: "a", value: "b")])
+            XCTAssertEqual(request.headers, [])
+            XCTAssertEqual(request.headersSize, 45)
+            XCTAssertEqual(request.bodySize, 3)
+        }
     }
 
     func testURLRequest() throws {
@@ -37,7 +73,7 @@ final class HARTests: XCTestCase {
 
             let harRequest = HAR.Request(request: request)
             XCTAssertEqual(harRequest.method, .get)
-            XCTAssertEqual(harRequest.url, "http://example.com")
+            XCTAssertEqual(harRequest.url.absoluteString, "http://example.com")
             XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
             XCTAssert(harRequest.cookies.contains(HAR.Cookie(name: "session", value: "123")))
             XCTAssert(harRequest.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
@@ -54,7 +90,7 @@ final class HARTests: XCTestCase {
 
             let harRequest = HAR.Request(request: request)
             XCTAssertEqual(harRequest.method, .post)
-            XCTAssertEqual(harRequest.url, "http://example.com")
+            XCTAssertEqual(harRequest.url.absoluteString, "http://example.com")
             XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
             XCTAssertEqual(harRequest.queryString, [])
             XCTAssertEqual(harRequest.postData?.mimeType, "application/x-www-form-urlencoded; charset=UTF-8")
@@ -93,7 +129,9 @@ final class HARTests: XCTestCase {
                     let rar = HAR.Request(request: request)
                     XCTAssertEqual(entry.request.method, rar.method)
                     XCTAssertEqual(entry.request.url, rar.url)
+                    // FIXME: Fix test
                     // XCTAssertEqual(entry.request.headers, rar.headers)
+                    // FIXME: Fix test
                     // XCTAssertEqual(entry.request.queryString, rar.queryString)
                     XCTAssertEqual(entry.request.postData, rar.postData)
                 }
@@ -176,6 +214,7 @@ final class HARTests: XCTestCase {
         ("testLoadFixtures", testLoadFixtures),
         ("testCodable", testCodable),
         ("testDecodable", testDecodable),
+        ("testRequest", testRequest),
         ("testURLRequest", testURLRequest),
         ("testPostData", testPostData),
         ("testContent", testContent),
