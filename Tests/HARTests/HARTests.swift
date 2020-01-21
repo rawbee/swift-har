@@ -83,15 +83,33 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(request.httpBody?.count, 531)
             XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/x-www-form-urlencoded; charset=UTF-8")
         }
+
+        do {
+            for (_, data) in try loadFixtures() {
+                let har = try HAR(data: data)
+
+                for entry in har.log.entries {
+                    let request = URLRequest(har: entry.request)
+                    let rar = HAR.Request(request: request)
+                    XCTAssertEqual(entry.request.method, rar.method)
+                    XCTAssertEqual(entry.request.url, rar.url)
+                    // XCTAssertEqual(entry.request.headers, rar.headers)
+                    // XCTAssertEqual(entry.request.queryString, rar.queryString)
+                    XCTAssertEqual(entry.request.postData, rar.postData)
+                }
+            }
+        }
     }
 
     func testPostData() throws {
-        let postData = HAR.PostData(text: "foo=1&bar=2", mimeType: "application/x-www-form-urlencoded")
+        let postData = HAR.PostData(text: "foo=1&bar=2&message=Hello%20World&q=duck+duck+go", mimeType: "application/x-www-form-urlencoded")
         XCTAssertEqual(
             postData.params,
             [
                 HAR.Param(name: "foo", value: "1"),
                 HAR.Param(name: "bar", value: "2"),
+                HAR.Param(name: "message", value: "Hello World"),
+                HAR.Param(name: "q", value: "duck duck go"),
             ])
     }
 

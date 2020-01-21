@@ -557,8 +557,11 @@ extension HAR.Request {
             }
         }
 
-        // TODO:
-        queryString = []
+        // TODO: Don't force unwrap
+        let components = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+        queryString = components.queryItems?.map {
+            HAR.QueryString(name: $0.name, value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
+        } ?? []
 
         if let data = request.httpBody {
             let mimeType = request.value(forHTTPHeaderField: "Content-Type") ?? "application/x-www-form-urlencoded; charset=UTF-8"
@@ -583,7 +586,7 @@ extension HAR.Request {
 internal func parseFormUrlEncoded(_ str: String) -> [(key: String, value: String?)] {
     var components = URLComponents()
     components.query = str
-    return components.queryItems?.map { ($0.name, $0.value) } ?? []
+    return components.queryItems?.map { ($0.name, $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding) } ?? []
 }
 
 extension HAR.Param {
