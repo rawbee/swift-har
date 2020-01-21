@@ -2,12 +2,12 @@
 import XCTest
 
 final class HARTests: XCTestCase {
-    func testLoadFixtures() {
-        XCTAssertGreaterThan(fixtures.count, 1)
+    func testLoadFixtures() throws {
+        XCTAssertGreaterThan(try loadFixtures().count, 1)
     }
 
     func testCodable() throws {
-        for (name, data) in fixtures {
+        for (name, data) in try loadFixtures() {
             do {
                 let har = try HAR(data: data)
                 _ = try har.encoded()
@@ -29,7 +29,8 @@ final class HARTests: XCTestCase {
     }
 
     func testURLRequest() throws {
-        if let url = URL(string: "http://example.com") {
+        do {
+            let url = try unwrap(URL(string: "http://example.com"))
             var request = URLRequest(url: url)
             request.setValue("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forHTTPHeaderField: "Accept")
             request.setValue("session=123", forHTTPHeaderField: "Cookie")
@@ -44,7 +45,8 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.bodySize, -1)
         }
 
-        if let url = URL(string: "http://example.com") {
+        do {
+            let url = try unwrap(URL(string: "http://example.com"))
             var request = URLRequest(url: url)
             request.setValue("Content-Type", forHTTPHeaderField: "application/x-www-form-urlencoded; charset=UTF-8")
             request.httpMethod = "POST"
@@ -62,7 +64,9 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.bodySize, 7)
         }
 
-        if let harRequest = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har")).log.entries.first?.request {
+        do {
+            let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har"))
+            let harRequest = try unwrap(har.log.entries.first).request
             let request = URLRequest(har: harRequest)
             XCTAssertEqual(request.httpMethod, "GET")
             XCTAssertEqual(request.url?.absoluteString, "http://example.com/")
@@ -70,7 +74,9 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(request.value(forHTTPHeaderField: "User-Agent"), "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")
         }
 
-        if let harRequest = (try HAR(contentsOf: fixtureURL(name: "Safari jsbin.com.har"))).log.entries[25...].first?.request {
+        do {
+            let har = try HAR(contentsOf: fixtureURL(name: "Safari jsbin.com.har"))
+            let harRequest = try unwrap(har.log.entries[25...].first).request
             let request = URLRequest(har: harRequest)
             XCTAssertEqual(request.httpMethod, "POST")
             XCTAssertEqual(request.url?.absoluteString, "https://jsbin.com/save")
@@ -105,16 +111,17 @@ final class HARTests: XCTestCase {
     }
 
     func testTimings() throws {
-        let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har")).log.entries.first!
+        let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har"))
+        let entry = try unwrap(har.log.entries.first)
 
         let timing = HAR.Timing(blocked: 0, dns: -1, connect: 15, send: 20, wait: 38, receive: 12, ssl: -1)
         XCTAssertEqual(timing.total, 85)
 
-        var entry = HAR.Entry(request: har.request, response: har.response)
-        XCTAssertEqual(entry.time, 0)
+        var entry2 = HAR.Entry(request: entry.request, response: entry.response)
+        XCTAssertEqual(entry2.time, 0)
 
-        entry.timings = timing
-        XCTAssertEqual(entry.time, 85)
+        entry2.timings = timing
+        XCTAssertEqual(entry2.time, 85)
     }
 
     var fixtureURL: URL {
@@ -128,12 +135,23 @@ final class HARTests: XCTestCase {
         fixtureURL.appendingPathComponent(name)
     }
 
-    var fixtures: [String: Data] {
+    func loadFixtures() throws -> [String: Data] {
         var fixtures: [String: Data] = [:]
-        for name in try! FileManager.default.contentsOfDirectory(atPath: fixtureURL.path) {
-            fixtures[name] = try! Data(contentsOf: fixtureURL(name: name))
+        for name in try FileManager.default.contentsOfDirectory(atPath: fixtureURL.path) {
+            fixtures[name] = try Data(contentsOf: fixtureURL(name: name))
         }
         return fixtures
+    }
+
+    enum TestErrors: Error {
+        case nilValue
+    }
+
+    func unwrap<T>(_ value: T?) throws -> T {
+        guard let value = value else {
+            throw TestErrors.nilValue
+        }
+        return value
     }
 
     static var allTests = [
