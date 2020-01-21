@@ -310,7 +310,7 @@ public struct HAR: Codable, Equatable {
     /// This object describes posted data, if any (embedded in `Request` object).
     public struct PostData: Codable, Equatable {
         /// Mime type of posted data.
-        public var mimeType: String
+        public var mimeType: String = "application/octet-stream"
 
         /// List of posted parameters (in case of URL encoded parameters).
         ///
