@@ -196,7 +196,11 @@ public struct HAR: Codable, Equatable {
         public var queryString: [QueryString] = []
 
         /// Posted data info.
-        public var postData: PostData?
+        public var postData: PostData? {
+            didSet {
+                bodySize = postData?.data?.count ?? -1
+            }
+        }
 
         /// Total number of bytes from the start of the HTTP request message until (and including) the double CRLF before the body. Set to -1 if the info is not available.
         public var headersSize: Int = -1
@@ -557,6 +561,10 @@ extension HAR.Request {
             let text = String(bytes: data, encoding: .utf8)! // FIXME:
             postData = HAR.PostData(text: text, mimeType: mimeType)
         }
+
+        defer {
+            postData = postData
+        }
     }
 }
 
@@ -583,6 +591,10 @@ extension HAR.PostData {
         if mimeType.hasPrefix("application/x-www-form-urlencoded") {
             params = parseFormUrlEncoded(text).map { HAR.Param($0) }
         }
+    }
+
+    var data: Data? {
+        text.data(using: .utf8)
     }
 }
 
