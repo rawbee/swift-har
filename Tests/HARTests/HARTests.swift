@@ -6,59 +6,11 @@ final class HARTests: XCTestCase {
         XCTAssertGreaterThan(fixtures.count, 1)
     }
 
-    enum NormalizeJSON: Error {
-        case unavailable
-        case decodingError
-    }
-
-    func normalizeJSONObject(_ value: Any) -> Any {
-        switch value {
-        case let dict as [String: Any?]:
-            return dict
-                .compactMapValues { $0 }
-                .mapValues { normalizeJSONObject($0) }
-                .filter { !$0.key.starts(with: "_") }
-        case let array as [Any]:
-            return array.map { normalizeJSONObject($0) }
-        case let n as Double:
-            if n == n.rounded() {
-                return n
-            } else {
-                // work around lossy Doubles when decoding JSON
-                return String(format: "%.3f (rounded)", n)
-            }
-        default:
-            return value
-        }
-    }
-
-    func normalizeJSON(data: Data) throws -> String {
-        guard #available(macOS 10.13, *) else {
-            throw NormalizeJSON.unavailable
-        }
-
-        let jsonObject = normalizeJSONObject(try JSONSerialization.jsonObject(with: data))
-        let jsonData = try JSONSerialization.data(withJSONObject: jsonObject, options: [.sortedKeys, .prettyPrinted])
-
-        guard let jsonString = String(bytes: jsonData, encoding: .utf8) else {
-            throw NormalizeJSON.decodingError
-        }
-
-        return jsonString
-    }
-
     func testCodable() throws {
-        let decoder = JSONDecoder()
-
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-
         for (name, data) in fixtures {
             do {
-                let har = try decoder.decode(HAR.self, from: data)
-                let data2 = try encoder.encode(har)
-
-                XCTAssertEqual(try normalizeJSON(data: data), try normalizeJSON(data: data2), "\(name) did not serialize to same JSON.")
+                let har = try HAR(data: data)
+                _ = try har.encoded()
             } catch {
                 XCTAssertNil(error, "\(name) failed encoding.")
                 throw error

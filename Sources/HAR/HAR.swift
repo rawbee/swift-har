@@ -82,8 +82,8 @@ public struct HAR: Codable, Equatable {
 
     /// This object represents list of exported pages.
     public struct Page: Codable, Equatable {
-        /// Date and time stamp for the beginning of the page load (ISO 8601 - YYYY-MM-DDThh:mm:ss.sTZD, e.g. 2009-07-24T19:20:30.45+01:00).
-        public var startedDateTime: String
+        /// Date and time stamp for the beginning of the page load.
+        public var startedDateTime: Date
 
         /// Unique identifier of a page within the `Log`. Entries use it to refer the parent page.
         public var id: String
@@ -123,8 +123,8 @@ public struct HAR: Codable, Equatable {
         /// Reference to the parent page. Leave out this field if the application does not support grouping by pages.
         public var pageref: String?
 
-        /// Date and time stamp of the request start (ISO 8601 - YYYY-MM-DDThh:mm:ss.sTZD).
-        public var startedDateTime: String
+        /// Date and time stamp of the request start.
+        public var startedDateTime: Date
 
         /// Total elapsed time of the request in milliseconds. This is the sum of all timings available in the timings object (i.e. not including -1 values) .
         ///
@@ -257,8 +257,8 @@ public struct HAR: Codable, Equatable {
         // The host of the cookie.
         public var domain: String? = nil
 
-        /// Cookie expiration time. (ISO 8601 - YYYY-MM-DDThh:mm:ss.sTZD, e.g. 2009-07-24T19:20:30.123+02:00).
-        public var expires: String? = nil
+        /// Cookie expiration time.
+        public var expires: Date? = nil
 
         /// Set to true if the cookie is HTTP only, false otherwise.
         public var httpOnly: Bool? = nil
@@ -389,10 +389,10 @@ public struct HAR: Codable, Equatable {
 
     public struct CacheEntry: Codable, Equatable {
         /// Expiration time of the cache entry.
-        public var expires: String?
+        public var expires: Date?
 
         /// The last time the cache entry was opened.
-        public var lastAccess: String
+        public var lastAccess: Date
 
         /// Etag
         public var eTag: String
@@ -439,13 +439,6 @@ public struct HAR: Codable, Equatable {
 }
 
 extension HAR {
-    /// Creates a `HAR` from JSON `Data`.
-    ///
-    /// - Parameter data: UTF-8 JSON data.
-    init(data: Data) throws {
-        self = try JSONDecoder().decode(HAR.self, from: data)
-    }
-
     /// Creates a `HAR` from the contents of a file URL.
     ///
     /// - Parameter url: Path to `.har` file.
@@ -453,9 +446,47 @@ extension HAR {
         try self.init(data: try Data(contentsOf: url))
     }
 
+    /// Return ISO 8601 date formatter.
+    ///
+    /// Uses the format `YYYY-MM-DDThh:mm:ss.sTZD` to return a date such as `2009-07-24T19:20:30.45+01:00`.
+    private static func makeDateFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSZZZZZ"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return formatter
+    }
+
+    /// Initialize singleton ISO 8601 date formatter.
+    private static let dateFormatter: DateFormatter = makeDateFormatter()
+
+    /// Creates a `HAR` from JSON `Data`.
+    ///
+    /// - Parameter data: UTF-8 JSON data.
+    init(data: Data) throws {
+        let decoder = JSONDecoder()
+
+        decoder.dateDecodingStrategy = .custom { (decoder) -> Date in
+            let container = try decoder.singleValueContainer()
+            let dateStr = try container.decode(String.self)
+
+            if let date = HAR.dateFormatter.date(from: dateStr) {
+                return date
+            }
+
+            throw Swift.DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "invalid date: \(dateStr)")
+        }
+
+        self = try decoder.decode(HAR.self, from: data)
+    }
+
     /// Returns a HAR encoded as JSON `Data`.
     func encoded() throws -> Data {
-        try JSONEncoder().encode(self)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        encoder.dateEncodingStrategy = .formatted(HAR.dateFormatter)
+        return try encoder.encode(self)
     }
 }
 
