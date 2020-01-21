@@ -91,10 +91,10 @@ public struct HAR: Codable, Equatable {
         /// Page title.
         ///
         /// - Note: Spec requires value, but real world .har files sometimes omit it.
-        public var title: String?
+        public var title: String? = ""
 
         /// Detailed timing info about page load.
-        public var pageTimings: PageTiming
+        public var pageTimings: PageTiming = PageTiming()
 
         /// A comment provided by the user or the application.
         ///
@@ -107,10 +107,10 @@ public struct HAR: Codable, Equatable {
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad` event or `document.readyState == interactive`.
     public struct PageTiming: Codable, Equatable {
         /// Content of the page loaded. Number of milliseconds since page load started (`page.startedDateTime`). Use -1 if the timing does not apply to the current request.
-        public var onContentLoad: Double?
+        public var onContentLoad: Double? = -1
 
         /// Page is loaded (onLoad event fired). Number of milliseconds since page load started (`page.startedDateTime`). Use -1 if the timing does not apply to the current request.
-        public var onLoad: Double?
+        public var onLoad: Double? = -1
 
         /// A comment provided by the user or the application.
         ///
