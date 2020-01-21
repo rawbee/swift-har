@@ -103,7 +103,7 @@ final class HARTests: XCTestCase {
         do {
             let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har"))
             let harRequest = try unwrap(har.log.entries.first).request
-            let request = URLRequest(har: harRequest)
+            let request = URLRequest(request: harRequest)
             XCTAssertEqual(request.httpMethod, "GET")
             XCTAssertEqual(request.url?.absoluteString, "http://example.com/")
             XCTAssertNil(request.httpBody)
@@ -113,7 +113,7 @@ final class HARTests: XCTestCase {
         do {
             let har = try HAR(contentsOf: fixtureURL(name: "Safari jsbin.com.har"))
             let harRequest = try unwrap(har.log.entries[25...].first).request
-            let request = URLRequest(har: harRequest)
+            let request = URLRequest(request: harRequest)
             XCTAssertEqual(request.httpMethod, "POST")
             XCTAssertEqual(request.url?.absoluteString, "https://jsbin.com/save")
             XCTAssertEqual(request.httpBody?.count, 531)
@@ -125,7 +125,7 @@ final class HARTests: XCTestCase {
                 let har = try HAR(data: data)
 
                 for entry in har.log.entries {
-                    let request = URLRequest(har: entry.request)
+                    let request = URLRequest(request: entry.request)
                     let rar = HAR.Request(request: request)
                     XCTAssertEqual(entry.request.method, rar.method)
                     XCTAssertEqual(entry.request.url, rar.url)

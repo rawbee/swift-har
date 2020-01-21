@@ -534,16 +534,14 @@ extension HAR {
 extension URLRequest {
     /// Creates a URL Request from a `HAR.Request`.
     ///
-    /// - Parameter har: A `HAR.Request`.
-    init(har: HAR.Request) {
-        self.init(url: har.url)
-        httpMethod = har.method.rawValue
-        for header in har.headers {
+    /// - Parameter request: A `HAR.Request`.
+    init(request: HAR.Request) {
+        self.init(url: request.url)
+        httpMethod = request.method.rawValue
+        for header in request.headers {
             setValue(header.value, forHTTPHeaderField: header.name)
         }
-        if let postData = har.postData {
-            httpBody = postData.text.data(using: .utf8)
-        }
+        httpBody = request.postData?.data
     }
 }
 
