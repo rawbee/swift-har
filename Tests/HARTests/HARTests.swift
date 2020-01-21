@@ -86,6 +86,21 @@ final class HARTests: XCTestCase {
             ])
     }
 
+    func testContent() throws {
+        var content = HAR.Content(text: "foo=bar", mimeType: "multipart/form-content")
+        XCTAssertEqual(content.text, "foo=bar")
+        XCTAssertEqual(content.size, 7)
+
+        content.text = "foo=bar&baz=qux"
+        XCTAssertEqual(content.size, 15)
+
+        content = HAR.Content(text: "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=", encoding: .base64, mimeType: "text/html; charset=utf-8")
+        XCTAssertEqual(content.size, 35)
+        XCTAssertEqual(content.data?.count, 35)
+        XCTAssertEqual(content.text, "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=")
+        XCTAssertEqual(content.encoding, .base64)
+    }
+
     var fixtureURL: URL {
         var url = URL(fileURLWithPath: #file)
         url.appendPathComponent("../../Fixtures")
@@ -110,5 +125,7 @@ final class HARTests: XCTestCase {
         ("testCodable", testCodable),
         ("testDecodable", testDecodable),
         ("testURLRequest", testURLRequest),
+        ("testPostData", testPostData),
+        ("testContent", testContent),
     ]
 }

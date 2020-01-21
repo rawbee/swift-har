@@ -344,10 +344,14 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
+    public enum Encoding: String, Codable {
+        case base64
+    }
+
     /// This object describes details about response content (embedded in `Response` object).
     public struct Content: Codable, Equatable {
         /// Length of the returned content in bytes. Should be equal to `response.bodySize` if there is no compression and bigger when the content has been compressed.
-        public var size: Int
+        public var size: Int = 0
 
         /// Number of bytes saved. Leave out this field if the information is not available.
         public var compression: Int?
@@ -358,14 +362,18 @@ public struct HAR: Codable, Equatable {
         ///  Response body sent from the server or loaded from the browser cache. This field is populated with textual content only. The text field is either HTTP decoded text or a encoded (e.g. "base64") representation of the response body. Leave out this field if the information is not available.
         ///
         /// Before setting the text field, the HTTP response is decoded (decompressed & unchunked), than trans-coded from its original character set into UTF-8. Additionally, it can be encoded using e.g. base64. Ideally, the application should be able to unencode a base64 blob and get a byte-for-byte identical resource to what the browser operated on.
-        public var text: String?
+        public var text: String? {
+            didSet {
+                size = data?.count ?? 0
+            }
+        }
 
         /// Encoding used for response text field e.g "base64". Leave out this field if the text field is HTTP decoded (decompressed & unchunked), than trans-coded from its original character set into UTF-8.
         ///
         /// Encoding field is useful for including binary responses (e.g. images) into the HAR file.
         ///
         /// - Version: 1.2
-        public var encoding: String?
+        public var encoding: Encoding?
 
         /// A comment provided by the user or the application.
         ///
@@ -571,5 +579,28 @@ extension HAR.PostData {
         if mimeType.hasPrefix("application/x-www-form-urlencoded") {
             params = parseFormUrlEncoded(text).map { HAR.Param($0) }
         }
+    }
+}
+
+extension HAR.Content {
+    init(text: String, encoding: HAR.Encoding? = nil, mimeType: String) {
+        self.encoding = encoding
+        self.mimeType = mimeType
+
+        defer {
+            self.text = text
+        }
+    }
+
+    public var data: Data? {
+        if let text = text {
+            switch encoding {
+            case .base64:
+                return Data(base64Encoded: text)
+            default:
+                return text.data(using: .utf8)
+            }
+        }
+        return nil
     }
 }
