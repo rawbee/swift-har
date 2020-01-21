@@ -40,6 +40,7 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
             XCTAssert(harRequest.cookies.contains(HAR.Cookie(name: "session", value: "123")))
             XCTAssert(harRequest.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
+            XCTAssertEqual(harRequest.headersSize, 129)
             XCTAssertEqual(harRequest.bodySize, -1)
         }
 
@@ -57,6 +58,7 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.postData?.mimeType, "application/x-www-form-urlencoded; charset=UTF-8")
             XCTAssertEqual(harRequest.postData?.text, "foo=bar")
             XCTAssertEqual(harRequest.postData?.params.first, HAR.Param(name: "foo", value: "bar"))
+            XCTAssertEqual(harRequest.headersSize, 100)
             XCTAssertEqual(harRequest.bodySize, 7)
         }
 

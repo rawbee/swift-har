@@ -190,7 +190,11 @@ public struct HAR: Codable, Equatable {
         public var cookies: [Cookie] = []
 
         /// List of header objects.
-        public var headers: [Header] = []
+        public var headers: [Header] = [] {
+            didSet {
+                headersSize = headerText.data(using: .utf8)?.count ?? -1
+            }
+        }
 
         /// List of query parameter objects.
         public var queryString: [QueryString] = []
@@ -563,8 +567,16 @@ extension HAR.Request {
         }
 
         defer {
-            postData = postData
+            self.postData = self.postData
+            self.headers = self.headers
         }
+    }
+
+    var headerText: String {
+        """
+        \(method) \(url) \(httpVersion)\r
+        \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
+        """
     }
 }
 
