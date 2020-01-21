@@ -124,12 +124,12 @@ public struct HAR: Codable, Equatable {
         public var pageref: String?
 
         /// Date and time stamp of the request start.
-        public var startedDateTime: Date
+        public var startedDateTime: Date = Date()
 
         /// Total elapsed time of the request in milliseconds. This is the sum of all timings available in the timings object (i.e. not including -1 values) .
         ///
         /// - Invariant: The time value for the request must be equal to the sum of the timings supplied in this section (excluding any -1 values).
-        public var time: Double
+        public var time: Double = 0
 
         /// Detailed info about the request.
         public var request: Request
@@ -138,10 +138,14 @@ public struct HAR: Codable, Equatable {
         public var response: Response
 
         /// Info about cache usage.
-        public var cache: Cache
+        public var cache: Cache = Cache()
 
         /// Detailed timing info about request/response round trip.
-        public var timings: Timing
+        public var timings: Timing = Timing() {
+            didSet {
+                time = timings.total
+            }
+        }
 
         /// IP address of the server that was connected (result of DNS resolution).
         ///
@@ -426,13 +430,13 @@ public struct HAR: Codable, Equatable {
         public var connect: Double = -1
 
         /// Time required to send HTTP request to the server.
-        public var send: Double
+        public var send: Double = 0
 
         /// Waiting for a response from the server.
-        public var wait: Double
+        public var wait: Double = 0
 
         /// Time required to read entire response from the server (or cache).
-        public var receive: Double
+        public var receive: Double = 0
 
         /// Time required for SSL/TLS negotiation. If this field is defined then the time is also included in the connect field (to ensure backward compatibility with HAR 1.1). Use -1 if the timing does not apply to the current request.
         ///
@@ -592,7 +596,7 @@ extension HAR.Content {
         }
     }
 
-    public var data: Data? {
+    var data: Data? {
         if let text = text {
             switch encoding {
             case .base64:
@@ -602,5 +606,14 @@ extension HAR.Content {
             }
         }
         return nil
+    }
+}
+
+extension HAR.Timing {
+    /// Compute total request time.
+    ///
+    /// The time value for the request must be equal to the sum of the timings supplied in this section (excluding any -1 values).
+    public var total: Double {
+        [blocked, dns, connect, send, wait, receive].filter { $0 != -1 }.reduce(0, +)
     }
 }

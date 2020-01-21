@@ -101,6 +101,19 @@ final class HARTests: XCTestCase {
         XCTAssertEqual(content.encoding, .base64)
     }
 
+    func testTimings() throws {
+        let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har")).log.entries.first!
+
+        let timing = HAR.Timing(blocked: 0, dns: -1, connect: 15, send: 20, wait: 38, receive: 12, ssl: -1)
+        XCTAssertEqual(timing.total, 85)
+
+        var entry = HAR.Entry(request: har.request, response: har.response)
+        XCTAssertEqual(entry.time, 0)
+
+        entry.timings = timing
+        XCTAssertEqual(entry.time, 85)
+    }
+
     var fixtureURL: URL {
         var url = URL(fileURLWithPath: #file)
         url.appendPathComponent("../../Fixtures")
@@ -127,5 +140,6 @@ final class HARTests: XCTestCase {
         ("testURLRequest", testURLRequest),
         ("testPostData", testPostData),
         ("testContent", testContent),
+        ("testTimings", testTimings),
     ]
 }
