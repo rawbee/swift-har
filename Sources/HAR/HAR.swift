@@ -554,16 +554,20 @@ extension URLRequest {
 extension HAR.Request {
     /// Creates a HAR Request from a URL Request.
     ///
+    /// - TODO: Consider making initializer failable.
+    ///
     /// - Parameter request: A URL Request.
     init(request: URLRequest) {
+        // TODO: Investigate if url could be set later to something invalid.
         // FIXME: Do not force unwrap URL
         let url = request.url!
 
-        self.init(method: .get, url: url)
+        // TODO: Investigate behavior of URLRequest when no httpMethod is set.
+        let httpMethod = request.httpMethod ?? "GET"
+        // TODO: Investigate if httpMethod could be junk.
+        let method = HAR.HTTPMethod(rawValue: httpMethod) ?? .get
 
-        if let httpMethod = request.httpMethod, let method = HAR.HTTPMethod(rawValue: httpMethod) {
-            self.method = method
-        }
+        self.init(method: method, url: url)
 
         if let headers = request.allHTTPHeaderFields {
             for (name, value) in headers {
