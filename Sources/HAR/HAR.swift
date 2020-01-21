@@ -536,9 +536,7 @@ extension URLRequest {
     ///
     /// - Parameter har: A `HAR.Request`.
     init(har: HAR.Request) {
-        // FIXME: Do not force unwrap URL.
-        let url = har.url
-        self.init(url: url)
+        self.init(url: har.url)
         httpMethod = har.method.rawValue
         for header in har.headers {
             setValue(header.value, forHTTPHeaderField: header.name)
