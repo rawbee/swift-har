@@ -201,6 +201,12 @@ public struct HAR: Codable, Equatable {
         /// List of header objects.
         public var headers: [Header] = [] {
             didSet {
+                if let header = headers.first(where: { $0.name == "Cookie" }) {
+                    cookies = parseFormUrlEncoded(header.value).map {
+                        HAR.Cookie(name: $0.key, value: $0.value ?? "")
+                    }
+                }
+
                 headersSize = headerText.data(using: .utf8)?.count ?? -1
             }
         }
@@ -559,12 +565,6 @@ extension HAR.Request {
             self.method = method
         }
 
-        if let cookie = request.value(forHTTPHeaderField: "Cookie") {
-            cookies = parseFormUrlEncoded(cookie).map {
-                HAR.Cookie(name: $0.key, value: $0.value ?? "")
-            }
-        }
-
         if let headers = request.allHTTPHeaderFields {
             for (name, value) in headers {
                 self.headers.append(HAR.Header(name: name, value: value))
@@ -580,8 +580,8 @@ extension HAR.Request {
 
         // Run didSet hooks
         defer {
-            self.postData = self.postData
             self.headers = self.headers
+            self.postData = self.postData
         }
     }
 

@@ -53,13 +53,15 @@ final class HARTests: XCTestCase {
 
             var request = HAR.Request(method: .post, url: url)
             request.postData = HAR.PostData(text: "b=c", mimeType: "application/x-www-form-urlencoded")
+            request.headers.append(HAR.Header(name: "Cookie", value: "foo=bar"))
 
             XCTAssertEqual(request.method, .post)
             XCTAssertEqual(request.url.absoluteString, "http://example.com/path?a=b")
             XCTAssertEqual(request.httpVersion, "HTTP/1.1")
             XCTAssertEqual(request.queryString, [HAR.QueryString(name: "a", value: "b")])
-            XCTAssertEqual(request.headers, [])
-            XCTAssertEqual(request.headersSize, 45)
+            XCTAssertEqual(request.cookies, [HAR.Cookie(name: "foo", value: "bar")])
+            XCTAssertEqual(request.headers, [HAR.Header(name: "Cookie", value: "foo=bar")])
+            XCTAssertEqual(request.headersSize, 62)
             XCTAssertEqual(request.bodySize, 3)
         }
     }
