@@ -178,10 +178,17 @@ public struct HAR: Codable, Equatable {
     /// This object contains detailed info about performed request.
     public struct Request: Codable, Equatable {
         /// Request method.
-        public var method: HTTPMethod
+        public var method: HTTPMethod = .get {
+            didSet {
+                updateHeadersSize()
+            }
+        }
+
+        /// Empty URL when none is provided.
+        private static let blankUrl = URL(string: "about:blank")!
 
         /// Absolute URL of the request (fragments are not included).
-        public var url: URL {
+        public var url: URL = Self.blankUrl {
             didSet {
                 if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
                     queryString = queryItems.map {
@@ -189,11 +196,17 @@ public struct HAR: Codable, Equatable {
                         HAR.QueryString(name: $0.name, value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
                     }
                 }
+
+                updateHeadersSize()
             }
         }
 
         /// Request HTTP Version.
-        public var httpVersion: String = "HTTP/1.1"
+        public var httpVersion: String = "HTTP/1.1" {
+            didSet {
+                updateHeadersSize()
+            }
+        }
 
         /// List of cookie objects.
         public var cookies: [Cookie] = []
@@ -201,14 +214,24 @@ public struct HAR: Codable, Equatable {
         /// List of header objects.
         public var headers: [Header] = [] {
             didSet {
-                if let header = headers.first(where: { $0.name == "Cookie" }) {
-                    cookies = parseFormUrlEncoded(header.value).map {
+                if let value = value(forHTTPHeaderField: "Cookie") {
+                    cookies = parseFormUrlEncoded(value).map {
                         HAR.Cookie(name: $0.key, value: $0.value ?? "")
                     }
                 }
 
-                headersSize = headerText.data(using: .utf8)?.count ?? -1
+                updateHeadersSize()
             }
+        }
+
+        /// Find header value for name.
+        ///
+        /// Header names are case-insensitive.
+        ///
+        /// - Parameter name: The HTTP Header name.
+        public func value(forHTTPHeaderField name: String) -> String? {
+            let lowercasedName = name.lowercased()
+            return headers.first(where: { lowercasedName == $0.name.lowercased() })?.value
         }
 
         /// List of query parameter objects.
@@ -222,17 +245,48 @@ public struct HAR: Codable, Equatable {
         }
 
         /// Total number of bytes from the start of the HTTP request message until (and including) the double CRLF before the body. Set to -1 if the info is not available.
+        ///
+        /// - Important: Should be ran when mutating `method`, `url`, `httpVersion` or `headers`.
         public var headersSize: Int = -1
 
+        /// Compute and update `headerSize`.
+        private mutating func updateHeadersSize() {
+            headersSize = headerText.data(using: .utf8)?.count ?? -1
+        }
+
+        /// Compute text representation of header for computing it's size.
+        private var headerText: String {
+            """
+            \(method) \(url.relativePath) \(httpVersion)\r
+            \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
+            """
+        }
+
         /// Size of the request body (POST data payload) in bytes. Set to -1 if the info is not available.
-        public var bodySize: Int = -1
+        public var bodySize: Int = 0
 
         /// A comment provided by the user or the application.
         ///
         /// - Version: 1.2
         public var comment: String?
 
+        /// Create empty `Header` structure.
+        private init() {
+            // Run didSet hooks
+            defer {
+                self.url = self.url
+                headers = headers
+                postData = postData
+            }
+        }
+
+        /// Create `Request` with HTTP method and url.
+        ///
+        /// - Parameter method: An HTTP method.
+        /// - Parameter url: A URL.
         init(method: HTTPMethod, url: URL) {
+            self.init()
+
             self.method = method
             self.url = url
 
@@ -240,7 +294,6 @@ public struct HAR: Codable, Equatable {
             defer {
                 self.url = self.url
                 headers = headers
-                postData = postData
             }
         }
     }
@@ -558,42 +611,31 @@ extension HAR.Request {
     ///
     /// - Parameter request: A URL Request.
     init(request: URLRequest) {
-        // TODO: Investigate if url could be set later to something invalid.
-        // FIXME: Do not force unwrap URL
-        let url = request.url!
+        self.init()
 
-        // TODO: Investigate behavior of URLRequest when no httpMethod is set.
+        if let url = request.url {
+            self.url = url
+        }
+
+        /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
         let httpMethod = request.httpMethod ?? "GET"
-        // TODO: Investigate if httpMethod could be junk.
-        let method = HAR.HTTPMethod(rawValue: httpMethod) ?? .get
-
-        self.init(method: method, url: url)
+        method = HAR.HTTPMethod(rawValue: httpMethod) ?? .get
 
         if let headers = request.allHTTPHeaderFields {
-            for (name, value) in headers {
-                self.headers.append(HAR.Header(name: name, value: value))
-            }
+            self.headers = headers.map { HAR.Header($0) }
         }
 
         if let data = request.httpBody {
-            let mimeType = request.value(forHTTPHeaderField: "Content-Type") ?? "application/x-www-form-urlencoded; charset=UTF-8"
-            // FIXME: Do not force unwrap URL
-            let text = String(bytes: data, encoding: .utf8)!
-            postData = HAR.PostData(text: text, mimeType: mimeType)
+            postData = HAR.PostData(data: data, mimeType: value(forHTTPHeaderField: "Content-Type"))
         }
 
         // Run didSet hooks
         defer {
+            self.method = self.method
+            self.url = self.url
             self.headers = self.headers
             self.postData = self.postData
         }
-    }
-
-    var headerText: String {
-        """
-        \(method) \(url) \(httpVersion)\r
-        \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
-        """
     }
 }
 
@@ -601,6 +643,14 @@ internal func parseFormUrlEncoded(_ str: String) -> [(key: String, value: String
     var components = URLComponents()
     components.query = str
     return components.queryItems?.map { ($0.name, $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding) } ?? []
+}
+
+extension HAR.Header {
+    /// Create HAR Header from `(key, value)` tuple.
+    init(_ pair: (key: String, value: String)) {
+        name = pair.key
+        value = pair.value
+    }
 }
 
 extension HAR.Param {
@@ -613,13 +663,24 @@ extension HAR.Param {
 
 extension HAR.PostData {
     /// Create HAR PostData from plain text.
-    init(text: String, mimeType: String) {
-        self.mimeType = mimeType
+    init(text: String, mimeType: String?) {
         self.text = text
 
-        if mimeType.hasPrefix("application/x-www-form-urlencoded") {
+        if let mimeType = mimeType {
+            self.mimeType = mimeType
+        }
+
+        if self.mimeType.hasPrefix("application/x-www-form-urlencoded") {
             params = parseFormUrlEncoded(text).map { HAR.Param($0) }
         }
+    }
+
+    /// Create HAR PostData from data.
+    init?(data: Data, mimeType: String?) {
+        guard let text = String(bytes: data, encoding: .utf8) else {
+            return nil
+        }
+        self.init(text: text, mimeType: mimeType)
     }
 
     var data: Data? {

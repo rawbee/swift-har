@@ -41,7 +41,7 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(request.queryString, [HAR.QueryString(name: "a", value: "b")])
             XCTAssertEqual(request.headers, [])
             XCTAssertNil(request.postData)
-            XCTAssertEqual(request.headersSize, 44)
+            XCTAssertEqual(request.headersSize, 22)
             XCTAssertEqual(request.bodySize, -1)
 
             request.url = url2
@@ -61,7 +61,7 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(request.queryString, [HAR.QueryString(name: "a", value: "b")])
             XCTAssertEqual(request.cookies, [HAR.Cookie(name: "foo", value: "bar")])
             XCTAssertEqual(request.headers, [HAR.Header(name: "Cookie", value: "foo=bar")])
-            XCTAssertEqual(request.headersSize, 62)
+            XCTAssertEqual(request.headersSize, 40)
             XCTAssertEqual(request.bodySize, 3)
         }
     }
@@ -79,14 +79,47 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.httpVersion, "HTTP/1.1")
             XCTAssert(harRequest.cookies.contains(HAR.Cookie(name: "session", value: "123")))
             XCTAssert(harRequest.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
-            XCTAssertEqual(harRequest.headersSize, 129)
+            XCTAssertEqual(harRequest.headersSize, 111)
             XCTAssertEqual(harRequest.bodySize, -1)
         }
 
         do {
             let url = try unwrap(URL(string: "http://example.com"))
             var request = URLRequest(url: url)
-            request.setValue("Content-Type", forHTTPHeaderField: "application/x-www-form-urlencoded; charset=UTF-8")
+            request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
+            request.httpMethod = "POST"
+            request.httpBody = "{\"foo\":42}".data(using: .utf8)
+
+            let rar = HAR.Request(request: request)
+            XCTAssertEqual(rar.method, .post)
+            XCTAssertEqual(rar.url.absoluteString, "http://example.com")
+            XCTAssertEqual(rar.httpVersion, "HTTP/1.1")
+            XCTAssertEqual(rar.queryString, [])
+            XCTAssertEqual(rar.postData?.mimeType, "application/json; charset=UTF-8")
+            XCTAssertEqual(rar.postData?.text, "{\"foo\":42}")
+            XCTAssertEqual(rar.headersSize, 65)
+            XCTAssertEqual(rar.bodySize, 10)
+        }
+
+        do {
+            let url = try unwrap(URL(string: "http://example.com"))
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+
+            let junk = [UInt32](repeating: 0, count: 255).map { _ in arc4random() }
+            request.httpBody = Data(bytes: junk, count: 255)
+
+            let rar = HAR.Request(request: request)
+            XCTAssertEqual(rar.method, .post)
+            XCTAssertNil(rar.postData)
+            XCTAssertEqual(rar.headersSize, 18)
+            XCTAssertEqual(rar.bodySize, -1)
+        }
+
+        do {
+            let url = try unwrap(URL(string: "http://example.com"))
+            var request = URLRequest(url: url)
+            request.setValue("application/x-www-form-urlencoded; charset=UTF-8", forHTTPHeaderField: "Content-Type")
             request.httpMethod = "POST"
             request.httpBody = "foo=bar".data(using: .utf8)
 
@@ -98,8 +131,22 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.postData?.mimeType, "application/x-www-form-urlencoded; charset=UTF-8")
             XCTAssertEqual(harRequest.postData?.text, "foo=bar")
             XCTAssertEqual(harRequest.postData?.params.first, HAR.Param(name: "foo", value: "bar"))
-            XCTAssertEqual(harRequest.headersSize, 100)
+            XCTAssertEqual(harRequest.headersSize, 82)
             XCTAssertEqual(harRequest.bodySize, 7)
+        }
+
+        do {
+            let url = try unwrap(URL(string: "http://example.com"))
+
+            var req: URLRequest
+            var rar: HAR.Request
+
+            req = URLRequest(url: url)
+            req.httpMethod = nil
+            XCTAssertEqual(req.url?.absoluteString, "http://example.com")
+            XCTAssertEqual(req.httpMethod, "GET")
+            rar = HAR.Request(request: req)
+            XCTAssertEqual(rar.method, .get)
         }
 
         do {
@@ -139,6 +186,22 @@ final class HARTests: XCTestCase {
                 }
             }
         }
+    }
+
+    func testHeaders() throws {
+        let url = try unwrap(URL(string: "http://example.com"))
+
+        var req: HAR.Request
+
+        req = HAR.Request(method: .post, url: url)
+        req.headers = [
+            HAR.Header(("Accept", "*/*")),
+            HAR.Header(("Content-Type", "application/json")),
+        ]
+        XCTAssertEqual(req.value(forHTTPHeaderField: "Content-Type"), "application/json")
+        XCTAssertEqual(req.value(forHTTPHeaderField: "Content-type"), "application/json")
+        XCTAssertEqual(req.value(forHTTPHeaderField: "content-type"), "application/json")
+        XCTAssertNil(req.value(forHTTPHeaderField: "type"))
     }
 
     func testPostData() throws {
@@ -218,6 +281,7 @@ final class HARTests: XCTestCase {
         ("testDecodable", testDecodable),
         ("testRequest", testRequest),
         ("testURLRequest", testURLRequest),
+        ("testHeaders", testHeaders),
         ("testPostData", testPostData),
         ("testContent", testContent),
         ("testTimings", testTimings),
