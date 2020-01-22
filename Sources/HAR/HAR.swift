@@ -192,8 +192,7 @@ public struct HAR: Codable, Equatable {
             didSet {
                 if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
                     queryString = queryItems.map {
-                        // TODO: Refactor URI decoding logic
-                        QueryString(name: $0.name, value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
+                        QueryString($0)
                     }
                 }
 
@@ -642,7 +641,9 @@ extension HAR.Request {
 internal func parseFormUrlEncoded(_ str: String) -> [(key: String, value: String?)] {
     var components = URLComponents()
     components.query = str
-    return components.queryItems?.map { ($0.name, $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding) } ?? []
+    return components.queryItems?.map {
+        ($0.name, $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
+    } ?? []
 }
 
 extension HAR.Header {
@@ -653,11 +654,11 @@ extension HAR.Header {
     }
 }
 
-extension HAR.Param {
-    /// Create HAR Param from `(key, value)` tuple.
-    init(_ pair: (key: String, value: String?)) {
-        name = pair.key
-        value = pair.value
+extension HAR.QueryString {
+    init(_ queryItem: URLQueryItem) {
+        self.init(
+            name: queryItem.name,
+            value: queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? "")
     }
 }
 
@@ -685,6 +686,14 @@ extension HAR.PostData {
 
     var data: Data? {
         text.data(using: .utf8)
+    }
+}
+
+extension HAR.Param {
+    /// Create HAR Param from `(key, value)` tuple.
+    init(_ pair: (key: String, value: String?)) {
+        name = pair.key
+        value = pair.value
     }
 }
 

@@ -209,6 +209,26 @@ final class HARTests: XCTestCase {
         XCTAssertNil(req.value(forHTTPHeaderField: "type"))
     }
 
+    func testQueryString() throws {
+        let queryComponents = try unwrap(URLComponents(string: "http://example.com/?foo=bar&query=%40swift&message=hello+world"))
+        XCTAssertEqual(queryComponents.query, "foo=bar&query=@swift&message=hello+world")
+        XCTAssertEqual(
+            queryComponents.queryItems,
+            [
+                URLQueryItem(name: "foo", value: "bar"),
+                URLQueryItem(name: "query", value: "@swift"),
+                URLQueryItem(name: "message", value: "hello+world"),
+            ])
+
+        XCTAssertEqual(
+            queryComponents.queryItems?.map { HAR.QueryString($0) },
+            [
+                HAR.QueryString(name: "foo", value: "bar"),
+                HAR.QueryString(name: "query", value: "@swift"),
+                HAR.QueryString(name: "message", value: "hello world"),
+            ])
+    }
+
     func testPostData() throws {
         let postData = HAR.PostData(text: "foo=1&bar=2&message=Hello%20World&q=duck+duck+go", mimeType: "application/x-www-form-urlencoded")
         XCTAssertEqual(
@@ -287,6 +307,7 @@ final class HARTests: XCTestCase {
         ("testRequest", testRequest),
         ("testURLRequest", testURLRequest),
         ("testHeaders", testHeaders),
+        ("testQueryString", testQueryString),
         ("testPostData", testPostData),
         ("testContent", testContent),
         ("testTimings", testTimings),
