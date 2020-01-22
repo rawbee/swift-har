@@ -185,6 +185,44 @@ final class HARTests: XCTestCase {
         }
     }
 
+    func testURLResponse() throws {
+        do {
+            var rar = HAR.Response()
+            XCTAssertEqual(rar.status, 200)
+            XCTAssertEqual(rar.statusText, "OK")
+            XCTAssertEqual(rar.httpVersion, "HTTP/1.1")
+            XCTAssertEqual(rar.headers, [])
+            XCTAssertEqual(rar.content.data, nil)
+            XCTAssertEqual(rar.redirectURL, "")
+            XCTAssertEqual(rar.headersSize, -1)
+            XCTAssertEqual(rar.bodySize, -1)
+
+            rar.status = 404
+            XCTAssertEqual(rar.status, 404)
+            XCTAssertEqual(rar.statusText, "Not Found")
+
+            rar.status = 500
+            XCTAssertEqual(rar.status, 500)
+            XCTAssertEqual(rar.statusText, "Internal Server Error")
+
+            rar.headers.append(HAR.Header(name: "Content-Type", value: "application/json"))
+            XCTAssertEqual(rar.headers, [HAR.Header(name: "Content-Type", value: "application/json")])
+            XCTAssertEqual(rar.headersSize, 61)
+        }
+
+        do {
+            for (_, data) in try loadFixtures() {
+                let har = try HAR(data: data)
+
+                for entry in har.log.entries {
+                    let response = HTTPURLResponse(url: entry.request.url, response: entry.response)
+                    let rar = HAR.Response(response: response)
+                    XCTAssertEqual(entry.response.status, rar.status)
+                }
+            }
+        }
+    }
+
     func normalizedHeaders(_ headers: [HAR.Header]) -> [HAR.Header] {
         headers
             .map { HAR.Header(($0.name.lowercased(), $0.value)) }
@@ -309,6 +347,7 @@ final class HARTests: XCTestCase {
         ("testDecodable", testDecodable),
         ("testRequest", testRequest),
         ("testURLRequest", testURLRequest),
+        ("testURLResponse", testURLResponse),
         ("testCookie", testCookie),
         ("testHeaders", testHeaders),
         ("testQueryString", testQueryString),

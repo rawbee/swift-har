@@ -298,33 +298,55 @@ public struct HAR: Codable, Equatable {
     /// This object contains detailed info about the response.
     public struct Response: Codable, Equatable {
         /// Response status.
-        public var status: Int
+        public var status: Int = 200 {
+            didSet {
+                self.statusText = HTTPURLResponse.localizedString(forStatusCode: status).capitalized
+                updateHeadersSize()
+            }
+        }
 
         /// Response status description.
-        public var statusText: String
+        public var statusText: String = "OK"
 
         /// Response HTTP Version.
-        public var httpVersion: String
+        public var httpVersion: String = "HTTP/1.1"
 
         /// List of cookie objects.
         public var cookies: Cookies = []
 
         /// List of header objects.
-        public var headers: [Header] = []
+        public var headers: [Header] = [] {
+            didSet {
+                updateHeadersSize()
+            }
+        }
 
         /// Details about the response body.
-        public var content: Content
+        public var content: Content = Content()
 
         /// Redirection target URL from the Location response header.
-        public var redirectURL: String
+        public var redirectURL: String = ""
 
         /// Total number of bytes from the start of the HTTP response message until (and including) the double CRLF before the body. Set to -1 if the info is not available.
         ///
         /// The size of received response-headers is computed only from headers that are really received from the server. Additional headers appended by the browser are not included in this number, but they appear in the list of header objects.
-        public var headersSize: Int
+        public var headersSize: Int = -1
+
+        /// Compute and update `headerSize`.
+        private mutating func updateHeadersSize() {
+            headersSize = headerText.data(using: .utf8)?.count ?? -1
+        }
+
+        /// Compute text representation of header for computing it's size.
+        private var headerText: String {
+            """
+            \(status) \(statusText)\r
+            \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
+            """
+        }
 
         /// Size of the received response body in bytes. Set to zero in case of responses coming from the cache (304). Set to -1 if the info is not available.
-        public var bodySize: Int
+        public var bodySize: Int = -1
 
         /// A comment provided by the user or the application.
         ///
@@ -632,6 +654,25 @@ extension HAR.Request {
             self.url = self.url
             self.headers = self.headers
             self.postData = self.postData
+        }
+    }
+}
+
+extension HTTPURLResponse {
+    convenience init(url: URL, response: HAR.Response) {
+        // FIXME: force unwrapping
+        self.init(url: url, statusCode: response.status, httpVersion: response.httpVersion, headerFields: [:])!
+    }
+}
+
+extension HAR.Response {
+    init(response: HTTPURLResponse) {
+        status = response.statusCode
+        content = HAR.Content()
+
+        defer {
+            self.status = self.status
+            self.headers = self.headers
         }
     }
 }
