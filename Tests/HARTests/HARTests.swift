@@ -179,8 +179,6 @@ final class HARTests: XCTestCase {
                     XCTAssertEqual(entry.request.method, rar.method)
                     XCTAssertEqual(entry.request.url, rar.url)
                     XCTAssertEqual(normalizedHeaders(entry.request.headers), normalizedHeaders(rar.headers))
-                    // FIXME: Fix test
-                    // XCTAssertEqual(entry.request.queryString, rar.queryString)
                     XCTAssertEqual(entry.request.postData, rar.postData)
                 }
             }
