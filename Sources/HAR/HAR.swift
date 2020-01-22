@@ -193,7 +193,7 @@ public struct HAR: Codable, Equatable {
                 if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
                     queryString = queryItems.map {
                         // TODO: Refactor URI decoding logic
-                        HAR.QueryString(name: $0.name, value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
+                        QueryString(name: $0.name, value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
                     }
                 }
 
@@ -216,7 +216,7 @@ public struct HAR: Codable, Equatable {
             didSet {
                 if let value = value(forHTTPHeaderField: "Cookie") {
                     cookies = parseFormUrlEncoded(value).map {
-                        HAR.Cookie(name: $0.key, value: $0.value ?? "")
+                        Cookie(name: $0.key, value: $0.value ?? "")
                     }
                 }
 
@@ -569,7 +569,7 @@ extension HAR {
             let container = try decoder.singleValueContainer()
             let dateStr = try container.decode(String.self)
 
-            if let date = HAR.dateFormatter.date(from: dateStr) {
+            if let date = Self.dateFormatter.date(from: dateStr) {
                 return date
             }
 
@@ -578,14 +578,14 @@ extension HAR {
                 debugDescription: "invalid date: \(dateStr)")
         }
 
-        self = try decoder.decode(HAR.self, from: data)
+        self = try decoder.decode(Self.self, from: data)
     }
 
     /// Returns a HAR encoded as JSON `Data`.
     func encoded() throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
-        encoder.dateEncodingStrategy = .formatted(HAR.dateFormatter)
+        encoder.dateEncodingStrategy = .formatted(Self.dateFormatter)
         return try encoder.encode(self)
     }
 }
