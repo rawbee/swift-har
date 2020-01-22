@@ -664,16 +664,20 @@ extension HTTPURLResponse {
     convenience init(url: URL, response: HAR.Response) {
         let headerFields = response.headers.reduce(into: [:]) { $0[$1.name] = $1.value }
 
-        // FIXME: force unwrapping
+        /// - Remark: initializer doesn't appear to have any failure cases
         self.init(url: url, statusCode: response.status, httpVersion: response.httpVersion, headerFields: headerFields)!
     }
 }
 
 extension HAR.Response {
-    init(response: HTTPURLResponse) {
+    init(response: HTTPURLResponse, data: Data?) {
         status = response.statusCode
-        content = HAR.Content()
         headers = HAR.Headers(response.allHeaderFields)
+        bodySize = Int(truncatingIfNeeded: response.expectedContentLength)
+
+        if let data = data {
+            content = HAR.Content(data: data, size: bodySize, mimeType: response.mimeType)
+        }
 
         defer {
             self.status = self.status
@@ -769,6 +773,7 @@ extension HAR.Param {
 }
 
 extension HAR.Content {
+    /// - ToDo: Document initializer.
     init(text: String, encoding: HAR.Encoding? = nil, mimeType: String) {
         self.encoding = encoding
         self.mimeType = mimeType
@@ -779,6 +784,25 @@ extension HAR.Content {
         }
     }
 
+    /// - ToDo: Document initializer.
+    init(data: Data, size: Int, mimeType: String?) {
+        self.size = size
+        self.mimeType = mimeType
+
+        if let text = String(bytes: data, encoding: .utf8) {
+            self.text = text
+        } else {
+            text = data.base64EncodedString()
+            encoding = .base64
+        }
+
+        // Run didSet hooks
+        defer {
+            self.text = text
+        }
+    }
+
+    /// - ToDo: Document property.
     var data: Data? {
         if let text = text {
             switch encoding {
