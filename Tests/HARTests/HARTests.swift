@@ -218,6 +218,7 @@ final class HARTests: XCTestCase {
                     let response = HTTPURLResponse(url: entry.request.url, response: entry.response)
                     let rar = HAR.Response(response: response)
                     XCTAssertEqual(entry.response.status, rar.status)
+                    XCTAssertEqual(normalizedHeaders(entry.response.headers), normalizedHeaders(rar.headers))
                 }
             }
         }

@@ -211,7 +211,7 @@ public struct HAR: Codable, Equatable {
         public var cookies: Cookies = []
 
         /// List of header objects.
-        public var headers: [Header] = [] {
+        public var headers: Headers = [] {
             didSet {
                 if let value = value(forHTTPHeaderField: "Cookie") {
                     cookies = Cookies(fromCookieHeader: value)
@@ -315,7 +315,7 @@ public struct HAR: Codable, Equatable {
         public var cookies: Cookies = []
 
         /// List of header objects.
-        public var headers: [Header] = [] {
+        public var headers: Headers = [] {
             didSet {
                 updateHeadersSize()
             }
@@ -404,6 +404,8 @@ public struct HAR: Codable, Equatable {
         /// - Version: 1.2
         public var comment: String?
     }
+
+    public typealias Headers = [Header]
 
     /// This object contains list of all parameters & values parsed from a query string, if any (embedded in `Request` object).
     public struct QueryString: Codable, Equatable {
@@ -660,8 +662,10 @@ extension HAR.Request {
 
 extension HTTPURLResponse {
     convenience init(url: URL, response: HAR.Response) {
+        let headerFields = response.headers.reduce(into: [:]) { $0[$1.name] = $1.value }
+
         // FIXME: force unwrapping
-        self.init(url: url, statusCode: response.status, httpVersion: response.httpVersion, headerFields: [:])!
+        self.init(url: url, statusCode: response.status, httpVersion: response.httpVersion, headerFields: headerFields)!
     }
 }
 
@@ -669,6 +673,7 @@ extension HAR.Response {
     init(response: HTTPURLResponse) {
         status = response.statusCode
         content = HAR.Content()
+        headers = HAR.Headers(response.allHeaderFields)
 
         defer {
             self.status = self.status
@@ -695,6 +700,18 @@ extension HAR.Header {
     init(_ pair: (key: String, value: String)) {
         name = pair.key
         value = pair.value
+    }
+}
+
+extension HAR.Headers {
+    init(_ fields: [AnyHashable: Any]) {
+        self = fields.compactMap {
+            if let name = $0.key as? String, let value = $0.value as? String {
+                return HAR.Header(name: name, value: value)
+            } else {
+                return nil
+            }
+        }
     }
 }
 
