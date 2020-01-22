@@ -606,8 +606,6 @@ extension URLRequest {
 extension HAR.Request {
     /// Creates a HAR Request from a URL Request.
     ///
-    /// - TODO: Consider making initializer failable.
-    ///
     /// - Parameter request: A URL Request.
     init(request: URLRequest) {
         self.init()
