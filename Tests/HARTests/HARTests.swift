@@ -178,14 +178,19 @@ final class HARTests: XCTestCase {
                     let rar = HAR.Request(request: request)
                     XCTAssertEqual(entry.request.method, rar.method)
                     XCTAssertEqual(entry.request.url, rar.url)
-                    // FIXME: Fix test
-                    // XCTAssertEqual(entry.request.headers, rar.headers)
+                    XCTAssertEqual(normalizedHeaders(entry.request.headers), normalizedHeaders(rar.headers))
                     // FIXME: Fix test
                     // XCTAssertEqual(entry.request.queryString, rar.queryString)
                     XCTAssertEqual(entry.request.postData, rar.postData)
                 }
             }
         }
+    }
+
+    func normalizedHeaders(_ headers: [HAR.Header]) -> [HAR.Header] {
+        headers
+            .map { HAR.Header(($0.name.lowercased(), $0.value)) }
+            .sorted { $0.name < $1.name }
     }
 
     func testHeaders() throws {
