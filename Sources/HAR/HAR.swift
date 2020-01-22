@@ -208,15 +208,13 @@ public struct HAR: Codable, Equatable {
         }
 
         /// List of cookie objects.
-        public var cookies: [Cookie] = []
+        public var cookies: Cookies = []
 
         /// List of header objects.
         public var headers: [Header] = [] {
             didSet {
                 if let value = value(forHTTPHeaderField: "Cookie") {
-                    cookies = parseFormUrlEncoded(value).map {
-                        Cookie(name: $0.key, value: $0.value ?? "")
-                    }
+                    cookies = Cookies(fromCookieHeader: value)
                 }
 
                 updateHeadersSize()
@@ -309,7 +307,7 @@ public struct HAR: Codable, Equatable {
         public var httpVersion: String
 
         /// List of cookie objects.
-        public var cookies: [Cookie] = []
+        public var cookies: Cookies = []
 
         /// List of header objects.
         public var headers: [Header] = []
@@ -371,6 +369,8 @@ public struct HAR: Codable, Equatable {
         /// - Version: Unspecified
         public var sameSite: String? = nil
     }
+
+    public typealias Cookies = [Cookie]
 
     /// This object contains list of all headers (used in `Request` and `Response` objects).
     public struct Header: Codable, Equatable {
@@ -638,12 +638,17 @@ extension HAR.Request {
     }
 }
 
-internal func parseFormUrlEncoded(_ str: String) -> [(key: String, value: String?)] {
-    var components = URLComponents()
-    components.query = str
-    return components.queryItems?.map {
-        ($0.name, $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
-    } ?? []
+extension HAR.Cookies {
+    init(fromCookieHeader header: String) {
+        self = header.components(separatedBy: ";").map {
+            let pair = $0.components(separatedBy: "=").map {
+                $0.trimmingCharacters(in: .whitespaces)
+            }[0 ... 1]
+            let name: String = pair.first ?? ""
+            let value: String = pair.last ?? ""
+            return HAR.Cookie(name: name, value: value)
+        }
+    }
 }
 
 extension HAR.Header {
@@ -672,8 +677,18 @@ extension HAR.PostData {
         }
 
         if self.mimeType.hasPrefix("application/x-www-form-urlencoded") {
-            params = parseFormUrlEncoded(text).map { HAR.Param($0) }
+            params = parseFormUrlEncoded(text)
         }
+    }
+
+    internal func parseFormUrlEncoded(_ str: String) -> [HAR.Param] {
+        var components = URLComponents()
+        components.query = str
+        return components.queryItems?.map {
+            HAR.Param(
+                name: $0.name,
+                value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
+        } ?? []
     }
 
     /// Create HAR PostData from data.

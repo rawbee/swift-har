@@ -193,6 +193,11 @@ final class HARTests: XCTestCase {
             .sorted { $0.name < $1.name }
     }
 
+    func testCookie() throws {
+        XCTAssertEqual(HAR.Cookies(fromCookieHeader: "foo=bar"), [HAR.Cookie(name: "foo", value: "bar")])
+        XCTAssertEqual(HAR.Cookies(fromCookieHeader: "foo=bar; bar="), [HAR.Cookie(name: "foo", value: "bar"), HAR.Cookie(name: "bar", value: "")])
+    }
+
     func testHeaders() throws {
         let url = try unwrap(URL(string: "http://example.com"))
 
@@ -306,6 +311,7 @@ final class HARTests: XCTestCase {
         ("testDecodable", testDecodable),
         ("testRequest", testRequest),
         ("testURLRequest", testURLRequest),
+        ("testCookie", testCookie),
         ("testHeaders", testHeaders),
         ("testQueryString", testQueryString),
         ("testPostData", testPostData),
