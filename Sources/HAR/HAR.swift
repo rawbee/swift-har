@@ -203,7 +203,7 @@ public struct HAR: Codable, Equatable {
         }
 
         /// Request HTTP Version.
-        public var httpVersion: String = "HTTP/1.1" {
+        public var httpVersion: String? = "HTTP/1.1" {
             didSet {
                 updateHeadersSize()
             }
@@ -256,7 +256,7 @@ public struct HAR: Codable, Equatable {
         /// Compute text representation of header for computing it's size.
         private var headerText: String {
             """
-            \(method) \(url.relativePath) \(httpVersion)\r
+            \(method) \(url.relativePath) \(httpVersion ?? "HTTP/1.1")\r
             \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
             """
         }
@@ -311,7 +311,7 @@ public struct HAR: Codable, Equatable {
         public var statusText: String = "OK"
 
         /// Response HTTP Version.
-        public var httpVersion: String = "HTTP/1.1"
+        public var httpVersion: String? = "HTTP/1.1"
 
         /// List of cookie objects.
         public var cookies: Cookies = []
@@ -450,7 +450,7 @@ public struct HAR: Codable, Equatable {
     /// List of posted parameters, if any (embedded in `PostData` object).
     public struct Param: Codable, Equatable {
         /// Name of a posted parameter.
-        public var name: String
+        public var name: String?
 
         /// Value of a posted parameter or content of a posted file.
         public var value: String?
@@ -465,10 +465,6 @@ public struct HAR: Codable, Equatable {
         ///
         /// - Version: 1.2
         public var comment: String?
-    }
-
-    public enum Encoding: String, Codable {
-        case base64
     }
 
     /// This object describes details about response content (embedded in `Response` object).
@@ -496,7 +492,7 @@ public struct HAR: Codable, Equatable {
         /// Encoding field is useful for including binary responses (e.g. images) into the HAR file.
         ///
         /// - Version: 1.2
-        public var encoding: Encoding?
+        public var encoding: String?
 
         /// A comment provided by the user or the application.
         ///
@@ -540,13 +536,13 @@ public struct HAR: Codable, Equatable {
     /// This object describes various phases within request-response round trip. All times are specified in milliseconds.
     public struct Timing: Codable, Equatable {
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing does not apply to the current request.
-        public var blocked: Double = -1
+        public var blocked: Double? = -1
 
         /// DNS resolution time. The time required to resolve a host name. Use -1 if the timing does not apply to the current request.
-        public var dns: Double = -1
+        public var dns: Double? = -1
 
         ///  Time required to create TCP connection. Use -1 if the timing does not apply to the current request.
-        public var connect: Double = -1
+        public var connect: Double? = -1
 
         /// Time required to send HTTP request to the server.
         public var send: Double = 0
@@ -560,7 +556,7 @@ public struct HAR: Codable, Equatable {
         /// Time required for SSL/TLS negotiation. If this field is defined then the time is also included in the connect field (to ensure backward compatibility with HAR 1.1). Use -1 if the timing does not apply to the current request.
         ///
         /// - Version: 1.2
-        public var ssl: Double = -1
+        public var ssl: Double? = -1
 
         /// A comment provided by the user or the application.
         ///
@@ -629,7 +625,7 @@ extension URLRequest {
         self.init(url: request.url)
         httpMethod = request.method.rawValue
         for header in request.headers {
-            setValue(header.value, forHTTPHeaderField: header.name)
+            addValue(header.value, forHTTPHeaderField: header.name)
         }
         httpBody = request.postData?.data
     }
@@ -809,7 +805,7 @@ extension HAR.PostData {
         var components = URLComponents()
         components.query = str
         return components.queryItems?.map {
-            HAR.Param(
+            return HAR.Param(
                 name: $0.name,
                 value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
         } ?? []
@@ -838,7 +834,7 @@ extension HAR.Param {
 
 extension HAR.Content {
     /// - ToDo: Document initializer.
-    init(text: String, encoding: HAR.Encoding? = nil, mimeType: String) {
+    init(text: String, encoding: String? = nil, mimeType: String) {
         self.encoding = encoding
         self.mimeType = mimeType
 
@@ -857,7 +853,7 @@ extension HAR.Content {
             self.text = text
         } else {
             text = data.base64EncodedString()
-            encoding = .base64
+            encoding = "base64"
         }
 
         // Run didSet hooks
@@ -870,7 +866,7 @@ extension HAR.Content {
     public var data: Data? {
         if let text = text {
             switch encoding {
-            case .base64:
+            case "base64":
                 return Data(base64Encoded: text)
             default:
                 return text.data(using: .utf8)
@@ -885,7 +881,10 @@ extension HAR.Timing {
     ///
     /// The time value for the request must be equal to the sum of the timings supplied in this section (excluding any -1 values).
     public var total: Double {
-        [blocked, dns, connect, send, wait, receive].filter { $0 != -1 }.reduce(0, +)
+        [blocked, dns, connect, send, wait, receive]
+            .map { $0 ?? -1 }
+            .filter { $0 != -1 }
+            .reduce(0, +)
     }
 }
 
