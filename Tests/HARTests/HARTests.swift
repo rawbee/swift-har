@@ -327,6 +327,24 @@ final class HARTests: XCTestCase {
         XCTAssertEqual(entry2.time, 85)
     }
 
+    func testRecord() throws {
+        let url = try unwrap(URL(string: "http://example.com"))
+        let request = URLRequest(url: url)
+
+        let har = try HAR.record(request: request)
+
+        guard let entry = har.log.entries.first else {
+            XCTFail("no entries")
+            return
+        }
+
+        XCTAssertGreaterThan(entry.time, 0)
+        XCTAssertGreaterThan(entry.timings.receive, 0)
+
+        XCTAssertEqual(entry.request.url.absoluteString, "http://example.com")
+        XCTAssertEqual(entry.response.status, 200)
+    }
+
     var fixtureURL: URL {
         var url = URL(fileURLWithPath: #file)
         url.appendPathComponent("../../Fixtures")

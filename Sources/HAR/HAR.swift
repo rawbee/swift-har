@@ -37,7 +37,7 @@ public struct HAR: Codable, Equatable {
         public var version: String = "1.2"
 
         /// Name and version info of the log creator application.
-        public var creator: Creator
+        public var creator: Creator = Creator.defaultCreator
 
         /// Name and version info of used browser.
         public var browser: Browser?
@@ -55,6 +55,8 @@ public struct HAR: Codable, Equatable {
     }
 
     public struct Creator: Codable, Equatable {
+        static let defaultCreator = Creator(name: "SwiftHAR", version: "0.1.0")
+
         /// Name of the application/browser used to export the log.
         public var name: String
 
@@ -885,4 +887,59 @@ extension HAR.Timing {
     public var total: Double {
         [blocked, dns, connect, send, wait, receive].filter { $0 != -1 }.reduce(0, +)
     }
+}
+
+extension HAR.Entry {
+    static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
+        var timings = HAR.Timing()
+        let start = DispatchTime.now()
+
+        let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
+            timings.receive = Double(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds) / 1000000
+
+            if let response = response as? HTTPURLResponse {
+                let entry = Self(
+                    time: timings.total,
+                    request: HAR.Request(request: request),
+                    response: HAR.Response(response: response, data: data),
+                    timings: timings)
+                completionHandler(.success(entry))
+            } else if let error = error {
+                completionHandler(.failure(error))
+            }
+        }
+
+        dataTask.resume()
+    }
+
+    static func record(request: URLRequest) throws -> Self {
+        try SyncResult { record(request: request, completionHandler: $0) }
+    }
+}
+
+extension HAR {
+    static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
+        Self.Entry.record(
+            request: request,
+            completionHandler: {
+                completionHandler($0.map { Self(log: Self.Log(entries: [$0])) })
+        })
+    }
+
+    static func record(request: URLRequest) throws -> Self {
+        try SyncResult { Self.record(request: request, completionHandler: $0) }
+    }
+}
+
+internal func SyncResult<T>(_ asyncHandler: (@escaping (Result<T, Error>) -> Void) -> Void) throws -> T {
+    let semaphore = DispatchSemaphore(value: 0)
+    var result: Result<T, Error>?
+
+    asyncHandler { (_result: Result<T, Error>) in
+        result = _result
+        semaphore.signal()
+    }
+
+    _ = semaphore.wait(timeout: .distantFuture)
+    return try result!.get()
 }
