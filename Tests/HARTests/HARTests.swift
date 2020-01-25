@@ -208,6 +208,20 @@ final class HARTests: XCTestCase {
             rar.headers.append(HAR.Header(name: "Content-Type", value: "application/json"))
             XCTAssertEqual(rar.headers, [HAR.Header(name: "Content-Type", value: "application/json")])
             XCTAssertEqual(rar.headersSize, 61)
+
+            rar.headers = [
+                HAR.Header(name: "Content-Type", value: "text/html"),
+                HAR.Header(name: "Set-Cookie", value: "sessionId=38afes7a8"),
+                HAR.Header(name: "Set-Cookie", value: "id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT"),
+            ]
+
+            XCTAssertEqual(rar.cookies.count, 2)
+            XCTAssertEqual(
+                rar.cookies,
+                [
+                    HAR.Cookie(name: "sessionId", value: "38afes7a8", httpOnly: false, secure: false),
+                    HAR.Cookie(name: "id", value: "a3fWa", expires: Date(timeIntervalSince1970: 1445412480), httpOnly: false, secure: false),
+                ])
         }
 
         do {

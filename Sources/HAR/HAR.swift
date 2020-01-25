@@ -317,6 +317,12 @@ public struct HAR: Codable, Equatable {
         /// List of header objects.
         public var headers: Headers = [] {
             didSet {
+                for header in headers {
+                    if header.name.lowercased() == "set-cookie" {
+                        cookies.append(Cookie(fromSetCookieHeader: header.value))
+                    }
+                }
+
                 updateHeadersSize()
             }
         }
@@ -686,16 +692,72 @@ extension HAR.Response {
     }
 }
 
+func breakIntoHalfs(_ string: String, separatedBy: String) -> (String, String?) {
+    var components = string.components(separatedBy: separatedBy)
+    let first = components.removeFirst()
+    let rest = components.joined(separator: separatedBy)
+    return (first, rest.isEmpty ? nil : rest)
+}
+
+/// Parse cookie style attribute pairs seperated by `;` and `=`
+func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] {
+    string.components(separatedBy: ";").compactMap {
+        let (key, value) = breakIntoHalfs($0, separatedBy: "=")
+        return (key.trimmingCharacters(in: .whitespaces), value?.trimmingCharacters(in: .whitespaces))
+    }
+}
+
+extension HAR.Cookie {
+    init(fromSetCookieHeader header: String) {
+        var attributeValues = parseCookieAttributes(header)
+
+        let (name, value) = attributeValues.removeFirst()
+        self.name = name
+        self.value = value ?? ""
+
+        secure = false
+        httpOnly = false
+
+        for (key, value) in attributeValues {
+            switch key.lowercased() {
+            case "expires":
+                if let value = value {
+                    // Tue, 18 Jan 2022 23:07:07 GMT
+                    for dateFormat in ["EEE',' dd MMM yyyy HH:mm:ss 'GMT'", "EEE',' dd'-'MMM'-'yy HH:mm:ss 'GMT'", "EEE',' dd'-'MMM'-'yyyy HH:mm:ss 'GMT'"] {
+                        let formatter = DateFormatter()
+                        formatter.timeZone = TimeZone(identifier: "UTC")
+                        formatter.dateFormat = dateFormat
+
+                        expires = formatter.date(from: value)
+                        if expires != nil {
+                            break
+                        }
+                    }
+
+                    if expires == nil {
+                        print("bad parse: \(value)")
+                    }
+                }
+            case "domain":
+                domain = value
+            case "path":
+                path = value
+            case "secure":
+                secure = true
+            case "httponly":
+                httpOnly = true
+            case "samesite":
+                sameSite = value
+            default:
+                continue
+            }
+        }
+    }
+}
+
 extension HAR.Cookies {
     init(fromCookieHeader header: String) {
-        self = header.components(separatedBy: ";").map {
-            let pair = $0.components(separatedBy: "=").map {
-                $0.trimmingCharacters(in: .whitespaces)
-            }[0 ... 1]
-            let name: String = pair.first ?? ""
-            let value: String = pair.last ?? ""
-            return HAR.Cookie(name: name, value: value)
-        }
+        self = parseCookieAttributes(header).map { HAR.Cookie(name: $0.key, value: $0.value ?? "") }
     }
 }
 
