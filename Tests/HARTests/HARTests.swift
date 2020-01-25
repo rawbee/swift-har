@@ -364,15 +364,17 @@ final class HARTests: XCTestCase {
         return fixtures
     }
 
-    enum TestErrors: Error {
-        case nilValue
-    }
-
-    func unwrap<T>(_ value: T?) throws -> T {
-        guard let value = value else {
-            throw TestErrors.nilValue
+    struct TestErrorWhileUnwrappingOptional: Error {}
+    func unwrap<T>(_ expression: @autoclosure () throws -> T?, _ message: @autoclosure () -> String = "", file: StaticString = #file, line: UInt = #line) throws -> T {
+        if let value = try expression() {
+            return value
         }
-        return value
+
+        let providedMessage = message()
+        let failureMessage = providedMessage.isEmpty ? "Expected non-nil value of type \"\(String(describing: T.self))\"" : providedMessage
+
+        XCTFail(failureMessage, file: file, line: line)
+        throw TestErrorWhileUnwrappingOptional()
     }
 
     static var allTests = [
