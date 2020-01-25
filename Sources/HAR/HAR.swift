@@ -573,7 +573,7 @@ extension HAR {
     /// Creates a `HAR` from the contents of a file URL.
     ///
     /// - Parameter url: Path to `.har` file.
-    init(contentsOf url: URL) throws {
+    public init(contentsOf url: URL) throws {
         try self.init(data: try Data(contentsOf: url))
     }
 
@@ -593,7 +593,7 @@ extension HAR {
     /// Creates a `HAR` from JSON `Data`.
     ///
     /// - Parameter data: UTF-8 JSON data.
-    init(data: Data) throws {
+    public init(data: Data) throws {
         let decoder = JSONDecoder()
 
         decoder.dateDecodingStrategy = .custom { (decoder) -> Date in
@@ -613,7 +613,7 @@ extension HAR {
     }
 
     /// Returns a HAR encoded as JSON `Data`.
-    func encoded() throws -> Data {
+    public func encoded() throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         encoder.dateEncodingStrategy = .formatted(Self.dateFormatter)
@@ -669,7 +669,7 @@ extension HAR.Request {
 }
 
 extension HTTPURLResponse {
-    convenience init(url: URL, response: HAR.Response) {
+    public convenience init(url: URL, response: HAR.Response) {
         let headerFields = response.headers.reduce(into: [:]) { $0[$1.name] = $1.value }
 
         /// - Remark: initializer doesn't appear to have any failure cases
@@ -867,7 +867,7 @@ extension HAR.Content {
     }
 
     /// - ToDo: Document property.
-    var data: Data? {
+    public var data: Data? {
         if let text = text {
             switch encoding {
             case .base64:
@@ -890,7 +890,7 @@ extension HAR.Timing {
 }
 
 extension HAR.Entry {
-    static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
+    public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
         var timings = HAR.Timing()
         let start = DispatchTime.now()
 
@@ -912,13 +912,13 @@ extension HAR.Entry {
         dataTask.resume()
     }
 
-    static func record(request: URLRequest) throws -> Self {
+    public static func record(request: URLRequest) throws -> Self {
         try SyncResult { record(request: request, completionHandler: $0) }
     }
 }
 
 extension HAR {
-    static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
+    public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
         Self.Entry.record(
             request: request,
             completionHandler: {
@@ -926,7 +926,7 @@ extension HAR {
         })
     }
 
-    static func record(request: URLRequest) throws -> Self {
+    public static func record(request: URLRequest) throws -> Self {
         try SyncResult { Self.record(request: request, completionHandler: $0) }
     }
 }
