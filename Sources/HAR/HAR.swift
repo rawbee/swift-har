@@ -371,21 +371,21 @@ public struct HAR: Codable, Equatable {
         public var value: String
 
         /// The path pertaining to the cookie.
-        public var path: String? = nil
+        public var path: String?
 
         // The host of the cookie.
-        public var domain: String? = nil
+        public var domain: String?
 
         /// Cookie expiration time.
-        public var expires: Date? = nil
+        public var expires: Date?
 
         /// Set to true if the cookie is HTTP only, false otherwise.
-        public var httpOnly: Bool? = nil
+        public var httpOnly: Bool?
 
         /// True if the cookie was transmitted over ssl, false otherwise.
         ///
         /// - Version: 1.2
-        public var secure: Bool? = nil
+        public var secure: Bool?
 
         /// A comment provided by the user or the application.
         ///
@@ -397,7 +397,7 @@ public struct HAR: Codable, Equatable {
         /// Possible values: `"strict"`, `"lax"`, `"none"`
         ///
         /// - Version: Unspecified
-        public var sameSite: String? = nil
+        public var sameSite: String?
     }
 
     public typealias Cookies = [Cookie]
