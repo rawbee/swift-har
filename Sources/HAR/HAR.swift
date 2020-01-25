@@ -250,7 +250,7 @@ public struct HAR: Codable, Equatable {
 
         /// Compute and update `headerSize`.
         private mutating func updateHeadersSize() {
-            headersSize = headerText.data(using: .utf8)?.count ?? -1
+            headersSize = Data(headerText.utf8).count
         }
 
         /// Compute text representation of header for computing it's size.
@@ -342,7 +342,7 @@ public struct HAR: Codable, Equatable {
 
         /// Compute and update `headerSize`.
         private mutating func updateHeadersSize() {
-            headersSize = headerText.data(using: .utf8)?.count ?? -1
+            headersSize = Data(headerText.utf8).count
         }
 
         /// Compute text representation of header for computing it's size.
@@ -820,7 +820,7 @@ extension HAR.PostData {
     }
 
     var data: Data? {
-        text.data(using: .utf8)
+        Data(text.utf8)
     }
 }
 
@@ -869,7 +869,7 @@ extension HAR.Content {
             case "base64":
                 return Data(base64Encoded: text)
             default:
-                return text.data(using: .utf8)
+                return Data(text.utf8)
             }
         }
         return nil
