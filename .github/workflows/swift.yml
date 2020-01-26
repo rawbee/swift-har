@@ -4,20 +4,16 @@ on: [push]
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
-
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v1
 
       - name: Build
-        run: swift build --verbose
+        run: swift build -v
 
       - name: Run tests
-        run: swift test --enable-test-discovery --verbose
+        run: swift test -v
 
   lint:
     runs-on: macos-latest
