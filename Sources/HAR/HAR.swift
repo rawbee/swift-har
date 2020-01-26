@@ -180,24 +180,12 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
-    public enum HTTPMethod: String, Codable {
-        case get = "GET"
-        case head = "HEAD"
-        case post = "POST"
-        case put = "PUT"
-        case delete = "DELETE"
-        case connect = "CONNECT"
-        case options = "OPTIONS"
-        case trace = "TRACE"
-        case patch = "PATCH"
-    }
-
     // MARK: - Request
 
     /// This object contains detailed info about performed request.
     public struct Request: Codable, Equatable {
         /// Request method.
-        public var method: HTTPMethod = .get {
+        public var method: String = "GET" {
             didSet {
                 updateHeadersSize()
             }
@@ -300,7 +288,7 @@ public struct HAR: Codable, Equatable {
         ///
         /// - Parameter method: An HTTP method.
         /// - Parameter url: A URL.
-        init(method: HTTPMethod, url: URL) {
+        init(method: String, url: URL) {
             self.init()
 
             self.method = method
@@ -658,7 +646,7 @@ extension URLRequest {
     /// - Parameter request: A `HAR.Request`.
     init(request: HAR.Request) {
         self.init(url: request.url)
-        httpMethod = request.method.rawValue
+        httpMethod = request.method
         for header in request.headers {
             addValue(header.value, forHTTPHeaderField: header.name)
         }
@@ -678,8 +666,7 @@ extension HAR.Request {
         }
 
         /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
-        let httpMethod = request.httpMethod ?? "GET"
-        method = HAR.HTTPMethod(rawValue: httpMethod) ?? .get
+        method = request.httpMethod ?? "GET"
 
         if let headers = request.allHTTPHeaderFields {
             self.headers = headers.map { HAR.Header($0) }
