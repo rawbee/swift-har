@@ -29,6 +29,8 @@ import Foundation
 public struct HAR: Codable, Equatable {
     public var log: Log
 
+    // MARK: - Log
+
     /// This object represents the root of exported data.
     ///
     /// There is one `Page` object for every exported web page and one `Entry` object for every HTTP request. In case when an HTTP trace tool isn't able to group requests by a page, the `pages` object is empty and individual requests doesn't have a parent page.
@@ -54,6 +56,8 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
+    // MARK: - Creator
+
     public struct Creator: Codable, Equatable {
         static let defaultCreator = Creator(name: "SwiftHAR", version: "0.1.0")
 
@@ -69,6 +73,8 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
+    // MARK: - Browser
+
     public struct Browser: Codable, Equatable {
         /// Name of the application/browser used to export the log.
         public var name: String
@@ -81,6 +87,8 @@ public struct HAR: Codable, Equatable {
         /// - Version: 1.2
         public var comment: String?
     }
+
+    // MARK: - Pages
 
     /// This object represents list of exported pages.
     public struct Page: Codable, Equatable {
@@ -104,6 +112,8 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
+    // MARK: - PageTimings
+
     /// This object describes timings for various events (states) fired during the page load. All times are specified in milliseconds. If a time info is not available appropriate field is set to -1.
     ///
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad` event or `document.readyState == interactive`.
@@ -119,6 +129,8 @@ public struct HAR: Codable, Equatable {
         /// - Version: 1.2
         public var comment: String?
     }
+
+    // MARK: - Entries
 
     /// This object represents an array with all exported HTTP requests. Sorting entries by `startedDateTime` (starting from the oldest) is preferred way how to export data since it can make importing faster. However the reader application should always make sure the array is sorted (if required for the import).
     public struct Entry: Codable, Equatable {
@@ -176,6 +188,8 @@ public struct HAR: Codable, Equatable {
         case trace = "TRACE"
         case patch = "PATCH"
     }
+
+    // MARK: - Request
 
     /// This object contains detailed info about performed request.
     public struct Request: Codable, Equatable {
@@ -297,6 +311,8 @@ public struct HAR: Codable, Equatable {
         }
     }
 
+    // MARK: - Response
+
     /// This object contains detailed info about the response.
     public struct Response: Codable, Equatable {
         /// Response status.
@@ -362,6 +378,8 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
+    // MARK: - Cookies
+
     /// This object contains list of all cookies (used in `Request` and `Response` objects).
     public struct Cookie: Codable, Equatable {
         /// The name of the cookie.
@@ -402,6 +420,8 @@ public struct HAR: Codable, Equatable {
 
     public typealias Cookies = [Cookie]
 
+    // MARK: - Headers
+
     /// This object contains list of all headers (used in `Request` and `Response` objects).
     public struct Header: Codable, Equatable {
         public var name: String
@@ -415,6 +435,8 @@ public struct HAR: Codable, Equatable {
 
     public typealias Headers = [Header]
 
+    // MARK: - QueryString
+
     /// This object contains list of all parameters & values parsed from a query string, if any (embedded in `Request` object).
     public struct QueryString: Codable, Equatable {
         public var name: String
@@ -425,6 +447,8 @@ public struct HAR: Codable, Equatable {
         /// - Version: 1.2
         public var comment: String?
     }
+
+    // MARK: - PostData
 
     /// This object describes posted data, if any (embedded in `Request` object).
     public struct PostData: Codable, Equatable {
@@ -447,6 +471,8 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
+    // MARK: - Params
+
     /// List of posted parameters, if any (embedded in `PostData` object).
     public struct Param: Codable, Equatable {
         /// Name of a posted parameter.
@@ -466,6 +492,8 @@ public struct HAR: Codable, Equatable {
         /// - Version: 1.2
         public var comment: String?
     }
+
+    // MARK: - Content
 
     /// This object describes details about response content (embedded in `Response` object).
     public struct Content: Codable, Equatable {
@@ -500,6 +528,8 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
+    // MARK: - Cache
+
     /// This objects contains info about a request coming from browser cache.
     public struct Cache: Codable, Equatable {
         // State of a cache entry before the request. Leave out this field if the information is not available.
@@ -532,6 +562,8 @@ public struct HAR: Codable, Equatable {
         /// - Version: 1.2
         public var comment: String?
     }
+
+    // MARK: - Timings
 
     /// This object describes various phases within request-response round trip. All times are specified in milliseconds.
     public struct Timing: Codable, Equatable {
