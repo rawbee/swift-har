@@ -1,7 +1,1 @@
-import XCTest
-
-import HARTests
-
-var tests = [XCTestCaseEntry]()
-tests += HARTests.allTests()
-XCTMain(tests)
+fatalError("Use --enable-test-discovery to run tests on Linux.")

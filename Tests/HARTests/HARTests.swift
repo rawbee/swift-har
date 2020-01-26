@@ -1,6 +1,10 @@
 @testable import HAR
 import XCTest
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 final class HARTests: XCTestCase {
     func testLoadFixtures() throws {
         XCTAssertGreaterThan(try loadFixtures().count, 1)
@@ -106,7 +110,7 @@ final class HARTests: XCTestCase {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
 
-            let junk = [UInt32](repeating: 0, count: 255).map { _ in arc4random() }
+            let junk = [UInt32](repeating: 0, count: 255).map { _ in UInt32.random(in: 0 ... 10000) }
             request.httpBody = Data(bytes: junk, count: 255)
 
             let rar = HAR.Request(request: request)
@@ -378,19 +382,4 @@ final class HARTests: XCTestCase {
         XCTFail(failureMessage, file: file, line: line)
         throw TestErrorWhileUnwrappingOptional()
     }
-
-    static var allTests = [
-        ("testLoadFixtures", testLoadFixtures),
-        ("testCodable", testCodable),
-        ("testDecodable", testDecodable),
-        ("testRequest", testRequest),
-        ("testURLRequest", testURLRequest),
-        ("testURLResponse", testURLResponse),
-        ("testCookie", testCookie),
-        ("testHeaders", testHeaders),
-        ("testQueryString", testQueryString),
-        ("testPostData", testPostData),
-        ("testContent", testContent),
-        ("testTimings", testTimings),
-    ]
 }
