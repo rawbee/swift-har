@@ -461,7 +461,7 @@ public struct HAR: Codable, Equatable {
         /// List of posted parameters (in case of URL encoded parameters).
         ///
         /// - Invariant: Text and params fields are mutually exclusive.
-        public var params: [Param] = []
+        public var params: [Param]? = []
 
         /// Plain text posted data
         ///

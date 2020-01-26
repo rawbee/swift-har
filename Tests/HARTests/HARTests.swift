@@ -134,7 +134,7 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(harRequest.queryString, [])
             XCTAssertEqual(harRequest.postData?.mimeType, "application/x-www-form-urlencoded; charset=UTF-8")
             XCTAssertEqual(harRequest.postData?.text, "foo=bar")
-            XCTAssertEqual(harRequest.postData?.params.first, HAR.Param(name: "foo", value: "bar"))
+            XCTAssertEqual(harRequest.postData?.params?.first, HAR.Param(name: "foo", value: "bar"))
             XCTAssertEqual(harRequest.headersSize, 82)
             XCTAssertEqual(harRequest.bodySize, 7)
         }
