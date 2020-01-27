@@ -861,6 +861,10 @@ extension HAR.PostData {
     }
 }
 
+// MARK: - Params
+
+extension HAR.Param: Hashable {}
+
 extension HAR.Param {
     /// Create HAR Param from `(key, value)` tuple.
     init(_ pair: (key: String, value: String?)) {
