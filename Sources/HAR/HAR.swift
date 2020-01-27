@@ -705,6 +705,8 @@ extension HAR.Response {
             content = HAR.Content(data: data, size: bodySize, mimeType: response.mimeType)
         }
 
+        // TODO: Use HTTPCookie.cookies(withResponseHeaderFields:for:) to parse cookies
+
         defer {
             self.status = self.status
             self.headers = self.headers
