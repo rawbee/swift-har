@@ -783,6 +783,19 @@ extension HAR.Cookies {
     }
 }
 
+extension HTTPCookie {
+    convenience init?(cookie: HAR.Cookie, url: URL) {
+        // TODO: Cover all HTTPCookiePropertyKey cases
+        self.init(
+            properties: [
+                .path: "",
+                .name: cookie.name,
+                .value: cookie.value,
+                .domain: url.host ?? "",
+            ])
+    }
+}
+
 extension HAR.Header {
     /// Create HAR Header from `(key, value)` tuple.
     init(_ pair: (key: String, value: String)) {
