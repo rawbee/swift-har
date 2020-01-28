@@ -10,6 +10,11 @@ final class ParamTests: XCTestCase {
     }
 
     func testHashable() {
-        _ = HAR.Param(name: "foo", value: "1").hashValue
+        let set = Set([
+            HAR.Param(name: "foo", value: "1"),
+            HAR.Param(name: "foo", value: "1"),
+            HAR.Param(name: "foo", value: "2"),
+        ])
+        XCTAssertEqual(set.count, 2)
     }
 }
