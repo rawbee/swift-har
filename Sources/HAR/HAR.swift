@@ -867,6 +867,37 @@ extension HAR.PostData {
 
 extension HAR.Param: Hashable {}
 
+extension HAR.Param: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        var str = ""
+
+        if let name = name {
+            if let value = value {
+                str += "\(name)=\(value)"
+            } else {
+                str += name
+            }
+        }
+
+        if let fileName = fileName {
+            str += "; filename=\"\(fileName)\""
+        }
+        if let contentType = contentType {
+            str += "; content-type=\"\(contentType)\""
+        }
+
+        return str
+    }
+}
+
+extension HAR.Param: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.Param { \(description) }"
+    }
+}
+
 extension HAR.Param {
     /// Create HAR Param from `(key, value)` tuple.
     init(_ pair: (key: String, value: String?)) {
