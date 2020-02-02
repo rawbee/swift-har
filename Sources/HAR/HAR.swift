@@ -590,6 +590,8 @@ public struct HAR: Codable, Equatable {
     }
 }
 
+// MARK: - HAR
+
 extension HAR {
     /// Creates a `HAR` from the contents of a file URL.
     ///
@@ -642,6 +644,20 @@ extension HAR {
     }
 }
 
+// MARK: - Log
+
+// MARK: - Creator
+
+// MARK: - Browser
+
+// MARK: - Pages
+
+// MARK: - PageTimings
+
+// MARK: - Entries
+
+// MARK: - Request
+
 extension URLRequest {
     /// Creates a URL Request from a `HAR.Request`.
     ///
@@ -688,6 +704,8 @@ extension HAR.Request {
     }
 }
 
+// MARK: - Response
+
 extension HTTPURLResponse {
     public convenience init(url: URL, response: HAR.Response) {
         let headerFields = response.headers.reduce(into: [:]) { $0[$1.name] = $1.value }
@@ -715,6 +733,8 @@ extension HAR.Response {
         }
     }
 }
+
+// MARK: - Cookies
 
 func breakIntoHalfs(_ string: String, separatedBy: String) -> (String, String?) {
     var components = string.components(separatedBy: separatedBy)
@@ -798,6 +818,8 @@ extension HTTPCookie {
     }
 }
 
+// MARK: - Headers
+
 extension HAR.Header {
     /// Create HAR Header from `(key, value)` tuple.
     init(_ pair: (key: String, value: String)) {
@@ -817,6 +839,8 @@ extension HAR.Headers {
         }
     }
 }
+
+// MARK: - QueryString
 
 extension HAR.QueryString {
     init(_ queryItem: URLQueryItem) {
@@ -929,6 +953,8 @@ extension HAR.Param: Codable {
     }
 }
 
+// MARK: - Content
+
 extension HAR.Content {
     /// - ToDo: Document initializer.
     init(text: String, encoding: String? = nil, mimeType: String) {
@@ -973,6 +999,10 @@ extension HAR.Content {
     }
 }
 
+// MARK: - Cache
+
+// MARK: - Timings
+
 extension HAR.Timing {
     /// Compute total request time.
     ///
@@ -984,6 +1014,8 @@ extension HAR.Timing {
             .reduce(0, +)
     }
 }
+
+// MARK: - Other
 
 extension HAR.Entry {
     public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
