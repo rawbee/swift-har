@@ -56,7 +56,7 @@ final class HARTests: XCTestCase {
             let url = try unwrap(URL(string: "http://example.com/path?a=b"))
 
             var request = HAR.Request(method: "POST", url: url)
-            request.postData = HAR.PostData(text: "b=c", mimeType: "application/x-www-form-urlencoded")
+            request.postData = HAR.PostData(parsingText: "b=c", mimeType: "application/x-www-form-urlencoded")
             request.headers.append(HAR.Header(name: "Cookie", value: "foo=bar"))
 
             XCTAssertEqual(request.method, "POST")
@@ -293,18 +293,6 @@ final class HARTests: XCTestCase {
                 HAR.QueryString(name: "foo", value: "bar"),
                 HAR.QueryString(name: "query", value: "@swift"),
                 HAR.QueryString(name: "message", value: "hello world"),
-            ])
-    }
-
-    func testPostData() throws {
-        let postData = HAR.PostData(text: "foo=1&bar=2&message=Hello%20World&q=duck+duck+go", mimeType: "application/x-www-form-urlencoded")
-        XCTAssertEqual(
-            postData.params,
-            [
-                HAR.Param(name: "foo", value: "1"),
-                HAR.Param(name: "bar", value: "2"),
-                HAR.Param(name: "message", value: "Hello World"),
-                HAR.Param(name: "q", value: "duck duck go"),
             ])
     }
 

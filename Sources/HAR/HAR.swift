@@ -675,7 +675,7 @@ extension HAR.Request {
         }
 
         if let data = request.httpBody {
-            postData = HAR.PostData(data: data, mimeType: value(forHTTPHeaderField: "Content-Type"))
+            postData = HAR.PostData(parsingData: data, mimeType: value(forHTTPHeaderField: "Content-Type"))
         }
 
         // Run didSet hooks
@@ -846,7 +846,7 @@ extension HAR.PostData: Codable {
 
 extension HAR.PostData {
     /// Create HAR PostData from plain text.
-    init(text: String, mimeType: String?) {
+    init(parsingText text: String, mimeType: String?) {
         self.text = text
 
         self.mimeType = "application/octet-stream"
@@ -871,11 +871,11 @@ extension HAR.PostData {
     }
 
     /// Create HAR PostData from data.
-    init?(data: Data, mimeType: String?) {
+    init?(parsingData data: Data, mimeType: String?) {
         guard let text = String(bytes: data, encoding: .utf8) else {
             return nil
         }
-        self.init(text: text, mimeType: mimeType)
+        self.init(parsingText: text, mimeType: mimeType)
     }
 
     var data: Data? {
