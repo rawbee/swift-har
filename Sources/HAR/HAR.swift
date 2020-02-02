@@ -503,11 +503,7 @@ public struct HAR {
         ///  Response body sent from the server or loaded from the browser cache. This field is populated with textual content only. The text field is either HTTP decoded text or a encoded (e.g. "base64") representation of the response body. Leave out this field if the information is not available.
         ///
         /// Before setting the text field, the HTTP response is decoded (decompressed & unchunked), than trans-coded from its original character set into UTF-8. Additionally, it can be encoded using e.g. base64. Ideally, the application should be able to unencode a base64 blob and get a byte-for-byte identical resource to what the browser operated on.
-        public var text: String? {
-            didSet {
-                size = data?.count ?? 0
-            }
-        }
+        public var text: String?
 
         /// Encoding used for response text field e.g "base64". Leave out this field if the text field is HTTP decoded (decompressed & unchunked), than trans-coded from its original character set into UTF-8.
         ///
@@ -1011,14 +1007,13 @@ extension HAR.Content: Codable {}
 extension HAR.Content {
     /// - ToDo: Document initializer.
     init(text: String, encoding: String? = nil, mimeType: String) {
-        size = 0
         self.encoding = encoding
         self.mimeType = mimeType
+        self.text = text
 
-        // Run didSet hooks
-        defer {
-            self.text = text
-        }
+        // FIXME: This assignment feels silly
+        size = 0
+        size = data?.count ?? 0
     }
 
     /// - ToDo: Document initializer.
@@ -1031,11 +1026,6 @@ extension HAR.Content {
         } else {
             text = data.base64EncodedString()
             encoding = "base64"
-        }
-
-        // Run didSet hooks
-        defer {
-            self.text = text
         }
     }
 
