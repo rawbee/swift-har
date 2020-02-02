@@ -1,7 +1,7 @@
 @testable import HAR
 import XCTest
 
-final class ParamTests: XCTestCase {
+final class ParamsTests: XCTestCase {
     func testEquatable() {
         XCTAssertEqual(HAR.Param(name: "foo", value: "1"), HAR.Param(name: "foo", value: "1"))
         XCTAssertNotEqual(HAR.Param(name: "foo", value: "1"), HAR.Param(name: "foo", value: "2"))
