@@ -830,6 +830,8 @@ extension HAR.QueryString {
 
 extension HAR.PostData: Equatable {}
 
+extension HAR.PostData: Hashable {}
+
 extension HAR.PostData: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)

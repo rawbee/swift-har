@@ -25,6 +25,15 @@ final class PostDataTests: XCTestCase {
             HAR.PostData(mimeType: "multipart/form-data; boundary=----WebKitFormBoundary", params: [], text: formDataText))
     }
 
+    func testHashable() {
+        let set = Set([
+            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "foo", value: "1")], text: "foo=1"),
+            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "foo", value: "1")], text: "foo=1"),
+            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "bar", value: "2")], text: "bar=2"),
+        ])
+        XCTAssertEqual(set.count, 2)
+    }
+
     func testDecodable() throws {
         let json = """
             {
