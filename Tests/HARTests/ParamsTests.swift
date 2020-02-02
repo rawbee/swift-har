@@ -54,8 +54,7 @@ final class ParamsTests: XCTestCase {
         let data = try JSONEncoder().encode(HAR.Param(name: "foo", value: "42"))
         let json = String(decoding: data, as: UTF8.self)
 
-        XCTAssertEqual(
-            json,
-            #"{"name":"foo","value":"42"}"#)
+        XCTAssert(json.contains(#""name":"foo"#))
+        XCTAssert(json.contains(#""value":"42""#))
     }
 }
