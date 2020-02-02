@@ -160,7 +160,7 @@ public struct HAR {
         public var cache: Cache = Cache()
 
         /// Detailed timing info about request/response round trip.
-        public var timings: Timing = Timing() {
+        public var timings: Timing = Timing(send: 0, wait: 0, receive: 0) {
             didSet {
                 time = timings.total
             }
@@ -570,13 +570,13 @@ public struct HAR {
         public var connect: Double? = -1
 
         /// Time required to send HTTP request to the server.
-        public var send: Double = 0
+        public var send: Double
 
         /// Waiting for a response from the server.
-        public var wait: Double = 0
+        public var wait: Double
 
         /// Time required to read entire response from the server (or cache).
-        public var receive: Double = 0
+        public var receive: Double
 
         /// Time required for SSL/TLS negotiation. If this field is defined then the time is also included in the connect field (to ensure backward compatibility with HAR 1.1). Use -1 if the timing does not apply to the current request.
         ///
@@ -1081,7 +1081,7 @@ extension HAR.Timing {
 
 extension HAR.Entry {
     public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
-        var timings = HAR.Timing()
+        var timings = HAR.Timing(send: 0, wait: 0, receive: 0)
         let start = DispatchTime.now()
 
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
