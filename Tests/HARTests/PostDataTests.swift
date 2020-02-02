@@ -24,4 +24,32 @@ final class PostDataTests: XCTestCase {
             HAR.PostData(mimeType: "multipart/form-data; boundary=----WebKitFormBoundary", params: [], text: formDataText),
             HAR.PostData(mimeType: "multipart/form-data; boundary=----WebKitFormBoundary", params: [], text: formDataText))
     }
+
+    func testDecodable() throws {
+        let json = """
+            {
+                "mimeType": "application/x-www-form-urlencoded; charset=UTF-8",
+                "text": "foo=1",
+                "params": [ { "name": "foo", "value": "1" } ]
+            }
+        """
+
+        let postData = try JSONDecoder().decode(HAR.PostData.self, from: Data(json.utf8))
+        XCTAssertEqual(
+            postData,
+            HAR.PostData(
+                mimeType: "application/x-www-form-urlencoded; charset=UTF-8",
+                params: [HAR.Param(name: "foo", value: "1")],
+                text: "foo=1"))
+    }
+
+    func testEncodable() throws {
+        let data = try JSONEncoder().encode(HAR.PostData(
+            mimeType: "application/x-www-form-urlencoded; charset=UTF-8",
+            params: [HAR.Param(name: "foo", value: "1")],
+            text: "foo=1"))
+        let json = String(decoding: data, as: UTF8.self)
+
+        XCTAssert(json.contains(#""text":"foo=1""#))
+    }
 }

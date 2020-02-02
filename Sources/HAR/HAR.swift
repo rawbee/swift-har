@@ -444,14 +444,14 @@ public struct HAR: Codable, Equatable {
     // MARK: - PostData
 
     /// This object describes posted data, if any (embedded in `Request` object).
-    public struct PostData: Codable {
+    public struct PostData {
         /// Mime type of posted data.
-        public var mimeType: String = "application/octet-stream"
+        public var mimeType: String
 
         /// List of posted parameters (in case of URL encoded parameters).
         ///
         /// - Invariant: Text and params fields are mutually exclusive.
-        public var params: [Param]? = []
+        public var params: [Param]
 
         /// Plain text posted data
         ///
@@ -830,17 +830,31 @@ extension HAR.QueryString {
 
 extension HAR.PostData: Equatable {}
 
+extension HAR.PostData: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+
+        // TODO: Would be nice to inheirt remaining decoders by default
+        mimeType = try container.decodeIfPresent(String.self, forKey: .mimeType) ?? ""
+        params = try container.decodeIfPresent([HAR.Param].self, forKey: .params) ?? []
+        text = try container.decodeIfPresent(String.self, forKey: .text) ?? ""
+        comment = try container.decodeIfPresent(String.self, forKey: .comment)
+    }
+}
+
 extension HAR.PostData {
     /// Create HAR PostData from plain text.
     init(text: String, mimeType: String?) {
         self.text = text
 
+        self.mimeType = "application/octet-stream"
         if let mimeType = mimeType {
             self.mimeType = mimeType
         }
 
+        params = []
         if self.mimeType.hasPrefix("application/x-www-form-urlencoded") {
-            params = parseFormUrlEncoded(text)
+            params = parseFormUrlEncoded(self.text)
         }
     }
 
