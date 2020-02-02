@@ -467,9 +467,9 @@ public struct HAR: Codable, Equatable {
     // MARK: - Params
 
     /// List of posted parameters, if any (embedded in `PostData` object).
-    public struct Param: Codable, Equatable {
+    public struct Param {
         /// Name of a posted parameter.
-        public var name: String?
+        public var name: String
 
         /// Value of a posted parameter or content of a posted file.
         public var value: String?
@@ -865,26 +865,23 @@ extension HAR.PostData {
 
 // MARK: - Params
 
+extension HAR.Param: Equatable {}
+
 extension HAR.Param: Hashable {}
 
 extension HAR.Param: CustomStringConvertible {
     /// A human-readable description for the data.
     public var description: String {
-        var str = ""
-
-        if let name = name {
-            if let value = value {
-                str += "\(name)=\(value)"
-            } else {
-                str += name
-            }
-        }
+        var str = "\(name)"
 
         if let fileName = fileName {
-            str += "; filename=\"\(fileName)\""
-        }
-        if let contentType = contentType {
-            str += "; content-type=\"\(contentType)\""
+            str += "=@\(fileName)"
+
+            if let contentType = contentType {
+                str += ";type=\(contentType)"
+            }
+        } else if let value = value {
+            str += "=\(value)"
         }
 
         return str
@@ -898,11 +895,17 @@ extension HAR.Param: CustomDebugStringConvertible {
     }
 }
 
-extension HAR.Param {
-    /// Create HAR Param from `(key, value)` tuple.
-    init(_ pair: (key: String, value: String?)) {
-        name = pair.key
-        value = pair.value
+extension HAR.Param: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+
+        /// Override synthesised decoder to handle empty `name`.
+        name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+
+        // TODO: Would be nice to inheirt remaining decoders by default
+        value = try container.decodeIfPresent(String.self, forKey: .value)
+        fileName = try container.decodeIfPresent(String.self, forKey: .fileName)
+        contentType = try container.decodeIfPresent(String.self, forKey: .contentType)
     }
 }
 

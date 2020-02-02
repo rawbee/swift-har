@@ -23,8 +23,8 @@ final class ParamTests: XCTestCase {
             String(describing: HAR.Param(name: "foo", value: "1")),
             "foo=1")
         XCTAssertEqual(
-            String(describing: HAR.Param(name: "foo", value: "1", fileName: "example.pdf", contentType: "application/pdf")),
-            #"foo=1; filename="example.pdf"; content-type="application/pdf""#)
+            String(describing: HAR.Param(name: "foo", fileName: "example.pdf", contentType: "application/pdf")),
+            #"foo=@example.pdf;type=application/pdf"#)
     }
 
     func testCustomDebugStringConvertible() {
@@ -33,6 +33,29 @@ final class ParamTests: XCTestCase {
             "HAR.Param { foo=1 }")
         XCTAssertEqual(
             String(reflecting: HAR.Param(name: "foo", value: "1", fileName: "example.pdf", contentType: "application/pdf")),
-            #"HAR.Param { foo=1; filename="example.pdf"; content-type="application/pdf" }"#)
+            #"HAR.Param { foo=@example.pdf;type=application/pdf }"#)
+    }
+
+    func testDecodable() throws {
+        let json = """
+            {
+                "name": "foo",
+                "value": "42"
+            }
+        """
+
+        let param = try JSONDecoder().decode(HAR.Param.self, from: Data(json.utf8))
+        XCTAssertEqual(
+            param,
+            HAR.Param(name: "foo", value: "42"))
+    }
+
+    func testEncodable() throws {
+        let data = try JSONEncoder().encode(HAR.Param(name: "foo", value: "42"))
+        let json = String(decoding: data, as: UTF8.self)
+
+        XCTAssertEqual(
+            json,
+            #"{"name":"foo","value":"42"}"#)
     }
 }
