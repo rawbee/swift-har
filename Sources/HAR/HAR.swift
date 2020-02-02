@@ -444,7 +444,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - PostData
 
     /// This object describes posted data, if any (embedded in `Request` object).
-    public struct PostData: Codable, Equatable {
+    public struct PostData: Codable {
         /// Mime type of posted data.
         public var mimeType: String = "application/octet-stream"
 
@@ -825,6 +825,10 @@ extension HAR.QueryString {
             value: queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? "")
     }
 }
+
+// MARK: - PostData
+
+extension HAR.PostData: Equatable {}
 
 extension HAR.PostData {
     /// Create HAR PostData from plain text.
