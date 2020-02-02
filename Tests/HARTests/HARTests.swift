@@ -196,7 +196,7 @@ final class HARTests: XCTestCase {
             XCTAssertEqual(rar.statusText, "OK")
             XCTAssertEqual(rar.httpVersion, "HTTP/1.1")
             XCTAssertEqual(rar.headers, [])
-            XCTAssertEqual(rar.content.data, nil)
+            XCTAssertEqual(rar.content.text, "")
             XCTAssertEqual(rar.redirectURL, "")
             XCTAssertEqual(rar.headersSize, -1)
             XCTAssertEqual(rar.bodySize, -1)

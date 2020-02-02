@@ -339,7 +339,8 @@ public struct HAR {
         }
 
         /// Details about the response body.
-        public var content: Content = Content()
+        // FIXME: Bad default content
+        public var content: Content = HAR.Content(text: "", mimeType: "text/plain")
 
         /// Redirection target URL from the Location response header.
         public var redirectURL: String = ""
@@ -491,13 +492,13 @@ public struct HAR {
     /// This object describes details about response content (embedded in `Response` object).
     public struct Content {
         /// Length of the returned content in bytes. Should be equal to `response.bodySize` if there is no compression and bigger when the content has been compressed.
-        public var size: Int = 0
+        public var size: Int
 
         /// Number of bytes saved. Leave out this field if the information is not available.
         public var compression: Int?
 
         /// MIME type of the response text (value of the Content-Type response header). The charset attribute of the MIME type is included (if available).
-        public var mimeType: String?
+        public var mimeType: String
 
         ///  Response body sent from the server or loaded from the browser cache. This field is populated with textual content only. The text field is either HTTP decoded text or a encoded (e.g. "base64") representation of the response body. Leave out this field if the information is not available.
         ///
@@ -755,6 +756,8 @@ extension HAR.Response {
         headers = HAR.Headers(response.allHeaderFields)
         bodySize = Int(truncatingIfNeeded: response.expectedContentLength)
 
+        // FIXME: Bad default content
+        content = HAR.Content(text: "", mimeType: "text/plain")
         if let data = data {
             content = HAR.Content(data: data, size: bodySize, mimeType: response.mimeType)
         }
@@ -1008,6 +1011,7 @@ extension HAR.Content: Codable {}
 extension HAR.Content {
     /// - ToDo: Document initializer.
     init(text: String, encoding: String? = nil, mimeType: String) {
+        size = 0
         self.encoding = encoding
         self.mimeType = mimeType
 
@@ -1020,7 +1024,7 @@ extension HAR.Content {
     /// - ToDo: Document initializer.
     init(data: Data, size: Int, mimeType: String?) {
         self.size = size
-        self.mimeType = mimeType
+        self.mimeType = mimeType ?? "application/octet-stream"
 
         if let text = String(bytes: data, encoding: .utf8) {
             self.text = text
