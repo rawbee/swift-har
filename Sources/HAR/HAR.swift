@@ -31,7 +31,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
-public struct HAR: Codable, Equatable {
+public struct HAR {
     public var log: Log
 
     // MARK: - Log
@@ -39,7 +39,7 @@ public struct HAR: Codable, Equatable {
     /// This object represents the root of exported data.
     ///
     /// There is one `Page` object for every exported web page and one `Entry` object for every HTTP request. In case when an HTTP trace tool isn't able to group requests by a page, the `pages` object is empty and individual requests doesn't have a parent page.
-    public struct Log: Codable {
+    public struct Log {
         /// Version number of the format. If empty, string "1.1" is assumed by default.
         public var version: String = "1.2"
 
@@ -63,7 +63,7 @@ public struct HAR: Codable, Equatable {
 
     // MARK: - Creator
 
-    public struct Creator: Codable {
+    public struct Creator {
         static let defaultCreator = Creator(name: "SwiftHAR", version: "0.1.0")
 
         /// Name of the application/browser used to export the log.
@@ -80,7 +80,7 @@ public struct HAR: Codable, Equatable {
 
     // MARK: - Browser
 
-    public struct Browser: Codable {
+    public struct Browser {
         /// Name of the application/browser used to export the log.
         public var name: String
 
@@ -96,7 +96,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Pages
 
     /// This object represents list of exported pages.
-    public struct Page: Codable {
+    public struct Page {
         /// Date and time stamp for the beginning of the page load.
         public var startedDateTime: Date
 
@@ -122,7 +122,7 @@ public struct HAR: Codable, Equatable {
     /// This object describes timings for various events (states) fired during the page load. All times are specified in milliseconds. If a time info is not available appropriate field is set to -1.
     ///
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad` event or `document.readyState == interactive`.
-    public struct PageTiming: Codable {
+    public struct PageTiming {
         /// Content of the page loaded. Number of milliseconds since page load started (`page.startedDateTime`). Use -1 if the timing does not apply to the current request.
         public var onContentLoad: Double? = -1
 
@@ -138,7 +138,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Entries
 
     /// This object represents an array with all exported HTTP requests. Sorting entries by `startedDateTime` (starting from the oldest) is preferred way how to export data since it can make importing faster. However the reader application should always make sure the array is sorted (if required for the import).
-    public struct Entry: Codable {
+    public struct Entry {
         /// Reference to the parent page. Leave out this field if the application does not support grouping by pages.
         public var pageref: String?
 
@@ -185,7 +185,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Request
 
     /// This object contains detailed info about performed request.
-    public struct Request: Codable {
+    public struct Request {
         /// Request method.
         public var method: String = "GET" {
             didSet {
@@ -307,7 +307,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Response
 
     /// This object contains detailed info about the response.
-    public struct Response: Codable {
+    public struct Response {
         /// Response status.
         public var status: Int = 200 {
             didSet {
@@ -374,7 +374,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Cookies
 
     /// This object contains list of all cookies (used in `Request` and `Response` objects).
-    public struct Cookie: Codable {
+    public struct Cookie {
         /// The name of the cookie.
         public var name: String
 
@@ -416,7 +416,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Headers
 
     /// This object contains list of all headers (used in `Request` and `Response` objects).
-    public struct Header: Codable {
+    public struct Header {
         public var name: String
         public var value: String
 
@@ -431,7 +431,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - QueryString
 
     /// This object contains list of all parameters & values parsed from a query string, if any (embedded in `Request` object).
-    public struct QueryString: Codable {
+    public struct QueryString {
         public var name: String
         public var value: String
 
@@ -489,7 +489,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Content
 
     /// This object describes details about response content (embedded in `Response` object).
-    public struct Content: Codable {
+    public struct Content {
         /// Length of the returned content in bytes. Should be equal to `response.bodySize` if there is no compression and bigger when the content has been compressed.
         public var size: Int = 0
 
@@ -524,7 +524,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Cache
 
     /// This objects contains info about a request coming from browser cache.
-    public struct Cache: Codable {
+    public struct Cache {
         // State of a cache entry before the request. Leave out this field if the information is not available.
         public var beforeRequest: CacheEntry?
 
@@ -537,7 +537,7 @@ public struct HAR: Codable, Equatable {
         public var comment: String?
     }
 
-    public struct CacheEntry: Codable {
+    public struct CacheEntry {
         /// Expiration time of the cache entry.
         public var expires: Date?
 
@@ -559,7 +559,7 @@ public struct HAR: Codable, Equatable {
     // MARK: - Timings
 
     /// This object describes various phases within request-response round trip. All times are specified in milliseconds.
-    public struct Timing: Codable {
+    public struct Timing {
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing does not apply to the current request.
         public var blocked: Double? = -1
 
@@ -592,7 +592,9 @@ public struct HAR: Codable, Equatable {
 
 // MARK: - HAR
 
-extension HAR {
+extension HAR: Equatable {}
+
+extension HAR: Codable {
     /// Creates a `HAR` from the contents of a file URL.
     ///
     /// - Parameter url: Path to `.har` file.
@@ -648,29 +650,43 @@ extension HAR {
 
 extension HAR.Log: Equatable {}
 
+extension HAR.Log: Codable {}
+
 // MARK: - Creator
 
 extension HAR.Creator: Equatable {}
+
+extension HAR.Creator: Codable {}
 
 // MARK: - Browser
 
 extension HAR.Browser: Equatable {}
 
+extension HAR.Browser: Codable {}
+
 // MARK: - Pages
 
 extension HAR.Page: Equatable {}
+
+extension HAR.Page: Codable {}
 
 // MARK: - PageTimings
 
 extension HAR.PageTiming: Equatable {}
 
+extension HAR.PageTiming: Codable {}
+
 // MARK: - Entries
 
 extension HAR.Entry: Equatable {}
 
+extension HAR.Entry: Codable {}
+
 // MARK: - Request
 
 extension HAR.Request: Equatable {}
+
+extension HAR.Request: Codable {}
 
 extension URLRequest {
     /// Creates a URL Request from a `HAR.Request`.
@@ -722,6 +738,8 @@ extension HAR.Request {
 
 extension HAR.Response: Equatable {}
 
+extension HAR.Response: Codable {}
+
 extension HTTPURLResponse {
     public convenience init(url: URL, response: HAR.Response) {
         let headerFields = response.headers.reduce(into: [:]) { $0[$1.name] = $1.value }
@@ -753,6 +771,8 @@ extension HAR.Response {
 // MARK: - Cookies
 
 extension HAR.Cookie: Equatable {}
+
+extension HAR.Cookie: Codable {}
 
 func breakIntoHalfs(_ string: String, separatedBy: String) -> (String, String?) {
     var components = string.components(separatedBy: separatedBy)
@@ -840,6 +860,8 @@ extension HTTPCookie {
 
 extension HAR.Header: Equatable {}
 
+extension HAR.Header: Codable {}
+
 extension HAR.Header {
     /// Create HAR Header from `(key, value)` tuple.
     init(_ pair: (key: String, value: String)) {
@@ -863,6 +885,8 @@ extension HAR.Headers {
 // MARK: - QueryString
 
 extension HAR.QueryString: Equatable {}
+
+extension HAR.QueryString: Codable {}
 
 extension HAR.QueryString {
     init(_ queryItem: URLQueryItem) {
@@ -979,6 +1003,8 @@ extension HAR.Param: Codable {
 
 extension HAR.Content: Equatable {}
 
+extension HAR.Content: Codable {}
+
 extension HAR.Content {
     /// - ToDo: Document initializer.
     init(text: String, encoding: String? = nil, mimeType: String) {
@@ -1027,11 +1053,17 @@ extension HAR.Content {
 
 extension HAR.Cache: Equatable {}
 
+extension HAR.Cache: Codable {}
+
 extension HAR.CacheEntry: Equatable {}
+
+extension HAR.CacheEntry: Codable {}
 
 // MARK: - Timings
 
 extension HAR.Timing: Equatable {}
+
+extension HAR.Timing: Codable {}
 
 extension HAR.Timing {
     /// Compute total request time.
