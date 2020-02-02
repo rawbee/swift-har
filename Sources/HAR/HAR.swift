@@ -53,7 +53,7 @@ public struct HAR: Codable, Equatable {
         public var pages: [Page]?
 
         /// List of all exported (tracked) requests.
-        public var entries: [Entry]
+        public var entries: [Entry] = []
 
         /// A comment provided by the user or the application.
         ///
@@ -64,6 +64,8 @@ public struct HAR: Codable, Equatable {
     // MARK: - Creator
 
     public struct Creator: Codable {
+        static let defaultCreator = Creator(name: "SwiftHAR", version: "0.1.0")
+
         /// Name of the application/browser used to export the log.
         public var name: String
 
@@ -104,7 +106,7 @@ public struct HAR: Codable, Equatable {
         /// Page title.
         ///
         /// - Note: Spec requires value, but real world .har files sometimes omit it.
-        public var title: String
+        public var title: String? = ""
 
         /// Detailed timing info about page load.
         public var pageTimings: PageTiming = PageTiming()
@@ -650,10 +652,6 @@ extension HAR.Log: Equatable {}
 
 extension HAR.Creator: Equatable {}
 
-extension HAR.Creator {
-    static let defaultCreator = Self(name: "SwiftHAR", version: "0.1.0")
-}
-
 // MARK: - Browser
 
 extension HAR.Browser: Equatable {}
@@ -967,7 +965,10 @@ extension HAR.Param: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
 
+        /// Override synthesised decoder to handle empty `name`.
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+
+        // TODO: Would be nice to inheirt remaining decoders by default
         value = try container.decodeIfPresent(String.self, forKey: .value)
         fileName = try container.decodeIfPresent(String.self, forKey: .fileName)
         contentType = try container.decodeIfPresent(String.self, forKey: .contentType)
