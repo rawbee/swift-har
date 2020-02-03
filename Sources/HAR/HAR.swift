@@ -320,7 +320,7 @@ public struct HAR {
         public var statusText: String = "OK"
 
         /// Response HTTP Version.
-        public var httpVersion: String? = "HTTP/1.1"
+        public var httpVersion: String = "HTTP/1.1"
 
         /// List of cookie objects.
         public var cookies: Cookies = []
@@ -735,7 +735,22 @@ extension HAR.Request {
 
 extension HAR.Response: Equatable {}
 
-extension HAR.Response: Codable {}
+extension HAR.Response: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+
+        status = try container.decode(Int.self, forKey: .status)
+        statusText = try container.decode(String.self, forKey: .statusText)
+        httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion) ?? "HTTP/1.1"
+        cookies = try container.decode([HAR.Cookie].self, forKey: .cookies)
+        headers = try container.decode([HAR.Header].self, forKey: .headers)
+        content = try container.decode(HAR.Content.self, forKey: .content)
+        redirectURL = try container.decode(String.self, forKey: .redirectURL)
+        headersSize = try container.decodeIfPresent(Int.self, forKey: .headersSize) ?? -1
+        bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
+        comment = try container.decodeIfPresent(String.self, forKey: .comment)
+    }
+}
 
 extension HTTPURLResponse {
     public convenience init(url: URL, response: HAR.Response) {
