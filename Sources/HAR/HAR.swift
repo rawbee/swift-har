@@ -158,11 +158,7 @@ public struct HAR {
         public var cache: Cache = Cache()
 
         /// Detailed timing info about request/response round trip.
-        public var timings: Timing = Timing(send: 0, wait: 0, receive: 0) {
-            didSet {
-                time = timings.total
-            }
-        }
+        public var timings: Timing = Timing(send: 0, wait: 0, receive: 0)
 
         /// IP address of the server that was connected (result of DNS resolution).
         ///
@@ -185,48 +181,22 @@ public struct HAR {
     /// This object contains detailed info about performed request.
     public struct Request {
         /// Request method.
-        public var method: String = "GET" {
-            didSet {
-                updateHeadersSize()
-            }
-        }
+        public var method: String = "GET"
 
         /// Empty URL when none is provided.
         private static let blankUrl = URL(string: "about:blank")!
 
         /// Absolute URL of the request (fragments are not included).
-        public var url: URL = Self.blankUrl {
-            didSet {
-                if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
-                    queryString = queryItems.map {
-                        QueryString($0)
-                    }
-                }
-
-                updateHeadersSize()
-            }
-        }
+        public var url: URL = Self.blankUrl
 
         /// Request HTTP Version.
-        public var httpVersion: String = "HTTP/1.1" {
-            didSet {
-                updateHeadersSize()
-            }
-        }
+        public var httpVersion: String = "HTTP/1.1"
 
         /// List of cookie objects.
         public var cookies: Cookies = []
 
         /// List of header objects.
-        public var headers: Headers = [] {
-            didSet {
-                if let value = value(forHTTPHeaderField: "Cookie") {
-                    cookies = Cookies(fromCookieHeader: value)
-                }
-
-                updateHeadersSize()
-            }
-        }
+        public var headers: Headers = []
 
         /// Find header value for name.
         ///
@@ -242,29 +212,12 @@ public struct HAR {
         public var queryString: [QueryString] = []
 
         /// Posted data info.
-        public var postData: PostData? {
-            didSet {
-                bodySize = postData?.data?.count ?? -1
-            }
-        }
+        public var postData: PostData?
 
         /// Total number of bytes from the start of the HTTP request message until (and including) the double CRLF before the body. Set to -1 if the info is not available.
         ///
         /// - Important: Should be ran when mutating `method`, `url`, `httpVersion` or `headers`.
         public var headersSize: Int = -1
-
-        /// Compute and update `headerSize`.
-        private mutating func updateHeadersSize() {
-            headersSize = Data(headerText.utf8).count
-        }
-
-        /// Compute text representation of header for computing it's size.
-        private var headerText: String {
-            """
-            \(method) \(url.relativePath) \(httpVersion)\r
-            \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
-            """
-        }
 
         /// Size of the request body (POST data payload) in bytes. Set to -1 if the info is not available.
         public var bodySize: Int = -1
@@ -276,12 +229,7 @@ public struct HAR {
 
         /// Create empty `Header` structure.
         private init() {
-            // Run didSet hooks
-            defer {
-                self.url = self.url
-                headers = headers
-                postData = postData
-            }
+            headersSize = computedHeadersSize
         }
 
         /// Create `Request` with HTTP method and url.
@@ -294,11 +242,8 @@ public struct HAR {
             self.method = method
             self.url = url
 
-            // Run didSet hooks
-            defer {
-                self.url = self.url
-                headers = headers
-            }
+            queryString = computedQueryString
+            headersSize = computedHeadersSize
         }
     }
 
@@ -307,11 +252,7 @@ public struct HAR {
     /// This object contains detailed info about the response.
     public struct Response {
         /// Response status.
-        public var status: Int = 200 {
-            didSet {
-                updateHeadersSize()
-            }
-        }
+        public var status: Int = 200
 
         /// Response status description.
         public var statusText: String = "OK"
@@ -323,17 +264,7 @@ public struct HAR {
         public var cookies: Cookies = []
 
         /// List of header objects.
-        public var headers: Headers = [] {
-            didSet {
-                for header in headers {
-                    if header.name.lowercased() == "set-cookie" {
-                        cookies.append(Cookie(fromSetCookieHeader: header.value))
-                    }
-                }
-
-                updateHeadersSize()
-            }
-        }
+        public var headers: Headers = []
 
         /// Details about the response body.
         // FIXME: Bad default content
@@ -346,19 +277,6 @@ public struct HAR {
         ///
         /// The size of received response-headers is computed only from headers that are really received from the server. Additional headers appended by the browser are not included in this number, but they appear in the list of header objects.
         public var headersSize: Int = -1
-
-        /// Compute and update `headerSize`.
-        private mutating func updateHeadersSize() {
-            headersSize = Data(headerText.utf8).count
-        }
-
-        /// Compute text representation of header for computing it's size.
-        private var headerText: String {
-            """
-            \(status) \(statusText)\r
-            \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
-            """
-        }
 
         /// Size of the received response body in bytes. Set to zero in case of responses coming from the cache (304). Set to -1 if the info is not available.
         public var bodySize: Int = -1
@@ -707,6 +625,37 @@ extension HAR.Request: Codable {
     }
 }
 
+extension HAR.Request {
+    /// Cookie property computed from headers
+    public var computedCookies: [HAR.Cookie] {
+        if let value = value(forHTTPHeaderField: "Cookie") {
+            return HAR.Cookies(fromCookieHeader: value)
+        }
+        return []
+    }
+
+    /// queryString property computed from URL query string.
+    public var computedQueryString: [HAR.QueryString] {
+        if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
+            return queryItems.map { HAR.QueryString($0) }
+        }
+        return []
+    }
+
+    /// Computed `headerSize`.
+    public var computedHeadersSize: Int {
+        Data(headerText.utf8).count
+    }
+
+    /// Compute text representation of header for computing it's size.
+    private var headerText: String {
+        """
+        \(method) \(url.relativePath) \(httpVersion)\r
+        \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
+        """
+    }
+}
+
 extension URLRequest {
     /// Creates a URL Request from a `HAR.Request`.
     ///
@@ -731,6 +680,7 @@ extension HAR.Request {
         if let url = request.url {
             self.url = url
         }
+        queryString = computedQueryString
 
         /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
         method = request.httpMethod ?? "GET"
@@ -739,17 +689,13 @@ extension HAR.Request {
             self.headers = headers.map { HAR.Header($0) }
         }
 
+        cookies = computedCookies
+        headersSize = computedHeadersSize
+
         if let data = request.httpBody {
             postData = HAR.PostData(parsingData: data, mimeType: value(forHTTPHeaderField: "Content-Type"))
         }
-
-        // Run didSet hooks
-        defer {
-            self.method = self.method
-            self.url = self.url
-            self.headers = self.headers
-            self.postData = self.postData
-        }
+        bodySize = postData?.data?.count ?? -1
     }
 }
 
@@ -771,6 +717,33 @@ extension HAR.Response: Codable {
         headersSize = try container.decodeIfPresent(Int.self, forKey: .headersSize) ?? -1
         bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
         comment = try container.decodeIfPresent(String.self, forKey: .comment)
+    }
+}
+
+extension HAR.Response {
+    /// cookies property computed from headers.
+    // TODO: Use HTTPCookie.cookies(withResponseHeaderFields:for:) to parse cookies
+    public var computedCookies: [HAR.Cookie] {
+        var cookies: [HAR.Cookie] = []
+        for header in headers {
+            if header.name.lowercased() == "set-cookie" {
+                cookies.append(HAR.Cookie(fromSetCookieHeader: header.value))
+            }
+        }
+        return cookies
+    }
+
+    /// Computed `headerSize`.
+    public var computedHeadersSize: Int {
+        Data(headerText.utf8).count
+    }
+
+    /// Compute text representation of header for computing it's size.
+    private var headerText: String {
+        """
+        \(status) \(statusText)\r
+        \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
+        """
     }
 }
 
@@ -796,11 +769,8 @@ extension HAR.Response {
             content = HAR.Content(data: data, size: bodySize, mimeType: response.mimeType)
         }
 
-        // TODO: Use HTTPCookie.cookies(withResponseHeaderFields:for:) to parse cookies
-
-        defer {
-            self.headers = self.headers
-        }
+        cookies = computedCookies
+        headersSize = computedHeadersSize
     }
 }
 
