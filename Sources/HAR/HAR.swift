@@ -104,9 +104,7 @@ public struct HAR {
         public var id: String
 
         /// Page title.
-        ///
-        /// - Note: Spec requires value, but real world .har files sometimes omit it.
-        public var title: String? = ""
+        public var title: String
 
         /// Detailed timing info about page load.
         public var pageTimings: PageTiming = PageTiming()
@@ -665,7 +663,17 @@ extension HAR.Browser: Codable {}
 
 extension HAR.Page: Equatable {}
 
-extension HAR.Page: Codable {}
+extension HAR.Page: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+
+        startedDateTime = try container.decode(Date.self, forKey: .startedDateTime)
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
+        pageTimings = try container.decode(HAR.PageTiming.self, forKey: .pageTimings)
+        comment = try container.decodeIfPresent(String.self, forKey: .comment)
+    }
+}
 
 // MARK: - PageTimings
 
