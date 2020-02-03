@@ -191,44 +191,6 @@ final class HARTests: XCTestCase {
 
     func testURLResponse() throws {
         do {
-            var rar = HAR.Response()
-            XCTAssertEqual(rar.status, 200)
-            XCTAssertEqual(rar.statusText, "OK")
-            XCTAssertEqual(rar.httpVersion, "HTTP/1.1")
-            XCTAssertEqual(rar.headers, [])
-            XCTAssertEqual(rar.content.text, "")
-            XCTAssertEqual(rar.redirectURL, "")
-            XCTAssertEqual(rar.headersSize, -1)
-            XCTAssertEqual(rar.bodySize, -1)
-
-            rar.status = 404
-            XCTAssertEqual(rar.status, 404)
-            XCTAssertEqual(rar.statusText, "Not Found")
-
-            rar.status = 500
-            XCTAssertEqual(rar.status, 500)
-            XCTAssertEqual(rar.statusText, "Internal Server Error")
-
-            rar.headers.append(HAR.Header(name: "Content-Type", value: "application/json"))
-            XCTAssertEqual(rar.headers, [HAR.Header(name: "Content-Type", value: "application/json")])
-            XCTAssertEqual(rar.headersSize, 61)
-
-            rar.headers = [
-                HAR.Header(name: "Content-Type", value: "text/html"),
-                HAR.Header(name: "Set-Cookie", value: "sessionId=38afes7a8"),
-                HAR.Header(name: "Set-Cookie", value: "id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT"),
-            ]
-
-            XCTAssertEqual(rar.cookies.count, 2)
-            XCTAssertEqual(
-                rar.cookies,
-                [
-                    HAR.Cookie(name: "sessionId", value: "38afes7a8", httpOnly: false, secure: false),
-                    HAR.Cookie(name: "id", value: "a3fWa", expires: Date(timeIntervalSince1970: 1445412480), httpOnly: false, secure: false),
-                ])
-        }
-
-        do {
             for (_, data) in try loadFixtures() {
                 let har = try HAR(data: data)
 

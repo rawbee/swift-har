@@ -309,7 +309,6 @@ public struct HAR {
         /// Response status.
         public var status: Int = 200 {
             didSet {
-                self.statusText = HTTPURLResponse.localizedString(forStatusCode: status).capitalized
                 updateHeadersSize()
             }
         }
@@ -787,6 +786,7 @@ extension HTTPURLResponse {
 extension HAR.Response {
     init(response: HTTPURLResponse, data: Data?) {
         status = response.statusCode
+        statusText = HTTPURLResponse.localizedString(forStatusCode: response.statusCode).capitalized
         headers = HAR.Headers(response.allHeaderFields)
         bodySize = Int(truncatingIfNeeded: response.expectedContentLength)
 
@@ -799,7 +799,6 @@ extension HAR.Response {
         // TODO: Use HTTPCookie.cookies(withResponseHeaderFields:for:) to parse cookies
 
         defer {
-            self.status = self.status
             self.headers = self.headers
         }
     }
