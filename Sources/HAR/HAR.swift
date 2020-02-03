@@ -210,7 +210,7 @@ public struct HAR {
         }
 
         /// Request HTTP Version.
-        public var httpVersion: String? = "HTTP/1.1" {
+        public var httpVersion: String = "HTTP/1.1" {
             didSet {
                 updateHeadersSize()
             }
@@ -263,13 +263,13 @@ public struct HAR {
         /// Compute text representation of header for computing it's size.
         private var headerText: String {
             """
-            \(method) \(url.relativePath) \(httpVersion ?? "HTTP/1.1")\r
+            \(method) \(url.relativePath) \(httpVersion)\r
             \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
             """
         }
 
         /// Size of the request body (POST data payload) in bytes. Set to -1 if the info is not available.
-        public var bodySize: Int = 0
+        public var bodySize: Int = -1
 
         /// A comment provided by the user or the application.
         ///
@@ -683,7 +683,22 @@ extension HAR.Entry: Codable {}
 
 extension HAR.Request: Equatable {}
 
-extension HAR.Request: Codable {}
+extension HAR.Request: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+
+        method = try container.decode(String.self, forKey: .method)
+        url = try container.decode(URL.self, forKey: .url)
+        httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion) ?? "HTTP/1.1"
+        cookies = try container.decode([HAR.Cookie].self, forKey: .cookies)
+        headers = try container.decode([HAR.Header].self, forKey: .headers)
+        queryString = try container.decode([HAR.QueryString].self, forKey: .queryString)
+        postData = try container.decodeIfPresent(HAR.PostData.self, forKey: .postData)
+        headersSize = try container.decodeIfPresent(Int.self, forKey: .headersSize) ?? -1
+        bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
+        comment = try container.decodeIfPresent(String.self, forKey: .comment)
+    }
+}
 
 extension URLRequest {
     /// Creates a URL Request from a `HAR.Request`.
