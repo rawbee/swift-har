@@ -572,6 +572,20 @@ extension HAR.Creator: Equatable {}
 
 extension HAR.Creator: Hashable {}
 
+extension HAR.Creator: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        "\(name)/\(version)"
+    }
+}
+
+extension HAR.Creator: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.Browser { \(description) }"
+    }
+}
+
 extension HAR.Creator: Codable {}
 
 // MARK: - Browser
@@ -579,6 +593,20 @@ extension HAR.Creator: Codable {}
 extension HAR.Browser: Equatable {}
 
 extension HAR.Browser: Hashable {}
+
+extension HAR.Browser: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        "\(name)/\(version)"
+    }
+}
+
+extension HAR.Browser: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.Browser { \(description) }"
+    }
+}
 
 extension HAR.Browser: Codable {}
 
