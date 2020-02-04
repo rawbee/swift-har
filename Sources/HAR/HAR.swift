@@ -630,6 +630,8 @@ extension HAR.Page: CustomDebugStringConvertible {
     }
 }
 
+extension HAR.Page: Identifiable {}
+
 extension HAR.Page: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
