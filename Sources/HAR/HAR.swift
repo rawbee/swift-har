@@ -104,7 +104,7 @@ public struct HAR {
         public var id: String
 
         /// Page title.
-        public var title: String
+        public var title: String = ""
 
         /// Detailed timing info about page load.
         public var pageTimings: PageTiming = PageTiming()
@@ -616,6 +616,20 @@ extension HAR.Page: Equatable {}
 
 extension HAR.Page: Hashable {}
 
+extension HAR.Page: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        "\(startedDateTime): \(id) \"\(title)\" - \(String(describing: pageTimings))"
+    }
+}
+
+extension HAR.Page: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.Page { \(description) }"
+    }
+}
+
 extension HAR.Page: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
@@ -633,6 +647,20 @@ extension HAR.Page: Codable {
 extension HAR.PageTiming: Equatable {}
 
 extension HAR.PageTiming: Hashable {}
+
+extension HAR.PageTiming: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        "onContentLoad: \(onContentLoad ?? -1), onLoad: \(onLoad ?? -1)"
+    }
+}
+
+extension HAR.PageTiming: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.PageTiming { \(description) }"
+    }
+}
 
 extension HAR.PageTiming: Codable {}
 
