@@ -562,11 +562,15 @@ extension HAR: Codable {
 
 extension HAR.Log: Equatable {}
 
+extension HAR.Log: Hashable {}
+
 extension HAR.Log: Codable {}
 
 // MARK: - Creator
 
 extension HAR.Creator: Equatable {}
+
+extension HAR.Creator: Hashable {}
 
 extension HAR.Creator: Codable {}
 
@@ -574,11 +578,15 @@ extension HAR.Creator: Codable {}
 
 extension HAR.Browser: Equatable {}
 
+extension HAR.Browser: Hashable {}
+
 extension HAR.Browser: Codable {}
 
 // MARK: - Pages
 
 extension HAR.Page: Equatable {}
+
+extension HAR.Page: Hashable {}
 
 extension HAR.Page: Codable {
     public init(from decoder: Decoder) throws {
@@ -596,17 +604,23 @@ extension HAR.Page: Codable {
 
 extension HAR.PageTiming: Equatable {}
 
+extension HAR.PageTiming: Hashable {}
+
 extension HAR.PageTiming: Codable {}
 
 // MARK: - Entries
 
 extension HAR.Entry: Equatable {}
 
+extension HAR.Entry: Hashable {}
+
 extension HAR.Entry: Codable {}
 
 // MARK: - Request
 
 extension HAR.Request: Equatable {}
+
+extension HAR.Request: Hashable {}
 
 extension HAR.Request: Codable {
     public init(from decoder: Decoder) throws {
@@ -703,6 +717,8 @@ extension HAR.Request {
 
 extension HAR.Response: Equatable {}
 
+extension HAR.Response: Hashable {}
+
 extension HAR.Response: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
@@ -777,6 +793,8 @@ extension HAR.Response {
 // MARK: - Cookies
 
 extension HAR.Cookie: Equatable {}
+
+extension HAR.Cookie: Hashable {}
 
 extension HAR.Cookie: Codable {}
 
@@ -866,6 +884,8 @@ extension HTTPCookie {
 
 extension HAR.Header: Equatable {}
 
+extension HAR.Header: Hashable {}
+
 extension HAR.Header: Codable {}
 
 extension HAR.Header {
@@ -891,6 +911,8 @@ extension HAR.Headers {
 // MARK: - QueryString
 
 extension HAR.QueryString: Equatable {}
+
+extension HAR.QueryString: Hashable {}
 
 extension HAR.QueryString: Codable {}
 
@@ -1009,6 +1031,8 @@ extension HAR.Param: Codable {
 
 extension HAR.Content: Equatable {}
 
+extension HAR.Content: Hashable {}
+
 extension HAR.Content: Codable {}
 
 extension HAR.Content {
@@ -1054,15 +1078,21 @@ extension HAR.Content {
 
 extension HAR.Cache: Equatable {}
 
+extension HAR.Cache: Hashable {}
+
 extension HAR.Cache: Codable {}
 
 extension HAR.CacheEntry: Equatable {}
+
+extension HAR.CacheEntry: Hashable {}
 
 extension HAR.CacheEntry: Codable {}
 
 // MARK: - Timings
 
 extension HAR.Timing: Equatable {}
+
+extension HAR.Timing: Hashable {}
 
 extension HAR.Timing: Codable {}
 
