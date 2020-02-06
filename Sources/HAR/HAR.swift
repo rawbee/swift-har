@@ -983,9 +983,8 @@ extension HAR.QueryString: Codable {}
 
 extension HAR.QueryString {
     init(_ queryItem: URLQueryItem) {
-        self.init(
-            name: queryItem.name,
-            value: queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? "")
+        name = queryItem.name
+        value = queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? ""
     }
 }
 
