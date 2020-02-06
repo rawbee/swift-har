@@ -228,20 +228,6 @@ final class HARTests: XCTestCase {
         XCTAssertEqual(content.encoding, "base64")
     }
 
-    func testTimings() throws {
-        let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har"))
-        let entry = try XCTUnwrap(har.log.entries.first)
-
-        let timing = HAR.Timing(blocked: 0, dns: -1, connect: 15, send: 20, wait: 38, receive: 12, ssl: -1)
-        XCTAssertEqual(timing.total, 85)
-
-        let entry2 = HAR.Entry(request: entry.request, response: entry.response)
-        XCTAssertEqual(entry2.time, 0)
-
-        // entry2.timings = timing
-        // XCTAssertEqual(entry2.time, 85)
-    }
-
     func testRecord() throws {
         let url = try XCTUnwrap(URL(string: "http://example.com"))
         let request = URLRequest(url: url)
