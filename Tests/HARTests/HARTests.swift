@@ -34,7 +34,7 @@ final class HARTests: XCTestCase {
 
     func testRequest() throws {
         do {
-            let url = try unwrap(URL(string: "http://example.com/path?a=b"))
+            let url = try XCTUnwrap(URL(string: "http://example.com/path?a=b"))
             let request = HAR.Request(method: "GET", url: url)
 
             XCTAssertEqual(request.method, "GET")
@@ -50,7 +50,7 @@ final class HARTests: XCTestCase {
 
     func testURLRequest() throws {
         do {
-            let url = try unwrap(URL(string: "http://example.com"))
+            let url = try XCTUnwrap(URL(string: "http://example.com"))
             var request = URLRequest(url: url)
             request.setValue("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forHTTPHeaderField: "Accept")
             request.setValue("session=123", forHTTPHeaderField: "Cookie")
@@ -66,7 +66,7 @@ final class HARTests: XCTestCase {
         }
 
         do {
-            let url = try unwrap(URL(string: "http://example.com"))
+            let url = try XCTUnwrap(URL(string: "http://example.com"))
             var request = URLRequest(url: url)
             request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
             request.httpMethod = "POST"
@@ -84,7 +84,7 @@ final class HARTests: XCTestCase {
         }
 
         do {
-            let url = try unwrap(URL(string: "http://example.com"))
+            let url = try XCTUnwrap(URL(string: "http://example.com"))
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
 
@@ -99,7 +99,7 @@ final class HARTests: XCTestCase {
         }
 
         do {
-            let url = try unwrap(URL(string: "http://example.com"))
+            let url = try XCTUnwrap(URL(string: "http://example.com"))
             var request = URLRequest(url: url)
             request.setValue("application/x-www-form-urlencoded; charset=UTF-8", forHTTPHeaderField: "Content-Type")
             request.httpMethod = "POST"
@@ -118,7 +118,7 @@ final class HARTests: XCTestCase {
         }
 
         do {
-            let url = try unwrap(URL(string: "http://example.com"))
+            let url = try XCTUnwrap(URL(string: "http://example.com"))
 
             var req: URLRequest
             var rar: HAR.Request
@@ -133,7 +133,7 @@ final class HARTests: XCTestCase {
 
         do {
             let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har"))
-            let harRequest = try unwrap(har.log.entries.first).request
+            let harRequest = try XCTUnwrap(har.log.entries.first).request
             let request = URLRequest(request: harRequest)
             XCTAssertEqual(request.httpMethod, "GET")
             XCTAssertEqual(request.url?.absoluteString, "http://example.com/")
@@ -143,7 +143,7 @@ final class HARTests: XCTestCase {
 
         do {
             let har = try HAR(contentsOf: fixtureURL(name: "Safari jsbin.com.har"))
-            let harRequest = try unwrap(har.log.entries[25...].first).request
+            let harRequest = try XCTUnwrap(har.log.entries[25...].first).request
             let request = URLRequest(request: harRequest)
             XCTAssertEqual(request.httpMethod, "POST")
             XCTAssertEqual(request.url?.absoluteString, "https://jsbin.com/save")
@@ -192,7 +192,7 @@ final class HARTests: XCTestCase {
     }
 
     func testCookie() throws {
-        let url = try unwrap(URL(string: "http://example.com"))
+        let url = try XCTUnwrap(URL(string: "http://example.com"))
 
         XCTAssertEqual(HAR.Cookies(fromCookieHeader: "foo=bar"), [HAR.Cookie(name: "foo", value: "bar")])
         XCTAssertEqual(HAR.Cookies(fromCookieHeader: "foo=bar; bar="), [HAR.Cookie(name: "foo", value: "bar"), HAR.Cookie(name: "bar", value: "")])
@@ -201,7 +201,7 @@ final class HARTests: XCTestCase {
     }
 
     func testHeaders() throws {
-        let url = try unwrap(URL(string: "http://example.com"))
+        let url = try XCTUnwrap(URL(string: "http://example.com"))
 
         var req: HAR.Request
 
@@ -217,7 +217,7 @@ final class HARTests: XCTestCase {
     }
 
     func testQueryString() throws {
-        let queryComponents = try unwrap(URLComponents(string: "http://example.com/?foo=bar&query=%40swift&message=hello+world"))
+        let queryComponents = try XCTUnwrap(URLComponents(string: "http://example.com/?foo=bar&query=%40swift&message=hello+world"))
         XCTAssertEqual(queryComponents.query, "foo=bar&query=@swift&message=hello+world")
         XCTAssertEqual(
             queryComponents.queryItems,
@@ -250,7 +250,7 @@ final class HARTests: XCTestCase {
 
     func testTimings() throws {
         let har = try HAR(contentsOf: fixtureURL(name: "Safari example.com.har"))
-        let entry = try unwrap(har.log.entries.first)
+        let entry = try XCTUnwrap(har.log.entries.first)
 
         let timing = HAR.Timing(blocked: 0, dns: -1, connect: 15, send: 20, wait: 38, receive: 12, ssl: -1)
         XCTAssertEqual(timing.total, 85)
@@ -263,7 +263,7 @@ final class HARTests: XCTestCase {
     }
 
     func testRecord() throws {
-        let url = try unwrap(URL(string: "http://example.com"))
+        let url = try XCTUnwrap(URL(string: "http://example.com"))
         let request = URLRequest(url: url)
 
         let har = try HAR.record(request: request)
@@ -297,18 +297,5 @@ final class HARTests: XCTestCase {
             fixtures[name] = try Data(contentsOf: fixtureURL(name: name))
         }
         return fixtures
-    }
-
-    struct TestErrorWhileUnwrappingOptional: Error {}
-    func unwrap<T>(_ expression: @autoclosure () throws -> T?, _ message: @autoclosure () -> String = "", file: StaticString = #file, line: UInt = #line) throws -> T {
-        if let value = try expression() {
-            return value
-        }
-
-        let providedMessage = message()
-        let failureMessage = providedMessage.isEmpty ? "Expected non-nil value of type \"\(String(describing: T.self))\"" : providedMessage
-
-        XCTFail(failureMessage, file: file, line: line)
-        throw TestErrorWhileUnwrappingOptional()
     }
 }
