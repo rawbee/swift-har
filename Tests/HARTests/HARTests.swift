@@ -216,18 +216,6 @@ final class HARTests: XCTestCase {
         XCTAssertNil(req.value(forHTTPHeaderField: "type"))
     }
 
-    func testContent() throws {
-        var content = HAR.Content(text: "foo=bar", mimeType: "multipart/form-content")
-        XCTAssertEqual(content.text, "foo=bar")
-        XCTAssertEqual(content.size, 7)
-
-        content = HAR.Content(text: "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=", encoding: "base64", mimeType: "text/html; charset=utf-8")
-        XCTAssertEqual(content.size, 35)
-        XCTAssertEqual(content.data?.count, 35)
-        XCTAssertEqual(content.text, "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=")
-        XCTAssertEqual(content.encoding, "base64")
-    }
-
     func testRecord() throws {
         let url = try XCTUnwrap(URL(string: "http://example.com"))
         let request = URLRequest(url: url)

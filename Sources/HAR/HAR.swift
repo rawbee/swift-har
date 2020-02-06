@@ -267,8 +267,7 @@ public struct HAR {
         public var headers: Headers = []
 
         /// Details about the response body.
-        // FIXME: Bad default content
-        public var content: Content = HAR.Content(text: "", mimeType: "text/plain")
+        public var content: Content = HAR.Content()
 
         /// Redirection target URL from the Location response header.
         public var redirectURL: String = ""
@@ -842,12 +841,11 @@ extension HAR.Response {
         status = response.statusCode
         statusText = HTTPURLResponse.localizedString(forStatusCode: response.statusCode).capitalized
         headers = HAR.Headers(response.allHeaderFields)
-        bodySize = Int(truncatingIfNeeded: response.expectedContentLength)
 
-        // FIXME: Bad default content
-        content = HAR.Content(text: "", mimeType: "text/plain")
         if let data = data {
-            content = HAR.Content(data: data, size: bodySize, mimeType: response.mimeType)
+            content = HAR.Content(decoding: data, mimeType: response.mimeType)
+        } else {
+            content = HAR.Content()
         }
 
         cookies = computedCookies
@@ -1100,21 +1098,36 @@ extension HAR.Content: Hashable {}
 extension HAR.Content: Codable {}
 
 extension HAR.Content {
-    /// - ToDo: Document initializer.
-    init(text: String, encoding: String? = nil, mimeType: String) {
-        self.encoding = encoding
-        self.mimeType = mimeType
-        self.text = text
-
-        // FIXME: This assignment feels silly
+    init() {
         size = 0
-        size = data?.count ?? 0
+        mimeType = "application/octet-stream"
     }
 
-    /// - ToDo: Document initializer.
-    init(data: Data, size: Int, mimeType: String?) {
-        self.size = size
-        self.mimeType = mimeType ?? "application/octet-stream"
+    /// Create HAR Content from string.
+    init(text: String, encoding: String? = nil, mimeType: String?) {
+        self.init()
+
+        if let mimeType = mimeType {
+            self.mimeType = mimeType
+        }
+
+        self.encoding = encoding
+        self.text = text
+
+        if let data = data {
+            size = data.count
+        }
+    }
+
+    /// Create HAR Content decoding HTTP Body Data.
+    init(decoding data: Data, mimeType: String?) {
+        self.init()
+
+        if let mimeType = mimeType {
+            self.mimeType = mimeType
+        }
+
+        size = data.count
 
         if let text = String(bytes: data, encoding: .utf8) {
             self.text = text
@@ -1124,17 +1137,15 @@ extension HAR.Content {
         }
     }
 
-    /// - ToDo: Document property.
+    /// Get content body as Data. May return nil if text is encoded improperly.
     public var data: Data? {
-        if let text = text {
-            switch encoding {
-            case "base64":
-                return Data(base64Encoded: text)
-            default:
-                return Data(text.utf8)
-            }
+        guard let text = text else { return nil }
+        switch encoding {
+        case "base64":
+            return Data(base64Encoded: text)
+        default:
+            return Data(text.utf8)
         }
-        return nil
     }
 }
 
