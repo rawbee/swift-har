@@ -674,6 +674,13 @@ extension HAR.Entry: Hashable {}
 
 extension HAR.Entry: Codable {}
 
+extension HAR.Entry {
+    /// Cookie property computed from timings.
+    public var computedTime: Double {
+        timings.total
+    }
+}
+
 // MARK: - Request
 
 extension HAR.Request: Equatable {}
