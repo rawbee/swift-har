@@ -1098,13 +1098,13 @@ extension HAR.Content: Hashable {}
 extension HAR.Content: Codable {}
 
 extension HAR.Content {
-    init() {
+    public init() {
         size = 0
         mimeType = "application/octet-stream"
     }
 
     /// Create HAR Content from string.
-    init(text: String, encoding: String? = nil, mimeType: String?) {
+    public init(text: String, encoding: String? = nil, mimeType: String?) {
         self.init()
 
         if let mimeType = mimeType {
@@ -1120,7 +1120,7 @@ extension HAR.Content {
     }
 
     /// Create HAR Content decoding HTTP Body Data.
-    init(decoding data: Data, mimeType: String?) {
+    public init(decoding data: Data, mimeType: String?) {
         self.init()
 
         if let mimeType = mimeType {
