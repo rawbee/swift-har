@@ -50,10 +50,10 @@ public struct HAR {
         public var browser: Browser?
 
         /// List of all exported (tracked) pages. Leave out this field if the application does not support grouping by pages.
-        public var pages: [Page]?
+        public var pages: Pages?
 
         /// List of all exported (tracked) requests.
-        public var entries: [Entry] = []
+        public var entries: Entries = []
 
         /// A comment provided by the user or the application.
         ///
@@ -114,6 +114,8 @@ public struct HAR {
         /// - Version: 1.2
         public var comment: String?
     }
+
+    public typealias Pages = [Page]
 
     // MARK: - PageTimings
 
@@ -176,6 +178,8 @@ public struct HAR {
         public var comment: String?
     }
 
+    public typealias Entries = [Entry]
+
     // MARK: - Request
 
     /// This object contains detailed info about performed request.
@@ -209,7 +213,7 @@ public struct HAR {
         }
 
         /// List of query parameter objects.
-        public var queryString: [QueryString] = []
+        public var queryString: QueryStrings = []
 
         /// Posted data info.
         public var postData: PostData?
@@ -356,6 +360,8 @@ public struct HAR {
         public var comment: String?
     }
 
+    public typealias QueryStrings = [QueryString]
+
     // MARK: - PostData
 
     /// This object describes posted data, if any (embedded in `Request` object).
@@ -366,7 +372,7 @@ public struct HAR {
         /// List of posted parameters (in case of URL encoded parameters).
         ///
         /// - Invariant: Text and params fields are mutually exclusive.
-        public var params: [Param]
+        public var params: Params
 
         /// Plain text posted data
         ///
@@ -400,6 +406,8 @@ public struct HAR {
         /// - Version: 1.2
         public var comment: String?
     }
+
+    public typealias Params = [Param]
 
     // MARK: - Content
 
