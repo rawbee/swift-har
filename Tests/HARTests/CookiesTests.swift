@@ -1,6 +1,10 @@
 @testable import HAR
 import XCTest
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 final class CookiesTests: XCTestCase {
     func testInitFromCookieHeader() {
         XCTAssertEqual(
