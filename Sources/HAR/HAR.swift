@@ -866,7 +866,7 @@ extension HAR.Response: Codable {
 
 extension HAR.Response {
     /// cookies property computed from headers.
-    // TODO: Use HTTPCookie.cookies(withResponseHeaderFields:for:) to parse cookies
+    #warning("Use HTTPCookie.cookies(withResponseHeaderFields:for:) to parse cookies")
     public var computedCookies: [HAR.Cookie] {
         var cookies: [HAR.Cookie] = []
         for header in headers {
@@ -943,6 +943,7 @@ func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] 
 }
 
 extension HAR.Cookie {
+    #warning("Cyclomatic Complexity Violation: Function should have complexity 10 or less: currently complexity equals 11 (cyclomatic_complexity)")
     init(fromSetCookieHeader header: String) {
         var attributeValues = parseCookieAttributes(header)
 
@@ -1071,7 +1072,6 @@ extension HAR.PostData: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
 
-        // TODO: Would be nice to inheirt remaining decoders by default
         mimeType = try container.decodeIfPresent(String.self, forKey: .mimeType) ?? ""
         params = try container.decodeIfPresent([HAR.Param].self, forKey: .params) ?? []
         text = try container.decodeIfPresent(String.self, forKey: .text) ?? ""
@@ -1159,7 +1159,6 @@ extension HAR.Param: Codable {
         /// Override synthesised decoder to handle empty `name`.
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
 
-        // TODO: Would be nice to inheirt remaining decoders by default
         value = try container.decodeIfPresent(String.self, forKey: .value)
         fileName = try container.decodeIfPresent(String.self, forKey: .fileName)
         contentType = try container.decodeIfPresent(String.self, forKey: .contentType)
