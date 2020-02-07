@@ -860,17 +860,12 @@ extension HAR.Cookie: Hashable {}
 
 extension HAR.Cookie: Codable {}
 
-func breakIntoHalfs(_ string: String, separatedBy: String) -> (String, String?) {
-    var components = string.components(separatedBy: separatedBy)
-    let first = components.removeFirst()
-    let rest = components.joined(separator: separatedBy)
-    return (first, rest.isEmpty ? nil : rest)
-}
-
 /// Parse cookie style attribute pairs seperated by `;` and `=`
 func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] {
-    string.components(separatedBy: ";").compactMap {
-        let (key, value) = breakIntoHalfs($0, separatedBy: "=")
+    string.split(separator: ";").compactMap {
+        let parts = $0.split(separator: "=", maxSplits: 1)
+        let key = String(parts[0])
+        let value = parts.count > 1 ? String(parts[1]) : nil
         return (key.trimmingCharacters(in: .whitespaces), value?.trimmingCharacters(in: .whitespaces))
     }
 }
