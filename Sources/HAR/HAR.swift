@@ -764,7 +764,7 @@ extension HAR.Request {
         method = request.httpMethod ?? "GET"
 
         if let headers = request.allHTTPHeaderFields {
-            self.headers = headers.map { HAR.Header($0) }
+            self.headers = headers.map { HAR.Header(name: $0.key, value: $0.value) }
         }
 
         cookies = computedCookies
@@ -950,14 +950,6 @@ extension HAR.Header: Equatable {}
 extension HAR.Header: Hashable {}
 
 extension HAR.Header: Codable {}
-
-extension HAR.Header {
-    /// Create HAR Header from `(key, value)` tuple.
-    init(_ pair: (key: String, value: String)) {
-        name = pair.key
-        value = pair.value
-    }
-}
 
 extension HAR.Headers {
     init(_ fields: [AnyHashable: Any]) {

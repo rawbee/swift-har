@@ -23,8 +23,8 @@ final class RequestTests: XCTestCase {
 
         var req = HAR.Request(method: "POST", url: url)
         req.headers = [
-            HAR.Header(("Accept", "*/*")),
-            HAR.Header(("Content-Type", "application/json")),
+            HAR.Header(name: "Accept", value: "*/*"),
+            HAR.Header(name: "Content-Type", value: "application/json"),
         ]
         XCTAssertEqual(req.value(forHTTPHeaderField: "Content-Type"), "application/json")
         XCTAssertEqual(req.value(forHTTPHeaderField: "Content-type"), "application/json")
@@ -153,7 +153,7 @@ final class RequestTests: XCTestCase {
 
     func normalizedHeaders(_ headers: [HAR.Header]) -> [HAR.Header] {
         headers
-            .map { HAR.Header(($0.name.lowercased(), $0.value)) }
+            .map { HAR.Header(name: $0.name.lowercased(), value: $0.value) }
             .sorted { $0.name < $1.name }
     }
 }
