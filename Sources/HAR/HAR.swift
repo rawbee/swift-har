@@ -866,7 +866,6 @@ extension HAR.Response: Codable {
 
 extension HAR.Response {
     /// cookies property computed from headers.
-    #warning("Use HTTPCookie.cookies(withResponseHeaderFields:for:) to parse cookies")
     public var computedCookies: [HAR.Cookie] {
         var cookies: [HAR.Cookie] = []
         for header in headers {
