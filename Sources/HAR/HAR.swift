@@ -38,7 +38,10 @@ public struct HAR {
 
     /// This object represents the root of exported data.
     ///
-    /// There is one `Page` object for every exported web page and one `Entry` object for every HTTP request. In case when an HTTP trace tool isn't able to group requests by a page, the `pages` object is empty and individual requests doesn't have a parent page.
+    /// There is one `Page` object for every exported web page and one `Entry` object
+    /// for every HTTP request. In case when an HTTP trace tool isn't able to group
+    /// requests by a page, the `pages` object is empty and individual requests doesn't
+    /// have a parent page.
     public struct Log {
         /// Version number of the format. If empty, string "1.1" is assumed by default.
         public var version: String = "1.2"
@@ -49,7 +52,8 @@ public struct HAR {
         /// Name and version info of used browser.
         public var browser: Browser?
 
-        /// List of all exported (tracked) pages. Leave out this field if the application does not support grouping by pages.
+        /// List of all exported (tracked) pages. Leave out this field if the
+        /// application does not support grouping by pages.
         public var pages: Pages?
 
         /// List of all exported (tracked) requests.
@@ -100,7 +104,8 @@ public struct HAR {
         /// Date and time stamp for the beginning of the page load.
         public var startedDateTime: Date
 
-        /// Unique identifier of a page within the `Log`. Entries use it to refer the parent page.
+        /// Unique identifier of a page within the `Log`. Entries use it to refer the
+        /// parent page.
         public var id: String
 
         /// Page title.
@@ -119,14 +124,21 @@ public struct HAR {
 
     // MARK: - PageTimings
 
-    /// This object describes timings for various events (states) fired during the page load. All times are specified in milliseconds. If a time info is not available appropriate field is set to -1.
+    /// This object describes timings for various events (states) fired during the page
+    /// load. All times are specified in milliseconds. If a time info is not available
+    /// appropriate field is set to -1.
     ///
-    /// Depending on the browser, onContentLoad property represents `DOMContentLoad` event or `document.readyState == interactive`.
+    /// Depending on the browser, onContentLoad property represents `DOMContentLoad`
+    /// event or `document.readyState == interactive`.
     public struct PageTiming {
-        /// Content of the page loaded. Number of milliseconds since page load started (`page.startedDateTime`). Use -1 if the timing does not apply to the current request.
+        /// Content of the page loaded. Number of milliseconds since page load started
+        /// (`page.startedDateTime`). Use -1 if the timing does not apply to the current
+        /// request.
         public var onContentLoad: Double? = -1
 
-        /// Page is loaded (onLoad event fired). Number of milliseconds since page load started (`page.startedDateTime`). Use -1 if the timing does not apply to the current request.
+        /// Page is loaded (onLoad event fired). Number of milliseconds since page load
+        /// started (`page.startedDateTime`). Use -1 if the timing does not apply to the
+        /// current request.
         public var onLoad: Double? = -1
 
         /// A comment provided by the user or the application.
@@ -137,17 +149,23 @@ public struct HAR {
 
     // MARK: - Entries
 
-    /// This object represents an array with all exported HTTP requests. Sorting entries by `startedDateTime` (starting from the oldest) is preferred way how to export data since it can make importing faster. However the reader application should always make sure the array is sorted (if required for the import).
+    /// This object represents an array with all exported HTTP requests. Sorting entries
+    /// by `startedDateTime` (starting from the oldest) is preferred way how to export
+    /// data since it can make importing faster. However the reader application should
+    /// always make sure the array is sorted (if required for the import).
     public struct Entry {
-        /// Reference to the parent page. Leave out this field if the application does not support grouping by pages.
+        /// Reference to the parent page. Leave out this field if the application does
+        /// not support grouping by pages.
         public var pageref: String?
 
         /// Date and time stamp of the request start.
         public var startedDateTime: Date = Date()
 
-        /// Total elapsed time of the request in milliseconds. This is the sum of all timings available in the timings object (i.e. not including -1 values) .
+        /// Total elapsed time of the request in milliseconds. This is the sum of all
+        /// timings available in the timings object (i.e. not including -1 values) .
         ///
-        /// - Invariant: The time value for the request must be equal to the sum of the timings supplied in this section (excluding any -1 values).
+        /// - Invariant: The time value for the request must be equal to the sum of the
+        /// timings supplied in this section (excluding any -1 values).
         public var time: Double = 0
 
         /// Detailed info about the request.
@@ -167,7 +185,12 @@ public struct HAR {
         /// - Version: 1.2
         public var serverIPAddress: String?
 
-        /// Unique ID of the parent TCP/IP connection, can be the client or server port number. Note that a port number doesn't have to be unique identifier in cases where the port is shared for more connections. If the port isn't available for the application, any other unique connection ID can be used instead (e.g. connection index). Leave out this field if the application doesn't support this info.
+        /// Unique ID of the parent TCP/IP connection, can be the client or server port
+        /// number. Note that a port number doesn't have to be unique identifier in cases
+        /// where the port is shared for more connections. If the port isn't available
+        /// for the application, any other unique connection ID can be used instead (e.g.
+        /// connection index). Leave out this field if the application doesn't support
+        /// this info.
         ///
         /// - Version: 1.2
         public var connection: String?
@@ -215,12 +238,16 @@ public struct HAR {
         /// Posted data info.
         public var postData: PostData?
 
-        /// Total number of bytes from the start of the HTTP request message until (and including) the double CRLF before the body. Set to -1 if the info is not available.
+        /// Total number of bytes from the start of the HTTP request message until (and
+        /// including) the double CRLF before the body. Set to -1 if the info is not
+        /// available.
         ///
-        /// - Important: Should be ran when mutating `method`, `url`, `httpVersion` or `headers`.
+        /// - Important: Should be ran when mutating `method`, `url`, `httpVersion` or
+        /// `headers`.
         public var headersSize: Int = -1
 
-        /// Size of the request body (POST data payload) in bytes. Set to -1 if the info is not available.
+        /// Size of the request body (POST data payload) in bytes. Set to -1 if the info
+        /// is not available.
         public var bodySize: Int = -1
 
         /// A comment provided by the user or the application.
@@ -266,12 +293,18 @@ public struct HAR {
         /// Redirection target URL from the Location response header.
         public var redirectURL: String = ""
 
-        /// Total number of bytes from the start of the HTTP response message until (and including) the double CRLF before the body. Set to -1 if the info is not available.
+        /// Total number of bytes from the start of the HTTP response message until (and
+        /// including) the double CRLF before the body. Set to -1 if the info is not
+        /// available.
         ///
-        /// The size of received response-headers is computed only from headers that are really received from the server. Additional headers appended by the browser are not included in this number, but they appear in the list of header objects.
+        /// The size of received response-headers is computed only from headers that are
+        /// really received from the server. Additional headers appended by the browser
+        /// are not included in this number, but they appear in the list of header
+        /// objects.
         public var headersSize: Int = -1
 
-        /// Size of the received response body in bytes. Set to zero in case of responses coming from the cache (304). Set to -1 if the info is not available.
+        /// Size of the received response body in bytes. Set to zero in case of responses
+        /// coming from the cache (304). Set to -1 if the info is not available.
         public var bodySize: Int = -1
 
         /// A comment provided by the user or the application.
@@ -282,7 +315,8 @@ public struct HAR {
 
     // MARK: - Cookies
 
-    /// This object contains list of all cookies (used in `Request` and `Response` objects).
+    /// This object contains list of all cookies (used in `Request` and `Response`
+    /// objects).
     public struct Cookie {
         /// The name of the cookie.
         public var name: String
@@ -324,7 +358,8 @@ public struct HAR {
 
     // MARK: - Headers
 
-    /// This object contains list of all headers (used in `Request` and `Response` objects).
+    /// This object contains list of all headers (used in `Request` and `Response`
+    /// objects).
     public struct Header {
         public var name: String
         public var value: String
@@ -339,7 +374,8 @@ public struct HAR {
 
     // MARK: - QueryString
 
-    /// This object contains list of all parameters & values parsed from a query string, if any (embedded in `Request` object).
+    /// This object contains list of all parameters & values parsed from a query string,
+    /// if any (embedded in `Request` object).
     public struct QueryString {
         public var name: String
         public var value: String
@@ -401,25 +437,40 @@ public struct HAR {
 
     // MARK: - Content
 
-    /// This object describes details about response content (embedded in `Response` object).
+    /// This object describes details about response content (embedded in `Response`
+    /// object).
     public struct Content {
-        /// Length of the returned content in bytes. Should be equal to `response.bodySize` if there is no compression and bigger when the content has been compressed.
+        /// Length of the returned content in bytes. Should be equal to
+        /// `response.bodySize` if there is no compression and bigger when the content
+        /// has been compressed.
         public var size: Int
 
-        /// Number of bytes saved. Leave out this field if the information is not available.
+        /// Number of bytes saved. Leave out this field if the information is not
+        /// available.
         public var compression: Int?
 
-        /// MIME type of the response text (value of the Content-Type response header). The charset attribute of the MIME type is included (if available).
+        /// MIME type of the response text (value of the Content-Type response header).
+        /// The charset attribute of the MIME type is included (if available).
         public var mimeType: String
 
-        ///  Response body sent from the server or loaded from the browser cache. This field is populated with textual content only. The text field is either HTTP decoded text or a encoded (e.g. "base64") representation of the response body. Leave out this field if the information is not available.
+        ///  Response body sent from the server or loaded from the browser cache. This
+        /// field is populated with textual content only. The text field is either HTTP
+        /// decoded text or a encoded (e.g. "base64") representation of the response
+        /// body. Leave out this field if the information is not available.
         ///
-        /// Before setting the text field, the HTTP response is decoded (decompressed & unchunked), than trans-coded from its original character set into UTF-8. Additionally, it can be encoded using e.g. base64. Ideally, the application should be able to unencode a base64 blob and get a byte-for-byte identical resource to what the browser operated on.
+        /// Before setting the text field, the HTTP response is decoded (decompressed &
+        /// unchunked), than trans-coded from its original character set into UTF-8.
+        /// Additionally, it can be encoded using e.g. base64. Ideally, the application
+        /// should be able to unencode a base64 blob and get a byte-for-byte identical
+        /// resource to what the browser operated on.
         public var text: String?
 
-        /// Encoding used for response text field e.g "base64". Leave out this field if the text field is HTTP decoded (decompressed & unchunked), than trans-coded from its original character set into UTF-8.
+        /// Encoding used for response text field e.g "base64". Leave out this field if
+        /// the text field is HTTP decoded (decompressed & unchunked), than trans-coded
+        /// from its original character set into UTF-8.
         ///
-        /// Encoding field is useful for including binary responses (e.g. images) into the HAR file.
+        /// Encoding field is useful for including binary responses (e.g. images) into
+        /// the HAR file.
         ///
         /// - Version: 1.2
         public var encoding: String?
@@ -434,10 +485,12 @@ public struct HAR {
 
     /// This objects contains info about a request coming from browser cache.
     public struct Cache {
-        // State of a cache entry before the request. Leave out this field if the information is not available.
+        // State of a cache entry before the request. Leave out this field if the
+        /// information is not available.
         public var beforeRequest: CacheEntry?
 
-        /// State of a cache entry after the request. Leave out this field if the information is not available.
+        /// State of a cache entry after the request. Leave out this field if the
+        /// information is not available.
         public var afterRequest: CacheEntry?
 
         /// A comment provided by the user or the application.
@@ -467,15 +520,19 @@ public struct HAR {
 
     // MARK: - Timings
 
-    /// This object describes various phases within request-response round trip. All times are specified in milliseconds.
+    /// This object describes various phases within request-response round trip. All
+    /// times are specified in milliseconds.
     public struct Timing {
-        /// Time spent in a queue waiting for a network connection. Use -1 if the timing does not apply to the current request.
+        /// Time spent in a queue waiting for a network connection. Use -1 if the timing
+        /// does not apply to the current request.
         public var blocked: Double? = -1
 
-        /// DNS resolution time. The time required to resolve a host name. Use -1 if the timing does not apply to the current request.
+        /// DNS resolution time. The time required to resolve a host name. Use -1 if the
+        /// timing does not apply to the current request.
         public var dns: Double? = -1
 
-        ///  Time required to create TCP connection. Use -1 if the timing does not apply to the current request.
+        ///  Time required to create TCP connection. Use -1 if the timing does not apply
+        /// to the current request.
         public var connect: Double? = -1
 
         /// Time required to send HTTP request to the server.
@@ -487,7 +544,9 @@ public struct HAR {
         /// Time required to read entire response from the server (or cache).
         public var receive: Double
 
-        /// Time required for SSL/TLS negotiation. If this field is defined then the time is also included in the connect field (to ensure backward compatibility with HAR 1.1). Use -1 if the timing does not apply to the current request.
+        /// Time required for SSL/TLS negotiation. If this field is defined then the
+        /// time is also included in the connect field (to ensure backward compatibility
+        /// with HAR 1.1). Use -1 if the timing does not apply to the current request.
         ///
         /// - Version: 1.2
         public var ssl: Double? = -1
@@ -515,7 +574,8 @@ extension HAR: Codable {
 
     /// Return ISO 8601 date formatter.
     ///
-    /// Uses the format `YYYY-MM-DDThh:mm:ss.sTZD` to return a date such as `2009-07-24T19:20:30.45+01:00`.
+    /// Uses the format `YYYY-MM-DDThh:mm:ss.sTZD` to return a date such as
+    /// `2009-07-24T19:20:30.45+01:00`.
     private static func makeDateFormatter() -> DateFormatter {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSZZZZZ"
@@ -690,7 +750,8 @@ extension HAR.Request: Codable {
 
         method = try container.decode(String.self, forKey: .method)
         url = try container.decode(URL.self, forKey: .url)
-        httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion) ?? "HTTP/1.1"
+        httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion)
+            ?? "HTTP/1.1"
         cookies = try container.decode([HAR.Cookie].self, forKey: .cookies)
         headers = try container.decode([HAR.Header].self, forKey: .headers)
         queryString = try container.decode([HAR.QueryString].self, forKey: .queryString)
@@ -712,7 +773,8 @@ extension HAR.Request {
 
     /// queryString property computed from URL query string.
     public var computedQueryString: [HAR.QueryString] {
-        if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
+        if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems {
             return queryItems.map { HAR.QueryString($0) }
         }
         return []
@@ -770,7 +832,9 @@ extension HAR.Request {
         headersSize = computedHeadersSize
 
         if let data = request.httpBody {
-            postData = HAR.PostData(parsingData: data, mimeType: value(forHTTPHeaderField: "Content-Type"))
+            postData = HAR.PostData(
+                parsingData: data,
+                mimeType: value(forHTTPHeaderField: "Content-Type"))
             bodySize = data.count
         }
     }
@@ -788,7 +852,8 @@ extension HAR.Response: Codable {
 
         status = try container.decode(Int.self, forKey: .status)
         statusText = try container.decode(String.self, forKey: .statusText)
-        httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion) ?? "HTTP/1.1"
+        httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion)
+            ?? "HTTP/1.1"
         cookies = try container.decode([HAR.Cookie].self, forKey: .cookies)
         headers = try container.decode([HAR.Header].self, forKey: .headers)
         content = try container.decode(HAR.Content.self, forKey: .content)
@@ -831,14 +896,19 @@ extension HTTPURLResponse {
         let headerFields = response.headers.reduce(into: [:]) { $0[$1.name] = $1.value }
 
         /// - Remark: initializer doesn't appear to have any failure cases
-        self.init(url: url, statusCode: response.status, httpVersion: response.httpVersion, headerFields: headerFields)!
+        self.init(
+            url: url,
+            statusCode: response.status,
+            httpVersion: response.httpVersion,
+            headerFields: headerFields)!
     }
 }
 
 extension HAR.Response {
     init(response: HTTPURLResponse, data: Data?) {
         status = response.statusCode
-        statusText = HTTPURLResponse.localizedString(forStatusCode: response.statusCode).capitalized
+        statusText = HTTPURLResponse.localizedString(forStatusCode: response.statusCode)
+            .capitalized
         headers = HAR.Headers(response.allHeaderFields)
 
         if let data = data {
@@ -866,7 +936,9 @@ func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] 
         let parts = $0.split(separator: "=", maxSplits: 1)
         let key = String(parts[0])
         let value = parts.count > 1 ? String(parts[1]) : nil
-        return (key.trimmingCharacters(in: .whitespaces), value?.trimmingCharacters(in: .whitespaces))
+        return (
+            key.trimmingCharacters(in: .whitespaces),
+            value?.trimmingCharacters(in: .whitespaces))
     }
 }
 
@@ -886,7 +958,11 @@ extension HAR.Cookie {
             case "expires":
                 if let value = value {
                     // Tue, 18 Jan 2022 23:07:07 GMT
-                    for dateFormat in ["EEE',' dd MMM yyyy HH:mm:ss 'GMT'", "EEE',' dd'-'MMM'-'yy HH:mm:ss 'GMT'", "EEE',' dd'-'MMM'-'yyyy HH:mm:ss 'GMT'"] {
+                    for dateFormat in [
+                        "EEE',' dd MMM yyyy HH:mm:ss 'GMT'",
+                        "EEE',' dd'-'MMM'-'yy HH:mm:ss 'GMT'",
+                        "EEE',' dd'-'MMM'-'yyyy HH:mm:ss 'GMT'",
+                    ] {
                         let formatter = DateFormatter()
                         formatter.timeZone = TimeZone(identifier: "UTC")
                         formatter.dateFormat = dateFormat
@@ -916,7 +992,9 @@ extension HAR.Cookie {
 
 extension HAR.Cookies {
     init(fromCookieHeader header: String) {
-        self = parseCookieAttributes(header).map { HAR.Cookie(name: $0.key, value: $0.value ?? "") }
+        self = parseCookieAttributes(header).map {
+            HAR.Cookie(name: $0.key, value: $0.value ?? "")
+        }
     }
 }
 
@@ -1023,7 +1101,9 @@ extension HAR.PostData {
         return components.queryItems?.map {
             return HAR.Param(
                 name: $0.name,
-                value: $0.value?.replacingOccurrences(of: "+", with: "%20").removingPercentEncoding ?? "")
+                value: $0.value?
+                    .replacingOccurrences(of: "+", with: "%20")
+                    .removingPercentEncoding ?? "")
         } ?? []
     }
 
@@ -1171,7 +1251,8 @@ extension HAR.Timing: Codable {}
 extension HAR.Timing {
     /// Compute total request time.
     ///
-    /// The time value for the request must be equal to the sum of the timings supplied in this section (excluding any -1 values).
+    /// The time value for the request must be equal to the sum of the timings supplied
+    /// in this section (excluding any -1 values).
     public var total: Double {
         [blocked, dns, connect, send, wait, receive]
             .map { $0 ?? -1 }
@@ -1188,7 +1269,9 @@ extension HAR.Entry {
         let start = DispatchTime.now()
 
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            timings.receive = Double(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds) / 1000000
+            timings.receive = Double(
+                DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds
+            ) / 1000000
 
             if let response = response as? HTTPURLResponse {
                 let entry = Self(
@@ -1224,7 +1307,9 @@ extension HAR {
     }
 }
 
-internal func SyncResult<T>(_ asyncHandler: (@escaping (Result<T, Error>) -> Void) -> Void) throws -> T {
+internal func SyncResult<T>(
+    _ asyncHandler: (@escaping (Result<T, Error>) -> Void) -> Void
+) throws -> T {
     let semaphore = DispatchSemaphore(value: 0)
     var result: Result<T, Error>?
 
