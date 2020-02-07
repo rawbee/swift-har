@@ -901,10 +901,6 @@ extension HAR.Cookie {
                             break
                         }
                     }
-
-                    if expires == nil {
-                        print("bad parse: \(value)")
-                    }
                 }
             case "domain":
                 domain = value
