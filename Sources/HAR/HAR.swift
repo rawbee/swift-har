@@ -969,6 +969,20 @@ extension HAR.QueryString: Equatable {}
 
 extension HAR.QueryString: Hashable {}
 
+extension HAR.QueryString: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        "\(name)=\(value)"
+    }
+}
+
+extension HAR.QueryString: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.QueryString { \(description) }"
+    }
+}
+
 extension HAR.QueryString: Codable {}
 
 extension HAR.QueryString {
