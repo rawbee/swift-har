@@ -263,8 +263,8 @@ public struct HAR {
             self.method = method
             self.url = url
 
-            queryString = computedQueryString
-            headersSize = computedHeadersSize
+            self.queryString = computedQueryString
+            self.headersSize = computedHeadersSize
         }
     }
 
@@ -602,7 +602,8 @@ extension HAR: Codable {
 
             throw Swift.DecodingError.dataCorruptedError(
                 in: container,
-                debugDescription: "invalid date: \(dateStr)")
+                debugDescription: "invalid date: \(dateStr)"
+            )
         }
 
         self = try decoder.decode(Self.self, from: data)
@@ -834,7 +835,8 @@ extension HAR.Request {
         if let data = request.httpBody {
             postData = HAR.PostData(
                 parsingData: data,
-                mimeType: value(forHTTPHeaderField: "Content-Type"))
+                mimeType: value(forHTTPHeaderField: "Content-Type")
+            )
             bodySize = data.count
         }
     }
@@ -899,7 +901,8 @@ extension HTTPURLResponse {
             url: url,
             statusCode: response.status,
             httpVersion: response.httpVersion,
-            headerFields: headerFields)!
+            headerFields: headerFields
+        )!
     }
 }
 
@@ -937,7 +940,8 @@ private func parseCookieAttributes(_ string: String) -> [(key: String, value: St
         let value = parts.count > 1 ? String(parts[1]) : nil
         return (
             key.trimmingCharacters(in: .whitespaces),
-            value?.trimmingCharacters(in: .whitespaces))
+            value?.trimmingCharacters(in: .whitespaces)
+        )
     }
 }
 
@@ -1108,7 +1112,8 @@ extension HAR.PostData {
                 name: $0.name,
                 value: $0.value?
                     .replacingOccurrences(of: "+", with: "%20")
-                    .removingPercentEncoding ?? "")
+                    .removingPercentEncoding ?? ""
+            )
         } ?? []
     }
 
@@ -1282,7 +1287,8 @@ extension HAR.Entry {
                     time: timings.total,
                     request: HAR.Request(request: request),
                     response: HAR.Response(response: response, data: data),
-                    timings: timings)
+                    timings: timings
+                )
                 completionHandler(.success(entry))
             } else if let error = error {
                 completionHandler(.failure(error))
@@ -1303,7 +1309,8 @@ extension HAR {
             request: request,
             completionHandler: {
                 completionHandler($0.map { Self(log: Self.Log(entries: [$0])) })
-        })
+            }
+        )
     }
 
     public static func record(request: URLRequest) throws -> Self {

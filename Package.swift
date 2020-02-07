@@ -7,11 +7,14 @@ let package = Package(
     products: [
         .library(
             name: "HAR",
-            targets: ["HAR"]),
+            targets: ["HAR"]
+        ),
     ],
     targets: [
         .target(name: "HAR"),
         .testTarget(
             name: "HARTests",
-            dependencies: ["HAR"]),
-    ])
+            dependencies: ["HAR"]
+        ),
+    ]
+)

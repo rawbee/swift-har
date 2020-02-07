@@ -15,14 +15,17 @@ final class PostDataTests: XCTestCase {
     func testEquatable() {
         XCTAssertEqual(
             HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "foo", value: "1")], text: "foo=1"),
-            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "foo", value: "1")], text: "foo=1"))
+            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "foo", value: "1")], text: "foo=1")
+        )
         XCTAssertNotEqual(
             HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "foo", value: "1")], text: "foo=1"),
-            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "bar", value: "2")], text: "bar=2"))
+            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "bar", value: "2")], text: "bar=2")
+        )
 
         XCTAssertEqual(
             HAR.PostData(mimeType: "multipart/form-data; boundary=----WebKitFormBoundary", params: [], text: formDataText),
-            HAR.PostData(mimeType: "multipart/form-data; boundary=----WebKitFormBoundary", params: [], text: formDataText))
+            HAR.PostData(mimeType: "multipart/form-data; boundary=----WebKitFormBoundary", params: [], text: formDataText)
+        )
     }
 
     func testHashable() {
@@ -49,14 +52,17 @@ final class PostDataTests: XCTestCase {
             HAR.PostData(
                 mimeType: "application/x-www-form-urlencoded; charset=UTF-8",
                 params: [HAR.Param(name: "foo", value: "1")],
-                text: "foo=1"))
+                text: "foo=1"
+            )
+        )
     }
 
     func testEncodable() throws {
         let data = try JSONEncoder().encode(HAR.PostData(
             mimeType: "application/x-www-form-urlencoded; charset=UTF-8",
             params: [HAR.Param(name: "foo", value: "1")],
-            text: "foo=1"))
+            text: "foo=1"
+        ))
         let json = String(decoding: data, as: UTF8.self)
 
         XCTAssert(json.contains(#""text":"foo=1""#))
@@ -68,10 +74,12 @@ final class PostDataTests: XCTestCase {
 
         XCTAssertEqual(
             urlEncodedPostData,
-            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "foo", value: "1")], text: "foo=1"))
+            HAR.PostData(mimeType: "application/x-www-form-urlencoded; charset=UTF-8", params: [HAR.Param(name: "foo", value: "1")], text: "foo=1")
+        )
 
         XCTAssertEqual(
             multipartPostData,
-            HAR.PostData(mimeType: "multipart/form-data; boundary=----WebKitFormBoundary", params: [], text: formDataText))
+            HAR.PostData(mimeType: "multipart/form-data; boundary=----WebKitFormBoundary", params: [], text: formDataText)
+        )
     }
 }

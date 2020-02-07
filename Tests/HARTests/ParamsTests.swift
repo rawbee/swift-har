@@ -21,19 +21,23 @@ final class ParamsTests: XCTestCase {
     func testCustomStringConvertible() {
         XCTAssertEqual(
             String(describing: HAR.Param(name: "foo", value: "1")),
-            "foo=1")
+            "foo=1"
+        )
         XCTAssertEqual(
             String(describing: HAR.Param(name: "foo", fileName: "example.pdf", contentType: "application/pdf")),
-            #"foo=@example.pdf;type=application/pdf"#)
+            #"foo=@example.pdf;type=application/pdf"#
+        )
     }
 
     func testCustomDebugStringConvertible() {
         XCTAssertEqual(
             String(reflecting: HAR.Param(name: "foo", value: "1")),
-            "HAR.Param { foo=1 }")
+            "HAR.Param { foo=1 }"
+        )
         XCTAssertEqual(
             String(reflecting: HAR.Param(name: "foo", value: "1", fileName: "example.pdf", contentType: "application/pdf")),
-            #"HAR.Param { foo=@example.pdf;type=application/pdf }"#)
+            #"HAR.Param { foo=@example.pdf;type=application/pdf }"#
+        )
     }
 
     func testDecodable() throws {
@@ -47,7 +51,8 @@ final class ParamsTests: XCTestCase {
         let param = try JSONDecoder().decode(HAR.Param.self, from: Data(json.utf8))
         XCTAssertEqual(
             param,
-            HAR.Param(name: "foo", value: "42"))
+            HAR.Param(name: "foo", value: "42")
+        )
     }
 
     func testEncodable() throws {

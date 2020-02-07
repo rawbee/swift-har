@@ -5,13 +5,15 @@ final class QueryStringTests: XCTestCase {
     func testCustomStringConvertible() {
         XCTAssertEqual(
             String(describing: HAR.QueryString(name: "foo", value: "1")),
-            "foo=1")
+            "foo=1"
+        )
     }
 
     func testCustomDebugStringConvertible() {
         XCTAssertEqual(
             String(reflecting: HAR.QueryString(name: "foo", value: "1")),
-            "HAR.QueryString { foo=1 }")
+            "HAR.QueryString { foo=1 }"
+        )
     }
 
     func testInitFromURLQueryItem() throws {
@@ -23,7 +25,8 @@ final class QueryStringTests: XCTestCase {
                 URLQueryItem(name: "foo", value: "bar"),
                 URLQueryItem(name: "query", value: "@swift"),
                 URLQueryItem(name: "message", value: "hello+world"),
-            ])
+            ]
+        )
 
         XCTAssertEqual(
             queryComponents.queryItems?.map { HAR.QueryString($0) },
@@ -31,6 +34,7 @@ final class QueryStringTests: XCTestCase {
                 HAR.QueryString(name: "foo", value: "bar"),
                 HAR.QueryString(name: "query", value: "@swift"),
                 HAR.QueryString(name: "message", value: "hello world"),
-            ])
+            ]
+        )
     }
 }
