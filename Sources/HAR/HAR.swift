@@ -503,6 +503,8 @@ public struct HAR {
 
 extension HAR: Equatable {}
 
+extension HAR: Hashable {}
+
 extension HAR: Codable {
     /// Creates a `HAR` from the contents of a file URL.
     ///
