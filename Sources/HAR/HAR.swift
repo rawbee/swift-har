@@ -1289,7 +1289,7 @@ extension HAR.Entry {
     }
 
     public static func record(request: URLRequest) throws -> Self {
-        try SyncResult { record(request: request, completionHandler: $0) }
+        try syncResult { record(request: request, completionHandler: $0) }
     }
 }
 
@@ -1303,18 +1303,18 @@ extension HAR {
     }
 
     public static func record(request: URLRequest) throws -> Self {
-        try SyncResult { Self.record(request: request, completionHandler: $0) }
+        try syncResult { Self.record(request: request, completionHandler: $0) }
     }
 }
 
-internal func SyncResult<T>(
+internal func syncResult<T>(
     _ asyncHandler: (@escaping (Result<T, Error>) -> Void) -> Void
 ) throws -> T {
     let semaphore = DispatchSemaphore(value: 0)
     var result: Result<T, Error>?
 
-    asyncHandler { (_result: Result<T, Error>) in
-        result = _result
+    asyncHandler { (asyncResult: Result<T, Error>) in
+        result = asyncResult
         semaphore.signal()
     }
 
