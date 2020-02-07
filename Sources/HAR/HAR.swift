@@ -772,8 +772,8 @@ extension HAR.Request {
 
         if let data = request.httpBody {
             postData = HAR.PostData(parsingData: data, mimeType: value(forHTTPHeaderField: "Content-Type"))
+            bodySize = data.count
         }
-        bodySize = postData?.data?.count ?? -1
     }
 }
 
