@@ -929,19 +929,6 @@ extension HAR.Cookies {
     }
 }
 
-extension HTTPCookie {
-    convenience init?(cookie: HAR.Cookie, url: URL) {
-        // TODO: Cover all HTTPCookiePropertyKey cases
-        self.init(
-            properties: [
-                .path: "",
-                .name: cookie.name,
-                .value: cookie.value,
-                .domain: url.host ?? "",
-            ])
-    }
-}
-
 // MARK: - Headers
 
 extension HAR.Header: Equatable {}
