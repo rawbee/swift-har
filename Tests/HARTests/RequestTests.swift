@@ -104,6 +104,17 @@ final class RequestTests: XCTestCase {
         XCTAssertEqual(request.bodySize, 7)
     }
 
+    func testURLRequestNilUrl() throws {
+        let url = try XCTUnwrap(URL(string: "http://example.com"))
+        var urlRequest = URLRequest(url: url)
+        urlRequest.url = nil
+
+        XCTAssertEqual(urlRequest.url?.absoluteString, nil)
+
+        let request = HAR.Request(request: urlRequest)
+        XCTAssertEqual(request.url.absoluteString, "about:blank")
+    }
+
     func testURLRequestDefaultHTTPMethod() throws {
         let url = try XCTUnwrap(URL(string: "http://example.com"))
         var urlRequest = URLRequest(url: url)

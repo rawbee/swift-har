@@ -187,11 +187,8 @@ public struct HAR {
         /// Request method.
         public var method: String = "GET"
 
-        /// Empty URL when none is provided.
-        private static let blankUrl = URL(string: "about:blank")!
-
         /// Absolute URL of the request (fragments are not included).
-        public var url: URL = Self.blankUrl
+        public var url: URL
 
         /// Request HTTP Version.
         public var httpVersion: String = "HTTP/1.1"
@@ -231,18 +228,11 @@ public struct HAR {
         /// - Version: 1.2
         public var comment: String?
 
-        /// Create empty `Header` structure.
-        private init() {
-            headersSize = computedHeadersSize
-        }
-
         /// Create `Request` with HTTP method and url.
         ///
         /// - Parameter method: An HTTP method.
         /// - Parameter url: A URL.
         init(method: String, url: URL) {
-            self.init()
-
             self.method = method
             self.url = url
 
@@ -761,11 +751,12 @@ extension HAR.Request {
     ///
     /// - Parameter request: A URL Request.
     init(request: URLRequest) {
-        self.init()
-
+        /// Empty URL fallback to cover edge case of nil URLRequest.url
+        url = URL(string: "about:blank")!
         if let url = request.url {
             self.url = url
         }
+
         queryString = computedQueryString
 
         /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
