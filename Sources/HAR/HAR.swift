@@ -949,6 +949,20 @@ extension HAR.Header: Equatable {}
 
 extension HAR.Header: Hashable {}
 
+extension HAR.Header: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        "\(name): \(value)"
+    }
+}
+
+extension HAR.Header: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.Header { \(description) }"
+    }
+}
+
 extension HAR.Header: Codable {}
 
 extension HAR.Headers {
