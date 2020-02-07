@@ -930,7 +930,7 @@ extension HAR.Cookie: Hashable {}
 extension HAR.Cookie: Codable {}
 
 /// Parse cookie style attribute pairs seperated by `;` and `=`
-func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] {
+private func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] {
     string.split(separator: ";").compactMap {
         let parts = $0.split(separator: "=", maxSplits: 1)
         let key = String(parts[0])
@@ -942,7 +942,6 @@ func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] 
 }
 
 extension HAR.Cookie {
-    #warning("Cyclomatic Complexity Violation: Function should have complexity 10 or less: currently complexity equals 11 (cyclomatic_complexity)")
     init(fromSetCookieHeader header: String) {
         var attributeValues = parseCookieAttributes(header)
 
@@ -957,21 +956,7 @@ extension HAR.Cookie {
             switch key.lowercased() {
             case "expires":
                 if let value = value {
-                    // Tue, 18 Jan 2022 23:07:07 GMT
-                    for dateFormat in [
-                        "EEE',' dd MMM yyyy HH:mm:ss 'GMT'",
-                        "EEE',' dd'-'MMM'-'yy HH:mm:ss 'GMT'",
-                        "EEE',' dd'-'MMM'-'yyyy HH:mm:ss 'GMT'",
-                    ] {
-                        let formatter = DateFormatter()
-                        formatter.timeZone = TimeZone(identifier: "UTC")
-                        formatter.dateFormat = dateFormat
-
-                        expires = formatter.date(from: value)
-                        if expires != nil {
-                            break
-                        }
-                    }
+                    expires = parseExpires(value)
                 }
             case "domain":
                 domain = value
@@ -987,6 +972,27 @@ extension HAR.Cookie {
                 continue
             }
         }
+    }
+
+    // Tue, 18 Jan 2022 23:07:07 GMT
+    private static let expiresDateFormats = [
+        "EEE',' dd MMM yyyy HH:mm:ss 'GMT'",
+        "EEE',' dd'-'MMM'-'yy HH:mm:ss 'GMT'",
+        "EEE',' dd'-'MMM'-'yyyy HH:mm:ss 'GMT'",
+    ]
+
+    private func parseExpires(_ string: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(identifier: "UTC")
+
+        for dateFormat in Self.expiresDateFormats {
+            formatter.dateFormat = dateFormat
+            if let date = formatter.date(from: string) {
+                return date
+            }
+        }
+
+        return nil
     }
 }
 
