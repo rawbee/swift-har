@@ -815,7 +815,7 @@ extension HAR.Request {
         method = request.httpMethod ?? "GET"
 
         if let headers = request.allHTTPHeaderFields {
-            self.headers = headers.map { HAR.Header(name: $0.key, value: $0.value) }
+            self.headers = HAR.Headers(headers)
         }
 
         cookies = computedCookies
