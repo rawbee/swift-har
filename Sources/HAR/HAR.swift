@@ -1040,6 +1040,19 @@ extension HAR.Headers {
             }
         }
     }
+
+    /// - TODO: Is this private helper useful within the module?
+    var headersAsDictionary: [String: String] {
+        var result: [String: String] = [:]
+        forEach {
+            if result[$0.name] == nil {
+                result[$0.name] = $0.value
+            } else {
+                result[$0.name]! += (", " + $0.value)
+            }
+        }
+        return result
+    }
 }
 
 // MARK: - QueryString
