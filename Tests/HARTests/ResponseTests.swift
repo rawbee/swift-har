@@ -7,7 +7,7 @@ import FoundationNetworking
 
 final class ResponseTests: XCTestCase {
     func testURLResponseFromFixtures() throws {
-        for data in fixtureData.values {
+        for (name, data) in fixtureData {
             let har = try HAR(data: data)
 
             for entry in har.log.entries {
@@ -15,9 +15,9 @@ final class ResponseTests: XCTestCase {
                 let urlResponse = HTTPURLResponse(url: entry.request.url, response: entry.response)
                 let r2 = HAR.Response(response: urlResponse, data: entry.response.content.data)
 
-                XCTAssertEqual(r1.status, r2.status)
-                XCTAssertEqual(normalizedHeaders(r1.headers), normalizedHeaders(r2.headers))
-                XCTAssertEqual(r1.content.data, r2.content.data)
+                XCTAssertEqual(r1.status, r2.status, name)
+                XCTAssertEqual(normalizedHeaders(r1.headers), normalizedHeaders(r2.headers), name)
+                XCTAssertEqual(r1.content.data, r2.content.data, name)
             }
         }
     }

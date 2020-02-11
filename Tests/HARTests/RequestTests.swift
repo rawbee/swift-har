@@ -150,7 +150,7 @@ final class RequestTests: XCTestCase {
     }
 
     func testURLRequestFromFixtures() throws {
-        for data in fixtureData.values {
+        for (name, data) in fixtureData {
             let har = try HAR(data: data)
 
             for entry in har.log.entries {
@@ -158,10 +158,10 @@ final class RequestTests: XCTestCase {
                 let request = URLRequest(request: r1)
                 let r2 = HAR.Request(request: request)
 
-                XCTAssertEqual(r1.method, r2.method)
-                XCTAssertEqual(r1.url, r2.url)
-                XCTAssertEqual(normalizedHeaders(r1.headers), normalizedHeaders(r2.headers))
-                XCTAssertEqual(r1.postData?.data, r2.postData?.data)
+                XCTAssertEqual(r1.method, r2.method, name)
+                XCTAssertEqual(r1.url, r2.url, name)
+                XCTAssertEqual(normalizedHeaders(r1.headers), normalizedHeaders(r2.headers), name)
+                XCTAssertEqual(r1.postData?.data, r2.postData?.data, name)
             }
         }
     }
