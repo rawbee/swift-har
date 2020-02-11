@@ -878,14 +878,12 @@ extension HAR.Response {
 
 extension HTTPURLResponse {
     public convenience init(url: URL, response: HAR.Response) {
-        let headerFields = response.headers.reduce(into: [:]) { $0[$1.name] = $1.value }
-
         /// - Remark: initializer doesn't appear to have any failure cases
         self.init(
             url: url,
             statusCode: response.status,
             httpVersion: response.httpVersion,
-            headerFields: headerFields
+            headerFields: response.headers.headersAsDictionary
         )!
     }
 }
@@ -1035,17 +1033,14 @@ extension HAR.Headers {
         }
     }
 
-    /// - TODO: Is this private helper useful within the module?
     var headersAsDictionary: [String: String] {
-        var result: [String: String] = [:]
-        forEach {
-            if result[$0.name] == nil {
-                result[$0.name] = $0.value
+        reduce(into: [:]) { result, header in
+            if result[header.name] == nil {
+                result[header.name] = header.value
             } else {
-                result[$0.name]! += (", " + $0.value)
+                result[header.name]! += (", " + header.value)
             }
         }
-        return result
     }
 
     /// Find all header values for name.
