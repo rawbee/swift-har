@@ -222,16 +222,6 @@ public struct HAR {
         /// List of header objects.
         public var headers: Headers = []
 
-        /// Find header value for name.
-        ///
-        /// Header names are case-insensitive.
-        ///
-        /// - Parameter name: The HTTP Header name.
-        public func value(forHTTPHeaderField name: String) -> String? {
-            let lowercasedName = name.lowercased()
-            return headers.first(where: { lowercasedName == $0.name.lowercased() })?.value
-        }
-
         /// List of query parameter objects.
         public var queryString: QueryStrings = []
 
@@ -766,10 +756,9 @@ extension HAR.Request: Codable {
 extension HAR.Request {
     /// Cookie property computed from headers
     public var computedCookies: [HAR.Cookie] {
-        if let value = value(forHTTPHeaderField: "Cookie") {
-            return HAR.Cookies(fromCookieHeader: value)
-        }
-        return []
+        headers.value(forName: "Cookie").map {
+            HAR.Cookies(fromCookieHeader: $0)
+        } ?? []
     }
 
     /// queryString property computed from URL query string.
@@ -835,7 +824,7 @@ extension HAR.Request {
         if let data = request.httpBody {
             postData = HAR.PostData(
                 parsingData: data,
-                mimeType: value(forHTTPHeaderField: "Content-Type")
+                mimeType: headers.value(forName: "Content-Type")
             )
             bodySize = data.count
         }
@@ -869,13 +858,8 @@ extension HAR.Response: Codable {
 extension HAR.Response {
     /// cookies property computed from headers.
     public var computedCookies: [HAR.Cookie] {
-        var cookies: [HAR.Cookie] = []
-        for header in headers {
-            if header.name.lowercased() == "set-cookie" {
-                cookies.append(HAR.Cookie(fromSetCookieHeader: header.value))
-            }
-        }
-        return cookies
+        headers.values(forName: "Set-Cookie")
+            .map { HAR.Cookie(fromSetCookieHeader: $0) }
     }
 
     /// Computed `headerSize`.
@@ -1010,9 +994,19 @@ extension HAR.Cookies {
 
 // MARK: - Headers
 
-extension HAR.Header: Equatable {}
+extension HAR.Header: Equatable {
+    public static func ==(lhs: Self, rhs: Self) -> Bool {
+        lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame &&
+            lhs.value == rhs.value &&
+            lhs.comment == rhs.comment
+    }
+}
 
-extension HAR.Header: Hashable {}
+extension HAR.Header: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name.lowercased())
+    }
+}
 
 extension HAR.Header: CustomStringConvertible {
     /// A human-readable description for the data.
@@ -1053,6 +1047,26 @@ extension HAR.Headers {
         }
         return result
     }
+
+    /// Find all header values for name.
+    ///
+    /// Header names are case-insensitive.
+    ///
+    /// - Parameter name: The HTTP Header name.
+    func values(forName name: String) -> [String] {
+        filter {
+            name.caseInsensitiveCompare($0.name) == .orderedSame
+        }.map { $0.value }
+    }
+
+    /// Find first header value for name.
+    ///
+    /// Header names are case-insensitive.
+    ///
+    /// - Parameter name: The HTTP Header name.
+    func value(forName name: String) -> String? {
+        values(forName: name).first
+    }
 }
 
 // MARK: - QueryString
@@ -1080,7 +1094,7 @@ extension HAR.QueryString: Codable {}
 extension HAR.QueryString {
     init(_ queryItem: URLQueryItem) {
         name = queryItem.name
-        value = queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? ""
+        self.value = queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? ""
     }
 }
 
@@ -1182,7 +1196,7 @@ extension HAR.Param: Codable {
         /// Override synthesised decoder to handle empty `name`.
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
 
-        value = try container.decodeIfPresent(String.self, forKey: .value)
+        self.value = try container.decodeIfPresent(String.self, forKey: .value)
         fileName = try container.decodeIfPresent(String.self, forKey: .fileName)
         contentType = try container.decodeIfPresent(String.self, forKey: .contentType)
     }
