@@ -669,7 +669,13 @@ extension HAR.Page: Hashable {}
 extension HAR.Page: CustomStringConvertible {
     /// A human-readable description for the data.
     public var description: String {
-        "\(startedDateTime): \(id) \"\(title)\" - \(String(describing: pageTimings))"
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M/d/yyyy, h:mm:ss a"
+        let timestamp = formatter.string(from: startedDateTime)
+
+        let load = (pageTimings.onLoad ?? -1).rounded()
+
+        return "\(load)ms  \(timestamp)  \(title)"
     }
 }
 

@@ -5,16 +5,20 @@ final class PagesTests: XCTestCase {
     let epoch = Date(timeIntervalSince1970: 0)
 
     func testCustomStringConvertible() {
+        let page = HAR.Page(startedDateTime: epoch, id: "page_0", title: "Title", pageTimings: HAR.PageTiming(onLoad: 245))
+
         XCTAssertEqual(
-            String(describing: HAR.Page(startedDateTime: epoch, id: "page_0", title: "Title")),
-            "1970-01-01 00:00:00 +0000: page_0 \"Title\" - onContentLoad: -1.0, onLoad: -1.0"
+            String(describing: page),
+            "245.0ms  12/31/1969, 4:00:00 PM  Title"
         )
     }
 
     func testCustomDebugStringConvertible() {
+        let page = HAR.Page(startedDateTime: epoch, id: "page_0", title: "Title", pageTimings: HAR.PageTiming(onLoad: 245))
+
         XCTAssertEqual(
-            String(reflecting: HAR.Page(startedDateTime: epoch, id: "page_0", title: "Title")),
-            "HAR.Page { 1970-01-01 00:00:00 +0000: page_0 \"Title\" - onContentLoad: -1.0, onLoad: -1.0 }"
+            String(reflecting: page),
+            "HAR.Page { 245.0ms  12/31/1969, 4:00:00 PM  Title }"
         )
     }
 }
