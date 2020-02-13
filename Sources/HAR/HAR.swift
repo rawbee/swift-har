@@ -134,12 +134,12 @@ public struct HAR {
         /// Content of the page loaded. Number of milliseconds since page load started
         /// (`page.startedDateTime`). Use -1 if the timing does not apply to the current
         /// request.
-        public var onContentLoad: TimeInterval? = -1
+        public var onContentLoad: Double? = -1
 
         /// Page is loaded (onLoad event fired). Number of milliseconds since page load
         /// started (`page.startedDateTime`). Use -1 if the timing does not apply to the
         /// current request.
-        public var onLoad: TimeInterval? = -1
+        public var onLoad: Double? = -1
 
         /// A comment provided by the user or the application.
         ///
@@ -166,7 +166,7 @@ public struct HAR {
         ///
         /// - Invariant: The time value for the request must be equal to the sum of the
         /// timings supplied in this section (excluding any -1 values).
-        public var time: TimeInterval = 0
+        public var time: Double = 0
 
         /// Detailed info about the request.
         public var request: Request
@@ -515,31 +515,31 @@ public struct HAR {
     public struct Timing {
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing
         /// does not apply to the current request.
-        public var blocked: TimeInterval? = -1
+        public var blocked: Double? = -1
 
         /// DNS resolution time. The time required to resolve a host name. Use -1 if the
         /// timing does not apply to the current request.
-        public var dns: TimeInterval? = -1
+        public var dns: Double? = -1
 
         ///  Time required to create TCP connection. Use -1 if the timing does not apply
         /// to the current request.
-        public var connect: TimeInterval? = -1
+        public var connect: Double? = -1
 
         /// Time required to send HTTP request to the server.
-        public var send: TimeInterval
+        public var send: Double
 
         /// Waiting for a response from the server.
-        public var wait: TimeInterval
+        public var wait: Double
 
         /// Time required to read entire response from the server (or cache).
-        public var receive: TimeInterval
+        public var receive: Double
 
         /// Time required for SSL/TLS negotiation. If this field is defined then the
         /// time is also included in the connect field (to ensure backward compatibility
         /// with HAR 1.1). Use -1 if the timing does not apply to the current request.
         ///
         /// - Version: 1.2
-        public var ssl: TimeInterval? = -1
+        public var ssl: Double? = -1
 
         /// A comment provided by the user or the application.
         ///
@@ -741,7 +741,7 @@ extension HAR.Entry: Codable {}
 
 extension HAR.Entry {
     /// Cookie property computed from timings.
-    public var computedTime: TimeInterval {
+    public var computedTime: Double {
         timings.total
     }
 }
@@ -1301,7 +1301,7 @@ extension HAR.Timing {
     ///
     /// The time value for the request must be equal to the sum of the timings supplied
     /// in this section (excluding any -1 values).
-    public var total: TimeInterval {
+    public var total: Double {
         [blocked, dns, connect, send, wait, receive]
             .map { $0 ?? -1 }
             .filter { $0 != -1 }
