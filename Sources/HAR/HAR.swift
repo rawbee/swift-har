@@ -868,6 +868,29 @@ extension HAR.Response: Equatable {}
 
 extension HAR.Response: Hashable {}
 
+extension HAR.Response: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        var strs: [String] = []
+
+        strs.append("\(status) \(statusText)")
+        strs.append(content.mimeType)
+
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .binary
+        strs.append(formatter.string(fromByteCount: Int64(bodySize)))
+
+        return strs.joined(separator: "  ")
+    }
+}
+
+extension HAR.Response: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.Response { \(description) }"
+    }
+}
+
 extension HAR.Response: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)

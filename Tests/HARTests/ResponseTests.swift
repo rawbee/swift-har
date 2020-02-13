@@ -6,6 +6,26 @@ import FoundationNetworking
 #endif
 
 final class ResponseTests: XCTestCase {
+    func testCustomStringConvertible() {
+        let content = HAR.Content(text: "Hello, World", mimeType: "text/plain")
+        let response = HAR.Response(status: 200, statusText: "OK", httpVersion: "HTTP/1.1", cookies: [], headers: [], content: content, redirectURL: "", headersSize: -1, bodySize: content.size)
+
+        XCTAssertEqual(
+            String(describing: response),
+            "200 OK  text/plain  12 bytes"
+        )
+    }
+
+    func testCustomDebugStringConvertible() {
+        let content = HAR.Content(text: "Hello, World", mimeType: "text/plain")
+        let response = HAR.Response(status: 200, statusText: "OK", httpVersion: "HTTP/1.1", cookies: [], headers: [], content: content, redirectURL: "", headersSize: -1, bodySize: content.size)
+
+        XCTAssertEqual(
+            String(reflecting: response),
+            "HAR.Response { 200 OK  text/plain  12 bytes }"
+        )
+    }
+
     func testURLResponseFromFixtures() throws {
         for (name, data) in fixtureData {
             let har = try HAR(data: data)
