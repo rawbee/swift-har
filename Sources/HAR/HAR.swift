@@ -752,6 +752,20 @@ extension HAR.Request: Equatable {}
 
 extension HAR.Request: Hashable {}
 
+extension HAR.Request: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        "\(method) \(url.absoluteString)"
+    }
+}
+
+extension HAR.Request: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.Request { \(description) }"
+    }
+}
+
 extension HAR.Request: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)

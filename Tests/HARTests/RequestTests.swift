@@ -6,6 +6,26 @@ import FoundationNetworking
 #endif
 
 final class RequestTests: XCTestCase {
+    func testCustomStringConvertible() throws {
+        let url = try XCTUnwrap(URL(string: "http://example.com/"))
+        let request = HAR.Request(method: "GET", url: url)
+
+        XCTAssertEqual(
+            String(describing: request),
+            "GET http://example.com/"
+        )
+    }
+
+    func testCustomDebugStringConvertible() throws {
+        let url = try XCTUnwrap(URL(string: "http://example.com/"))
+        let request = HAR.Request(method: "GET", url: url)
+
+        XCTAssertEqual(
+            String(reflecting: request),
+            "HAR.Request { GET http://example.com/ }"
+        )
+    }
+
     func testInitParsingUrl() throws {
         do {
             let url = try XCTUnwrap(URL(string: "http://example.com/path?a=b"))
