@@ -1376,6 +1376,7 @@ extension HAR.Timing {
     }
 }
 
+#if !canImport(FoundationNetworking)
 @available(OSX 10.12, *)
 extension HAR.Timing {
     public init(metric: URLSessionTaskTransactionMetrics) {
@@ -1414,6 +1415,7 @@ extension HAR.Timing {
         }
     }
 }
+#endif
 
 // MARK: - Other
 
