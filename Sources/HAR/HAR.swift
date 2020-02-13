@@ -178,7 +178,7 @@ public struct HAR {
         public var cache: Cache = Cache()
 
         /// Detailed timing info about request/response round trip.
-        public var timings: Timing = Timing(send: 0, wait: 0, receive: 0)
+        public var timings: Timing = Timing()
 
         /// IP address of the server that was connected (result of DNS resolution).
         ///
@@ -1365,6 +1365,53 @@ extension HAR.Timing {
             .map { $0 ?? -1 }
             .filter { $0 != -1 }
             .reduce(0, +)
+    }
+}
+
+extension HAR.Timing {
+    init() {
+        self.send = -1
+        self.wait = -1
+        self.receive = -1
+    }
+}
+
+@available(OSX 10.12, *)
+extension HAR.Timing {
+    public init(metric: URLSessionTaskTransactionMetrics) {
+        if let start = metric.fetchStartDate, let end = metric.domainLookupStartDate {
+            self.blocked = end.timeIntervalSince(start) * 1000
+        }
+
+        if let start = metric.domainLookupStartDate, let end = metric.domainLookupEndDate {
+            self.dns = end.timeIntervalSince(start) * 1000
+        }
+
+        if let start = metric.connectStartDate, let end = metric.connectEndDate {
+            self.connect = end.timeIntervalSince(start) * 1000
+        }
+
+        if let start = metric.requestStartDate, let end = metric.requestEndDate {
+            self.send = end.timeIntervalSince(start) * 1000
+        } else {
+            self.send = 0
+        }
+
+        if let start = metric.requestEndDate, let end = metric.responseStartDate {
+            self.wait = end.timeIntervalSince(start) * 1000
+        } else {
+            self.wait = 0
+        }
+
+        if let start = metric.responseStartDate, let end = metric.responseEndDate {
+            self.receive = end.timeIntervalSince(start) * 1000
+        } else {
+            self.receive = 0
+        }
+
+        if let start = metric.secureConnectionStartDate, let end = metric.secureConnectionEndDate {
+            self.ssl = end.timeIntervalSince(start) * 1000
+        }
     }
 }
 
