@@ -667,15 +667,26 @@ extension HAR.Page: Equatable {}
 extension HAR.Page: Hashable {}
 
 extension HAR.Page: CustomStringConvertible {
-    /// A human-readable description for the data.
-    public var description: String {
+    static let startedDateFormatter = makeStartedDateFormatter()
+
+    private static func makeStartedDateFormatter() -> DateFormatter {
         let formatter = DateFormatter()
         formatter.dateFormat = "M/d/yyyy, h:mm:ss a"
-        let timestamp = formatter.string(from: startedDateTime)
+        return formatter
+    }
 
-        let load = (pageTimings.onLoad ?? -1).rounded()
+    /// A human-readable description for the data.
+    public var description: String {
+        var strs: [String] = []
 
-        return "\(load)ms  \(timestamp)  \(title)"
+        if let onLoad = pageTimings.onLoad {
+            strs.append("\(onLoad.rounded())ms")
+        }
+
+        strs.append(Self.startedDateFormatter.string(from: startedDateTime))
+        strs.append(title)
+
+        return strs.joined(separator: "  ")
     }
 }
 

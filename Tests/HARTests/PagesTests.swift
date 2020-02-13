@@ -9,7 +9,7 @@ final class PagesTests: XCTestCase {
 
         XCTAssertEqual(
             String(describing: page),
-            "245.0ms  12/31/1969, 4:00:00 PM  Title"
+            "245.0ms  \(HAR.Page.startedDateFormatter.string(from: epoch))  Title"
         )
     }
 
@@ -18,7 +18,7 @@ final class PagesTests: XCTestCase {
 
         XCTAssertEqual(
             String(reflecting: page),
-            "HAR.Page { 245.0ms  12/31/1969, 4:00:00 PM  Title }"
+            "HAR.Page { 245.0ms  \(HAR.Page.startedDateFormatter.string(from: epoch))  Title }"
         )
     }
 }
