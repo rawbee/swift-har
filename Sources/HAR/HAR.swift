@@ -1294,6 +1294,28 @@ extension HAR.Timing: Equatable {}
 
 extension HAR.Timing: Hashable {}
 
+extension HAR.Timing: CustomStringConvertible {
+    /// A human-readable description for the data.
+    public var description: String {
+        """
+        Blocked: \(blocked ?? -1)ms
+        DNS: \(dns ?? -1)ms
+        SSL/TLS: \(ssl ?? -1)ms
+        Connect: \(connect ?? -1)ms
+        Send: \(send)ms
+        Wait: \(wait)ms
+        Receive: \(receive)ms
+        """
+    }
+}
+
+extension HAR.Timing: CustomDebugStringConvertible {
+    /// A human-readable debug description for the data.
+    public var debugDescription: String {
+        "HAR.Timing {\n\(description)\n}"
+    }
+}
+
 extension HAR.Timing: Codable {}
 
 extension HAR.Timing {
