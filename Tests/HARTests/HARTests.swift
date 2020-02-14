@@ -49,9 +49,11 @@ final class HARTests: XCTestCase {
         XCTAssertGreaterThan(entry.response.headersSize, 0)
         XCTAssertGreaterThan(entry.response.bodySize, 0)
 
+#if !os(Linux)
         XCTAssertGreaterThan(entry.time, 0)
         XCTAssertGreaterThan(entry.timings.send, 0)
         XCTAssertGreaterThan(entry.timings.wait, 0)
         XCTAssertGreaterThan(entry.timings.receive, 0)
+#endif
     }
 }
