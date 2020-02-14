@@ -1441,13 +1441,10 @@ class TaskDelegate: NSObject, URLSessionDataDelegate {
     private var metrics: AnyObject?
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        debugPrint("urlSession(_:dataTask:didReceive:)")
         self.data = data
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        debugPrint("urlSession(_:task:didCompleteWithError:)")
-
         if let request = task.currentRequest,
             let response = task.response as? HTTPURLResponse,
             let data = self.data {
@@ -1458,7 +1455,6 @@ class TaskDelegate: NSObject, URLSessionDataDelegate {
 
 #if !os(Linux)
             if #available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *) {
-                debugPrint("reading metrics...")
                 if let metrics = self.metrics as? URLSessionTaskMetrics {
                     if let metric = metrics.transactionMetrics.last {
                         entry.timings = HAR.Timing(metric: metric)
@@ -1479,7 +1475,6 @@ class TaskDelegate: NSObject, URLSessionDataDelegate {
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
 extension TaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        debugPrint("urlSession(_:task:didFinishCollecting:)")
         self.metrics = metrics
     }
 }
