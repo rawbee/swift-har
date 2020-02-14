@@ -1454,7 +1454,7 @@ class TaskDelegate: NSObject, URLSessionDataDelegate {
     }
 
     private var data: Data?
-    private var metrics: AnyObject?
+    private var metric: AnyObject?
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         self.data = data
@@ -1471,10 +1471,19 @@ class TaskDelegate: NSObject, URLSessionDataDelegate {
 
 #if !os(Linux)
             if #available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *) {
-                if let metrics = self.metrics as? URLSessionTaskMetrics {
-                    if let metric = metrics.transactionMetrics.last {
-                        entry.timings = HAR.Timing(metric: metric)
-                        entry.time = entry.timings.total
+                if let metric = self.metric as? URLSessionTaskTransactionMetrics {
+                    entry.timings = HAR.Timing(metric: metric)
+                    entry.time = entry.timings.total
+
+                    switch metric.networkProtocolName {
+                    case "h2":
+                        entry.request.httpVersion = "HTTP/2"
+                        entry.response.httpVersion = "HTTP/2"
+                    case "http/1.1":
+                        entry.request.httpVersion = "HTTP/1.1"
+                        entry.response.httpVersion = "HTTP/1.1"
+                    default:
+                        break
                     }
                 }
             }
@@ -1491,7 +1500,8 @@ class TaskDelegate: NSObject, URLSessionDataDelegate {
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
 extension TaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        self.metrics = metrics
+        // Choose last metric, though there might be more accurate of handling multiple metrics.
+        metric = metrics.transactionMetrics.last
     }
 }
 #endif
