@@ -943,10 +943,18 @@ extension HTTPURLResponse {
 }
 
 extension HAR.Response {
+    private static func statusText(forStatusCode statusCode: Int) -> String {
+        switch statusCode {
+        case 200:
+            return "OK"
+        default:
+            return HTTPURLResponse.localizedString(forStatusCode: statusCode).capitalized
+        }
+    }
+
     init(response: HTTPURLResponse, data: Data?) {
         status = response.statusCode
-        statusText = HTTPURLResponse.localizedString(forStatusCode: response.statusCode)
-            .capitalized
+        statusText = Self.statusText(forStatusCode: response.statusCode)
         headers = HAR.Headers(response.allHeaderFields)
 
         if let data = data {
