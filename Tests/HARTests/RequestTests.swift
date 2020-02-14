@@ -55,7 +55,7 @@ final class RequestTests: XCTestCase {
         XCTAssert(request.cookies.contains(HAR.Cookie(name: "session", value: "123")))
         XCTAssert(request.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
         XCTAssertEqual(request.headersSize, 111)
-        XCTAssertEqual(request.bodySize, -1)
+        XCTAssertEqual(request.bodySize, 0)
     }
 
     func testURLRequestPost() throws {

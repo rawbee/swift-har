@@ -41,6 +41,8 @@ final class HARTests: XCTestCase {
 
         XCTAssertEqual(entry.request.method, "GET")
         XCTAssertEqual(entry.request.url.absoluteString, "http://example.com/")
+        XCTAssertGreaterThan(entry.request.headersSize, 0)
+        XCTAssertEqual(entry.request.bodySize, 0)
 
         XCTAssertEqual(entry.response.status, 200)
         XCTAssertEqual(entry.response.statusText, "OK")

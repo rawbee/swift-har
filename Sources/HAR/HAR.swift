@@ -813,6 +813,11 @@ extension HAR.Request {
         \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
         """
     }
+
+    /// Computed `bodySize`.
+    public var computedBodySize: Int {
+        postData?.size ?? -1
+    }
 }
 
 extension URLRequest {
@@ -849,16 +854,18 @@ extension HAR.Request {
             self.headers = HAR.Headers(headers)
         }
 
-        cookies = computedCookies
-        headersSize = computedHeadersSize
-
         if let data = request.httpBody {
+            bodySize = data.count
             postData = HAR.PostData(
                 parsingData: data,
                 mimeType: headers.value(forName: "Content-Type")
             )
-            bodySize = data.count
+        } else {
+            bodySize = 0
         }
+
+        cookies = computedCookies
+        headersSize = computedHeadersSize
     }
 }
 
@@ -928,6 +935,11 @@ extension HAR.Response {
         \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
         """
     }
+
+    /// Computed `bodySize`.
+    public var computedBodySize: Int {
+        content.size
+    }
 }
 
 extension HTTPURLResponse {
@@ -965,7 +977,7 @@ extension HAR.Response {
 
         cookies = computedCookies
         headersSize = computedHeadersSize
-        bodySize = content.size
+        bodySize = computedBodySize
     }
 }
 
@@ -1210,8 +1222,12 @@ extension HAR.PostData {
         self.init(parsingText: text, mimeType: mimeType)
     }
 
-    var data: Data? {
+    var data: Data {
         Data(text.utf8)
+    }
+
+    var size: Int {
+        data.count
     }
 }
 
@@ -1270,7 +1286,7 @@ extension HAR.Content: Codable {}
 
 extension HAR.Content {
     public init() {
-        size = 0
+        self.size = 0
         mimeType = "application/octet-stream"
     }
 
@@ -1286,7 +1302,7 @@ extension HAR.Content {
         self.text = text
 
         if let data = data {
-            size = data.count
+            self.size = data.count
         }
     }
 
@@ -1298,7 +1314,7 @@ extension HAR.Content {
             self.mimeType = mimeType
         }
 
-        size = data.count
+        self.size = data.count
 
         if let text = String(bytes: data, encoding: .utf8) {
             self.text = text
