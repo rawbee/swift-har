@@ -29,7 +29,7 @@ final class HARTests: XCTestCase {
     }
 
     func testRecord() throws {
-        let url = try XCTUnwrap(URL(string: "http://example.com"))
+        let url = try XCTUnwrap(URL(string: "http://example.com/"))
         let request = URLRequest(url: url)
 
         let har = try HAR.record(request: request)
@@ -39,10 +39,17 @@ final class HARTests: XCTestCase {
             return
         }
 
-        XCTAssertGreaterThan(entry.time, 0)
-        XCTAssertGreaterThan(entry.timings.receive, 0)
+        XCTAssertEqual(entry.request.method, "GET")
+        XCTAssertEqual(entry.request.url.absoluteString, "http://example.com/")
 
-        XCTAssertEqual(entry.request.url.absoluteString, "http://example.com")
         XCTAssertEqual(entry.response.status, 200)
+        XCTAssertEqual(entry.response.statusText, "OK")
+        XCTAssertGreaterThan(entry.response.headersSize, 0)
+        XCTAssertGreaterThan(entry.response.bodySize, 0)
+
+        XCTAssertGreaterThan(entry.time, 0)
+        XCTAssertGreaterThan(entry.timings.send, 0)
+        XCTAssertGreaterThan(entry.timings.wait, 0)
+        XCTAssertGreaterThan(entry.timings.receive, 0)
     }
 }

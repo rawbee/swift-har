@@ -1385,8 +1385,8 @@ extension HAR.Timing {
     }
 }
 
-#if !canImport(FoundationNetworking)
-@available(OSX 10.12, *)
+#if !os(Linux)
+@available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
 extension HAR.Timing {
     public init(metric: URLSessionTaskTransactionMetrics) {
         if let start = metric.fetchStartDate, let end = metric.domainLookupStartDate {
@@ -1428,30 +1428,71 @@ extension HAR.Timing {
 
 // MARK: - Other
 
+class TaskDelegate: NSObject, URLSessionDataDelegate {
+    typealias CompletionHandler = (Result<HAR.Entry, Error>) -> Void
+
+    let completionHandler: CompletionHandler
+
+    init(_ completionHandler: @escaping CompletionHandler) {
+        self.completionHandler = completionHandler
+    }
+
+    private var data: Data?
+    private var metrics: AnyObject?
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        debugPrint("urlSession(_:dataTask:didReceive:)")
+        self.data = data
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        debugPrint("urlSession(_:task:didCompleteWithError:)")
+
+        if let request = task.currentRequest,
+            let response = task.response as? HTTPURLResponse,
+            let data = self.data {
+            var entry = HAR.Entry(
+                request: HAR.Request(request: request),
+                response: HAR.Response(response: response, data: data)
+            )
+
+#if !os(Linux)
+            if #available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *) {
+                debugPrint("reading metrics...")
+                if let metrics = self.metrics as? URLSessionTaskMetrics {
+                    if let metric = metrics.transactionMetrics.last {
+                        entry.timings = HAR.Timing(metric: metric)
+                        entry.time = entry.timings.total
+                    }
+                }
+            }
+#endif
+
+            completionHandler(.success(entry))
+        } else if let error = error {
+            completionHandler(.failure(error))
+        }
+    }
+}
+
+#if !os(Linux)
+@available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
+extension TaskDelegate {
+    func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
+        debugPrint("urlSession(_:task:didFinishCollecting:)")
+        self.metrics = metrics
+    }
+}
+#endif
+
 extension HAR.Entry {
     public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
-        var timings = HAR.Timing(send: 0, wait: 0, receive: 0)
-        let start = DispatchTime.now()
-
-        let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            timings.receive = Double(
-                DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds
-            ) / 1000000
-
-            if let response = response as? HTTPURLResponse {
-                let entry = Self(
-                    time: timings.total,
-                    request: HAR.Request(request: request),
-                    response: HAR.Response(response: response, data: data),
-                    timings: timings
-                )
-                completionHandler(.success(entry))
-            } else if let error = error {
-                completionHandler(.failure(error))
-            }
-        }
-
-        dataTask.resume()
+        let session = URLSession(
+            configuration: URLSessionConfiguration.ephemeral,
+            delegate: TaskDelegate(completionHandler),
+            delegateQueue: nil
+        )
+        session.dataTask(with: request).resume()
     }
 
     public static func record(request: URLRequest) throws -> Self {
