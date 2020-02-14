@@ -26,6 +26,26 @@ final class ResponseTests: XCTestCase {
         )
     }
 
+    func testSplitSetCookie() throws {
+        let url = try XCTUnwrap(URL(string: "https://www.google.com/"))
+        let headerFields = [
+            "Content-Type": "text/html",
+            "Set-Cookie": "A=1; Expires=Wed, 09 Jun 2021 10:18:14 GMT; path=/; domain=.google.com; Secure, B=2; Expires=Wed, 09 Jun 2021 10:18:14 GMT; path=/; domain=.google.com; HttpOnly",
+        ]
+        let urlResponse = try XCTUnwrap(HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: headerFields))
+        let data = Data("Hello, World!".utf8)
+
+        let response = HAR.Response(response: urlResponse, data: data)
+
+        XCTAssertEqual(response.status, 200)
+        XCTAssertEqual(response.statusText, "OK")
+        XCTAssertEqual(Set(response.headers), Set([
+            HAR.Header(name: "Content-Type", value: "text/html"),
+            HAR.Header(name: "Set-Cookie", value: "A=1; Expires=Wed, 09 Jun 2021 10:18:14 GMT; path=/; domain=.google.com; Secure"),
+            HAR.Header(name: "Set-Cookie", value: "B=2; Expires=Wed, 09 Jun 2021 10:18:14 GMT; path=/; domain=.google.com; HttpOnly"),
+        ]))
+    }
+
     func testURLResponseFromFixtures() throws {
         for (name, data) in fixtureData {
             let har = try HAR(data: data)

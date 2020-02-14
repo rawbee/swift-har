@@ -101,7 +101,8 @@ final class HeadersTests: XCTestCase {
             Set([
                 HAR.Header(name: "Content-Type", value: "text/html"),
                 HAR.Header(name: "Content-Length", value: "348"),
-                HAR.Header(name: "Set-Cookie", value: "theme=light, sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT"),
+                HAR.Header(name: "Set-Cookie", value: "theme=light"),
+                HAR.Header(name: "Set-Cookie", value: "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT"),
             ])
         )
     }
