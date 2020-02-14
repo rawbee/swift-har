@@ -965,6 +965,7 @@ extension HAR.Response {
 
         cookies = computedCookies
         headersSize = computedHeadersSize
+        bodySize = content.size
     }
 }
 
