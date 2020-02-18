@@ -31,10 +31,17 @@ import Foundation
 import FoundationNetworking
 #endif
 
+/// HTTP Archive
+/// - Version: 1.2
+///
+/// http://www.softwareishard.com/blog/har-12-spec/
 public struct HAR {
+    // MARK: Properties
+
+    /// Log data root.
     public var log: Log
 
-    // MARK: - Log
+    // MARK: Structures
 
     /// This object represents the root of exported data.
     ///
@@ -43,6 +50,8 @@ public struct HAR {
     /// requests by a page, the `pages` object is empty and individual requests doesn't
     /// have a parent page.
     public struct Log {
+        // MARK: Properties
+
         /// Version number of the format. If empty, string "1.1" is assumed by default.
         public var version: String = "1.2"
 
@@ -65,11 +74,15 @@ public struct HAR {
         public var comment: String?
     }
 
-    // MARK: - Creator
-
+    /// This object represents the log creator application.
     public struct Creator {
+        // MARK: Static Properties
+
+        /// Creator info used when this library creates a new HAR log.
         static let defaultCreator = Creator(name: "SwiftHAR", version: "0.1.0")
 
+        // MARK: Properties
+
         /// Name of the application/browser used to export the log.
         public var name: String
 
@@ -82,9 +95,10 @@ public struct HAR {
         public var comment: String?
     }
 
-    // MARK: - Browser
-
+    /// This object represents the web browser used.
     public struct Browser {
+        // MARK: Properties
+
         /// Name of the application/browser used to export the log.
         public var name: String
 
@@ -96,11 +110,11 @@ public struct HAR {
         /// - Version: 1.2
         public var comment: String?
     }
-
-    // MARK: - Pages
 
     /// This object represents list of exported pages.
     public struct Page {
+        // MARK: Properties
+
         /// Date and time stamp for the beginning of the page load.
         public var startedDateTime: Date
 
@@ -120,9 +134,8 @@ public struct HAR {
         public var comment: String?
     }
 
+    /// Array of Page objects.
     public typealias Pages = [Page]
-
-    // MARK: - PageTimings
 
     /// This object describes timings for various events (states) fired during the page
     /// load. All times are specified in milliseconds. If a time info is not available
@@ -131,6 +144,8 @@ public struct HAR {
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad`
     /// event or `document.readyState == interactive`.
     public struct PageTiming {
+        // MARK: Properties
+
         /// Content of the page loaded. Number of milliseconds since page load started
         /// (`page.startedDateTime`). Use -1 if the timing does not apply to the current
         /// request.
@@ -147,13 +162,13 @@ public struct HAR {
         public var comment: String?
     }
 
-    // MARK: - Entries
-
     /// This object represents an array with all exported HTTP requests. Sorting entries
     /// by `startedDateTime` (starting from the oldest) is preferred way how to export
     /// data since it can make importing faster. However the reader application should
     /// always make sure the array is sorted (if required for the import).
     public struct Entry {
+        // MARK: Properties
+
         /// Reference to the parent page. Leave out this field if the application does
         /// not support grouping by pages.
         public var pageref: String?
@@ -201,12 +216,13 @@ public struct HAR {
         public var comment: String?
     }
 
+    /// Array of Entry objects.
     public typealias Entries = [Entry]
-
-    // MARK: - Request
 
     /// This object contains detailed info about performed request.
     public struct Request {
+        // MARK: Properties
+
         /// Request method.
         public var method: String = "GET"
 
@@ -258,10 +274,10 @@ public struct HAR {
         }
     }
 
-    // MARK: - Response
-
     /// This object contains detailed info about the response.
     public struct Response {
+        // MARK: Properties
+
         /// Response status.
         public var status: Int = 200
 
@@ -303,11 +319,11 @@ public struct HAR {
         public var comment: String?
     }
 
-    // MARK: - Cookies
-
     /// This object contains list of all cookies (used in `Request` and `Response`
     /// objects).
     public struct Cookie {
+        // MARK: Properties
+
         /// The name of the cookie.
         public var name: String
 
@@ -344,14 +360,18 @@ public struct HAR {
         public var sameSite: String?
     }
 
+    /// Array of Cookie objects.
     public typealias Cookies = [Cookie]
-
-    // MARK: - Headers
 
     /// This object contains list of all headers (used in `Request` and `Response`
     /// objects).
     public struct Header {
+        // MARK: Properties
+
+        /// The header name.
         public var name: String
+
+        /// The header value.
         public var value: String
 
         /// A comment provided by the user or the application.
@@ -360,14 +380,18 @@ public struct HAR {
         public var comment: String?
     }
 
+    /// Array of Header objects.
     public typealias Headers = [Header]
-
-    // MARK: - QueryString
 
     /// This object contains list of all parameters & values parsed from a query string,
     /// if any (embedded in `Request` object).
     public struct QueryString {
+        // MARK: Properties
+
+        /// The query parameter name.
         public var name: String
+
+        /// The query parameter value.
         public var value: String
 
         /// A comment provided by the user or the application.
@@ -376,12 +400,13 @@ public struct HAR {
         public var comment: String?
     }
 
+    /// Array of QueryString objects.
     public typealias QueryStrings = [QueryString]
-
-    // MARK: - PostData
 
     /// This object describes posted data, if any (embedded in `Request` object).
     public struct PostData {
+        // MARK: Properties
+
         /// Mime type of posted data.
         public var mimeType: String
 
@@ -401,10 +426,10 @@ public struct HAR {
         public var comment: String?
     }
 
-    // MARK: - Params
-
     /// List of posted parameters, if any (embedded in `PostData` object).
     public struct Param {
+        // MARK: Properties
+
         /// Name of a posted parameter.
         public var name: String
 
@@ -423,13 +448,14 @@ public struct HAR {
         public var comment: String?
     }
 
+    /// Array of Param objects.
     public typealias Params = [Param]
-
-    // MARK: - Content
 
     /// This object describes details about response content (embedded in `Response`
     /// object).
     public struct Content {
+        // MARK: Properties
+
         /// Length of the returned content in bytes. Should be equal to
         /// `response.bodySize` if there is no compression and bigger when the content
         /// has been compressed.
@@ -471,11 +497,11 @@ public struct HAR {
         public var comment: String?
     }
 
-    // MARK: - Cache
-
     /// This objects contains info about a request coming from browser cache.
     public struct Cache {
-        // State of a cache entry before the request. Leave out this field if the
+        // MARK: Properties
+
+        /// State of a cache entry before the request. Leave out this field if the
         /// information is not available.
         public var beforeRequest: CacheEntry?
 
@@ -489,7 +515,10 @@ public struct HAR {
         public var comment: String?
     }
 
+    /// This objects contains cache entry state for the request.
     public struct CacheEntry {
+        // MARK: Properties
+
         /// Expiration time of the cache entry.
         public var expires: Date?
 
@@ -508,11 +537,11 @@ public struct HAR {
         public var comment: String?
     }
 
-    // MARK: - Timings
-
     /// This object describes various phases within request-response round trip. All
     /// times are specified in milliseconds.
     public struct Timing {
+        // MARK: Properties
+
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing
         /// does not apply to the current request.
         public var blocked: Double? = -1
@@ -555,6 +584,8 @@ extension HAR: Equatable {}
 extension HAR: Hashable {}
 
 extension HAR: Codable {
+    // MARK: Encoding and Decoding
+
     /// Creates a `HAR` from the contents of a file URL.
     ///
     /// - Parameter url: Path to `.har` file.
@@ -623,6 +654,8 @@ extension HAR.Creator: Equatable {}
 extension HAR.Creator: Hashable {}
 
 extension HAR.Creator: CustomStringConvertible {
+    // MARK: Describing Creators
+
     /// A human-readable description for the data.
     public var description: String {
         "\(name)/\(version)"
@@ -630,6 +663,8 @@ extension HAR.Creator: CustomStringConvertible {
 }
 
 extension HAR.Creator: CustomDebugStringConvertible {
+    // MARK: Describing Creators
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.Browser { \(description) }"
@@ -645,6 +680,8 @@ extension HAR.Browser: Equatable {}
 extension HAR.Browser: Hashable {}
 
 extension HAR.Browser: CustomStringConvertible {
+    // MARK: Describing Browsers
+
     /// A human-readable description for the data.
     public var description: String {
         "\(name)/\(version)"
@@ -652,6 +689,8 @@ extension HAR.Browser: CustomStringConvertible {
 }
 
 extension HAR.Browser: CustomDebugStringConvertible {
+    // MARK: Describing Browsers
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.Browser { \(description) }"
@@ -667,13 +706,7 @@ extension HAR.Page: Equatable {}
 extension HAR.Page: Hashable {}
 
 extension HAR.Page: CustomStringConvertible {
-    static let startedDateFormatter = makeStartedDateFormatter()
-
-    private static func makeStartedDateFormatter() -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M/d/yyyy, h:mm:ss a"
-        return formatter
-    }
+    // MARK: Describing Pages
 
     /// A human-readable description for the data.
     public var description: String {
@@ -688,9 +721,19 @@ extension HAR.Page: CustomStringConvertible {
 
         return strs.joined(separator: "  ")
     }
+
+    static let startedDateFormatter = makeStartedDateFormatter()
+
+    private static func makeStartedDateFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M/d/yyyy, h:mm:ss a"
+        return formatter
+    }
 }
 
 extension HAR.Page: CustomDebugStringConvertible {
+    // MARK: Describing Pages
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.Page { \(description) }"
@@ -698,6 +741,9 @@ extension HAR.Page: CustomDebugStringConvertible {
 }
 
 extension HAR.Page: Codable {
+    // MARK: Encoding and Decoding
+
+    /// Create Page from Decoder.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
 
@@ -716,6 +762,8 @@ extension HAR.PageTiming: Equatable {}
 extension HAR.PageTiming: Hashable {}
 
 extension HAR.PageTiming: CustomStringConvertible {
+    // MARK: Describing Page Timings
+
     /// A human-readable description for the data.
     public var description: String {
         "onContentLoad: \(onContentLoad ?? -1), onLoad: \(onLoad ?? -1)"
@@ -723,6 +771,8 @@ extension HAR.PageTiming: CustomStringConvertible {
 }
 
 extension HAR.PageTiming: CustomDebugStringConvertible {
+    // MARK: Describing Page Timings
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.PageTiming { \(description) }"
@@ -740,9 +790,30 @@ extension HAR.Entry: Hashable {}
 extension HAR.Entry: Codable {}
 
 extension HAR.Entry {
-    /// Cookie property computed from timings.
+    // MARK: Computed Properties
+
+    /// Computed `time` from timings.
     public var computedTime: Double {
         timings.total
+    }
+}
+
+extension HAR.Entry {
+    // MARK: Recording an Entry
+
+    /// Perform URL Request and create HTTP archive Entry of the request and response.
+    public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
+        let session = URLSession(
+            configuration: URLSessionConfiguration.ephemeral,
+            delegate: TaskDelegate(completionHandler),
+            delegateQueue: nil
+        )
+        session.dataTask(with: request).resume()
+    }
+
+    /// Synchronously perform URL Request and create HTTP archive Entry of the request and response.
+    public static func record(request: URLRequest) throws -> Self {
+        try syncResult { record(request: request, completionHandler: $0) }
     }
 }
 
@@ -753,6 +824,8 @@ extension HAR.Request: Equatable {}
 extension HAR.Request: Hashable {}
 
 extension HAR.Request: CustomStringConvertible {
+    // MARK: Describing Requests
+
     /// A human-readable description for the data.
     public var description: String {
         "\(method) \(url.absoluteString)"
@@ -760,6 +833,8 @@ extension HAR.Request: CustomStringConvertible {
 }
 
 extension HAR.Request: CustomDebugStringConvertible {
+    // MARK: Describing Requests
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.Request { \(description) }"
@@ -767,6 +842,9 @@ extension HAR.Request: CustomDebugStringConvertible {
 }
 
 extension HAR.Request: Codable {
+    // MARK: Encoding and Decoding
+
+    /// Create Request from Decoder.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
 
@@ -774,9 +852,9 @@ extension HAR.Request: Codable {
         url = try container.decode(URL.self, forKey: .url)
         httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion)
             ?? "HTTP/1.1"
-        cookies = try container.decode([HAR.Cookie].self, forKey: .cookies)
-        headers = try container.decode([HAR.Header].self, forKey: .headers)
-        queryString = try container.decode([HAR.QueryString].self, forKey: .queryString)
+        cookies = try container.decode(HAR.Cookies.self, forKey: .cookies)
+        headers = try container.decode(HAR.Headers.self, forKey: .headers)
+        queryString = try container.decode(HAR.QueryStrings.self, forKey: .queryString)
         postData = try container.decodeIfPresent(HAR.PostData.self, forKey: .postData)
         headersSize = try container.decodeIfPresent(Int.self, forKey: .headersSize) ?? -1
         bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
@@ -785,15 +863,17 @@ extension HAR.Request: Codable {
 }
 
 extension HAR.Request {
-    /// Cookie property computed from headers
-    public var computedCookies: [HAR.Cookie] {
+    // MARK: Computed Properties
+
+    /// Computed `cookies` from headers.
+    public var computedCookies: HAR.Cookies {
         headers.value(forName: "Cookie").map {
             HAR.Cookies(fromCookieHeader: $0)
         } ?? []
     }
 
-    /// queryString property computed from URL query string.
-    public var computedQueryString: [HAR.QueryString] {
+    /// Computed `queryString` from URL query string.
+    public var computedQueryString: HAR.QueryStrings {
         if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?
             .queryItems {
             return queryItems.map { HAR.QueryString($0) }
@@ -801,7 +881,7 @@ extension HAR.Request {
         return []
     }
 
-    /// Computed `headerSize`.
+    /// Computed `headersSize`.
     public var computedHeadersSize: Int {
         Data(headerText.utf8).count
     }
@@ -821,10 +901,12 @@ extension HAR.Request {
 }
 
 extension URLRequest {
+    // MARK: Initializers
+
     /// Creates a URL Request from a `HAR.Request`.
     ///
     /// - Parameter request: A `HAR.Request`.
-    init(request: HAR.Request) {
+    public init(request: HAR.Request) {
         self.init(url: request.url)
         httpMethod = request.method
         for header in request.headers {
@@ -835,6 +917,8 @@ extension URLRequest {
 }
 
 extension HAR.Request {
+    // MARK: Initializers
+
     /// Creates a HAR Request from a URL Request.
     ///
     /// - Parameter request: A URL Request.
@@ -876,6 +960,8 @@ extension HAR.Response: Equatable {}
 extension HAR.Response: Hashable {}
 
 extension HAR.Response: CustomStringConvertible {
+    // MARK: Describing Responses
+
     /// A human-readable description for the data.
     public var description: String {
         var strs: [String] = []
@@ -892,6 +978,8 @@ extension HAR.Response: CustomStringConvertible {
 }
 
 extension HAR.Response: CustomDebugStringConvertible {
+    // MARK: Describing Responses
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.Response { \(description) }"
@@ -899,6 +987,9 @@ extension HAR.Response: CustomDebugStringConvertible {
 }
 
 extension HAR.Response: Codable {
+    // MARK: Encoding and Decoding
+
+    /// Create Response from Decoder.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
 
@@ -906,8 +997,8 @@ extension HAR.Response: Codable {
         statusText = try container.decode(String.self, forKey: .statusText)
         httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion)
             ?? "HTTP/1.1"
-        cookies = try container.decode([HAR.Cookie].self, forKey: .cookies)
-        headers = try container.decode([HAR.Header].self, forKey: .headers)
+        cookies = try container.decode(HAR.Cookies.self, forKey: .cookies)
+        headers = try container.decode(HAR.Headers.self, forKey: .headers)
         content = try container.decode(HAR.Content.self, forKey: .content)
         redirectURL = try container.decode(String.self, forKey: .redirectURL)
         headersSize = try container.decodeIfPresent(Int.self, forKey: .headersSize) ?? -1
@@ -917,13 +1008,15 @@ extension HAR.Response: Codable {
 }
 
 extension HAR.Response {
-    /// cookies property computed from headers.
-    public var computedCookies: [HAR.Cookie] {
+    // MARK: Computed Properties
+
+    /// Computed `cookies` from headers.
+    public var computedCookies: HAR.Cookies {
         headers.values(forName: "Set-Cookie")
             .map { HAR.Cookie(fromSetCookieHeader: $0) }
     }
 
-    /// Computed `headerSize`.
+    /// Computed `headersSize`.
     public var computedHeadersSize: Int {
         Data(headerText.utf8).count
     }
@@ -943,6 +1036,12 @@ extension HAR.Response {
 }
 
 extension HTTPURLResponse {
+    // MARK: Initializers
+
+    /// Creates a HTTP URL Request from a `HAR.Response`.
+    ///
+    /// - Parameter url: The URL from which the response was generated.
+    /// - Parameter response: The HAR Response to reconstruct.
     public convenience init(url: URL, response: HAR.Response) {
         /// - Remark: initializer doesn't appear to have any failure cases
         self.init(
@@ -955,6 +1054,8 @@ extension HTTPURLResponse {
 }
 
 extension HAR.Response {
+    // MARK: Static Methods
+
     private static func statusText(forStatusCode statusCode: Int) -> String {
         switch statusCode {
         case 200:
@@ -963,6 +1064,8 @@ extension HAR.Response {
             return HTTPURLResponse.localizedString(forStatusCode: statusCode).capitalized
         }
     }
+
+    // MARK: Initializers
 
     init(response: HTTPURLResponse, data: Data?) {
         status = response.statusCode
@@ -1082,6 +1185,9 @@ private func splitCookieValue(_ cookies: String) -> [String] {
 }
 
 extension HAR.Cookie {
+    // MARK: Initializers
+
+    /// Create Cookie from HTTP Response "Set-Cookie" header value.
     init(fromSetCookieHeader header: String) {
         var attributeValues = parseCookieAttributes(header)
 
@@ -1114,13 +1220,15 @@ extension HAR.Cookie {
         }
     }
 
-    // Tue, 18 Jan 2022 23:07:07 GMT
+    /// Date Formatter to attempt parsing "Expires" strings.
+    /// "Tue, 18 Jan 2022 23:07:07 GMT"
     private static let expiresDateFormats = [
         "EEE',' dd MMM yyyy HH:mm:ss 'GMT'",
         "EEE',' dd'-'MMM'-'yy HH:mm:ss 'GMT'",
         "EEE',' dd'-'MMM'-'yyyy HH:mm:ss 'GMT'",
     ]
 
+    /// Parse Set-Cookie expires strings.
     private func parseExpires(_ string: String) -> Date? {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(identifier: "UTC")
@@ -1137,7 +1245,10 @@ extension HAR.Cookie {
 }
 
 extension HAR.Cookies {
-    init(fromCookieHeader header: String) {
+    // MARK: Initializers
+
+    /// Create Cookies array from HTTP Request "Cookie:" header value.
+    internal init(fromCookieHeader header: String) {
         self = parseCookieAttributes(header).map {
             HAR.Cookie(name: $0.key, value: $0.value ?? "")
         }
@@ -1147,24 +1258,35 @@ extension HAR.Cookies {
 // MARK: - Headers
 
 extension HAR.Header: Equatable {
+    // MARK: Comparing Headers
+
+    /// Returns a Boolean value indicating whether two headers are equal.
+    ///
+    /// Header names are case-insensitive.
     public static func ==(lhs: Self, rhs: Self) -> Bool {
         lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame &&
             lhs.value == rhs.value &&
             lhs.comment == rhs.comment
     }
 
+    /// Test if header matches case-insensitive name.
     func isNamed(_ name: String) -> Bool {
         self.name.caseInsensitiveCompare(name) == .orderedSame
     }
 }
 
 extension HAR.Header: Hashable {
+    // MARK: Comparing Headers
+
+    /// Hashes the lower case name of the header by feeding them into the given hasher.
     public func hash(into hasher: inout Hasher) {
         hasher.combine(name.lowercased())
     }
 }
 
 extension HAR.Header: CustomStringConvertible {
+    // MARK: Describing Headers
+
     /// A human-readable description for the data.
     public var description: String {
         "\(name): \(value)"
@@ -1172,6 +1294,8 @@ extension HAR.Header: CustomStringConvertible {
 }
 
 extension HAR.Header: CustomDebugStringConvertible {
+    // MARK: Describing Headers
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.Header { \(description) }"
@@ -1181,7 +1305,9 @@ extension HAR.Header: CustomDebugStringConvertible {
 extension HAR.Header: Codable {}
 
 extension HAR.Headers {
-    init(_ fields: [AnyHashable: Any]) {
+    // MARK: Initializers
+
+    internal init(_ fields: [AnyHashable: Any]) {
         self = fields.flatMap { (name, value) -> Self in
             guard let name = name as? String, let value = value as? String else {
                 return []
@@ -1198,7 +1324,9 @@ extension HAR.Headers {
         }
     }
 
-    var headersAsDictionary: [String: String] {
+    // MARK: Computed Properties
+
+    internal var headersAsDictionary: [String: String] {
         reduce(into: [:]) { result, header in
             if result[header.name] == nil {
                 result[header.name] = header.value
@@ -1208,12 +1336,14 @@ extension HAR.Headers {
         }
     }
 
+    // MARK: Instance Methods
+
     /// Find all header values for name.
     ///
     /// Header names are case-insensitive.
     ///
     /// - Parameter name: The HTTP Header name.
-    func values(forName name: String) -> [String] {
+    internal func values(forName name: String) -> [String] {
         filter { $0.isNamed(name) }.map { $0.value }
     }
 
@@ -1222,7 +1352,7 @@ extension HAR.Headers {
     /// Header names are case-insensitive.
     ///
     /// - Parameter name: The HTTP Header name.
-    func value(forName name: String) -> String? {
+    internal func value(forName name: String) -> String? {
         values(forName: name).first
     }
 }
@@ -1234,6 +1364,8 @@ extension HAR.QueryString: Equatable {}
 extension HAR.QueryString: Hashable {}
 
 extension HAR.QueryString: CustomStringConvertible {
+    // MARK: Describing Query Strings
+
     /// A human-readable description for the data.
     public var description: String {
         "\(name)=\(value)"
@@ -1241,6 +1373,8 @@ extension HAR.QueryString: CustomStringConvertible {
 }
 
 extension HAR.QueryString: CustomDebugStringConvertible {
+    // MARK: Describing Query Strings
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.QueryString { \(description) }"
@@ -1250,7 +1384,10 @@ extension HAR.QueryString: CustomDebugStringConvertible {
 extension HAR.QueryString: Codable {}
 
 extension HAR.QueryString {
-    init(_ queryItem: URLQueryItem) {
+    // MARK: Initializers
+
+    /// Create QueryString item from `URLQueryItem`.
+    internal init(_ queryItem: URLQueryItem) {
         name = queryItem.name
         self.value = queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? ""
     }
@@ -1263,19 +1400,24 @@ extension HAR.PostData: Equatable {}
 extension HAR.PostData: Hashable {}
 
 extension HAR.PostData: Codable {
+    // MARK: Encoding and Decoding
+
+    /// Create PostData from Decoder.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
 
         mimeType = try container.decodeIfPresent(String.self, forKey: .mimeType) ?? ""
-        params = try container.decodeIfPresent([HAR.Param].self, forKey: .params) ?? []
+        params = try container.decodeIfPresent(HAR.Params.self, forKey: .params) ?? []
         text = try container.decodeIfPresent(String.self, forKey: .text) ?? ""
         comment = try container.decodeIfPresent(String.self, forKey: .comment)
     }
 }
 
 extension HAR.PostData {
+    // MARK: Initializers
+
     /// Create HAR PostData from plain text.
-    init(parsingText text: String, mimeType: String?) {
+    public init(parsingText text: String, mimeType: String?) {
         self.text = text
 
         self.mimeType = "application/octet-stream"
@@ -1289,7 +1431,7 @@ extension HAR.PostData {
         }
     }
 
-    internal func parseFormUrlEncoded(_ str: String) -> [HAR.Param] {
+    private func parseFormUrlEncoded(_ str: String) -> HAR.Params {
         var components = URLComponents()
         components.query = str
         return components.queryItems?.map {
@@ -1303,18 +1445,22 @@ extension HAR.PostData {
     }
 
     /// Create HAR PostData from data.
-    init?(parsingData data: Data, mimeType: String?) {
+    fileprivate init?(parsingData data: Data, mimeType: String?) {
         guard let text = String(bytes: data, encoding: .utf8) else {
             return nil
         }
         self.init(parsingText: text, mimeType: mimeType)
     }
 
-    var data: Data {
+    // MARK: Computed Properties
+
+    /// Get text as UTF8 Data.
+    public var data: Data {
         Data(text.utf8)
     }
 
-    var size: Int {
+    /// Get bytesize of text.
+    public var size: Int {
         data.count
     }
 }
@@ -1326,6 +1472,8 @@ extension HAR.Param: Equatable {}
 extension HAR.Param: Hashable {}
 
 extension HAR.Param: CustomStringConvertible {
+    // MARK: Describing Params
+
     /// A human-readable description for the data.
     public var description: String {
         var str = "\(name)"
@@ -1345,6 +1493,8 @@ extension HAR.Param: CustomStringConvertible {
 }
 
 extension HAR.Param: CustomDebugStringConvertible {
+    // MARK: Describing Params
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.Param { \(description) }"
@@ -1352,6 +1502,9 @@ extension HAR.Param: CustomDebugStringConvertible {
 }
 
 extension HAR.Param: Codable {
+    // MARK: Encoding and Decoding
+
+    /// Create Param from Decoder.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Self.CodingKeys.self)
 
@@ -1373,6 +1526,9 @@ extension HAR.Content: Hashable {}
 extension HAR.Content: Codable {}
 
 extension HAR.Content {
+    // MARK: Initializers
+
+    /// Create empty unknown response body content.
     public init() {
         self.size = 0
         mimeType = "application/octet-stream"
@@ -1412,6 +1568,8 @@ extension HAR.Content {
         }
     }
 
+    // MARK: Computed Properties
+
     /// Get content body as Data. May return nil if text is encoded improperly.
     public var data: Data? {
         guard let text = text else { return nil }
@@ -1445,6 +1603,8 @@ extension HAR.Timing: Equatable {}
 extension HAR.Timing: Hashable {}
 
 extension HAR.Timing: CustomStringConvertible {
+    // MARK: Describing Timings
+
     /// A human-readable description for the data.
     public var description: String {
         """
@@ -1460,6 +1620,8 @@ extension HAR.Timing: CustomStringConvertible {
 }
 
 extension HAR.Timing: CustomDebugStringConvertible {
+    // MARK: Describing Timings
+
     /// A human-readable debug description for the data.
     public var debugDescription: String {
         "HAR.Timing {\n\(description)\n}"
@@ -1594,22 +1756,8 @@ extension TaskDelegate {
 }
 #endif
 
-extension HAR.Entry {
-    public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
-        let session = URLSession(
-            configuration: URLSessionConfiguration.ephemeral,
-            delegate: TaskDelegate(completionHandler),
-            delegateQueue: nil
-        )
-        session.dataTask(with: request).resume()
-    }
-
-    public static func record(request: URLRequest) throws -> Self {
-        try syncResult { record(request: request, completionHandler: $0) }
-    }
-}
-
 extension HAR {
+    /// Perform URL Request and create HTTP archive of the request and response.
     public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
         Self.Entry.record(
             request: request,
@@ -1619,6 +1767,7 @@ extension HAR {
         )
     }
 
+    /// Synchronously perform URL Request and create HTTP archive of the request and response.
     public static func record(request: URLRequest) throws -> Self {
         try syncResult { Self.record(request: request, completionHandler: $0) }
     }
