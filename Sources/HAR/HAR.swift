@@ -1703,17 +1703,15 @@ class TaskDelegate: NSObject, URLSessionDataDelegate {
         self.completionHandler = completionHandler
     }
 
-    private var data: Data?
+    private var data: Data = Data()
     private var metric: AnyObject?
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        self.data = data
+        self.data.append(data)
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        if let request = task.currentRequest,
-            let response = task.response as? HTTPURLResponse,
-            let data = self.data {
+        if let request = task.currentRequest, let response = task.response as? HTTPURLResponse {
             var entry = HAR.Entry(
                 request: HAR.Request(request: request),
                 response: HAR.Response(response: response, data: data)
