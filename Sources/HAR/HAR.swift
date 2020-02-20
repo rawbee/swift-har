@@ -1013,7 +1013,7 @@ extension HAR.Response {
     /// Computed `cookies` from headers.
     public var computedCookies: HAR.Cookies {
         headers.values(forName: "Set-Cookie")
-            .map { HAR.Cookie(fromSetCookieHeader: $0) }
+            .map(HAR.Cookie.init(fromSetCookieHeader:))
     }
 
     /// Computed `headersSize`.
