@@ -1267,7 +1267,7 @@ extension HAR.Header: Equatable {
     /// Returns a Boolean value indicating whether two headers are equal.
     ///
     /// Header names are case-insensitive.
-    private static func ==(lhs: Self, rhs: Self) -> Bool {
+    public static func ==(lhs: Self, rhs: Self) -> Bool {
         lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame &&
             lhs.value == rhs.value &&
             lhs.comment == rhs.comment
