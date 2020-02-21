@@ -79,7 +79,7 @@ public struct HAR {
         // MARK: Static Properties
 
         /// Creator info used when this library creates a new HAR log.
-        static let defaultCreator = Creator(name: "SwiftHAR", version: "0.1.0")
+        public static let defaultCreator = Creator(name: "SwiftHAR", version: "0.1.0")
 
         // MARK: Properties
 
@@ -260,18 +260,6 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
-
-        /// Create `Request` with HTTP method and url.
-        ///
-        /// - Parameter method: An HTTP method.
-        /// - Parameter url: A URL.
-        init(method: String, url: URL) {
-            self.method = method
-            self.url = url
-
-            self.queryString = computedQueryString
-            self.headersSize = computedHeadersSize
-        }
     }
 
     /// This object contains detailed info about the response.
@@ -722,7 +710,7 @@ extension HAR.Page: CustomStringConvertible {
         return strs.joined(separator: "  ")
     }
 
-    static let startedDateFormatter = makeStartedDateFormatter()
+    internal static let startedDateFormatter = makeStartedDateFormatter()
 
     private static func makeStartedDateFormatter() -> DateFormatter {
         let formatter = DateFormatter()
@@ -793,7 +781,7 @@ extension HAR.Entry {
     // MARK: Computed Properties
 
     /// Computed `time` from timings.
-    public var computedTime: Double {
+    internal var computedTime: Double {
         timings.total
     }
 }
@@ -812,7 +800,7 @@ extension HAR.Entry {
     }
 
     /// Synchronously perform URL Request and create HTTP archive Entry of the request and response.
-    public static func record(request: URLRequest) throws -> Self {
+    internal static func record(request: URLRequest) throws -> Self {
         try syncResult { record(request: request, completionHandler: $0) }
     }
 }
@@ -863,17 +851,33 @@ extension HAR.Request: Codable {
 }
 
 extension HAR.Request {
+    // MARK: Initializers
+
+    /// Create `Request` with HTTP method and url.
+    ///
+    /// - Parameter method: An HTTP method.
+    /// - Parameter url: A URL.
+    public init(method: String, url: URL) {
+        self.method = method
+        self.url = url
+
+        self.queryString = computedQueryString
+        self.headersSize = computedHeadersSize
+    }
+}
+
+extension HAR.Request {
     // MARK: Computed Properties
 
     /// Computed `cookies` from headers.
-    public var computedCookies: HAR.Cookies {
+    internal var computedCookies: HAR.Cookies {
         headers.value(forName: "Cookie").map {
             HAR.Cookies(fromCookieHeader: $0)
         } ?? []
     }
 
     /// Computed `queryString` from URL query string.
-    public var computedQueryString: HAR.QueryStrings {
+    internal var computedQueryString: HAR.QueryStrings {
         if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?
             .queryItems {
             return queryItems.map { HAR.QueryString($0) }
@@ -882,12 +886,12 @@ extension HAR.Request {
     }
 
     /// Computed `headersSize`.
-    public var computedHeadersSize: Int {
+    internal var computedHeadersSize: Int {
         Data(headerText.utf8).count
     }
 
     /// Compute text representation of header for computing it's size.
-    private var headerText: String {
+    internal var headerText: String {
         """
         \(method) \(url.relativePath) \(httpVersion)\r
         \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
@@ -895,7 +899,7 @@ extension HAR.Request {
     }
 
     /// Computed `bodySize`.
-    public var computedBodySize: Int {
+    internal var computedBodySize: Int {
         postData?.size ?? -1
     }
 }
@@ -922,7 +926,7 @@ extension HAR.Request {
     /// Creates a HAR Request from a URL Request.
     ///
     /// - Parameter request: A URL Request.
-    init(request: URLRequest) {
+    public init(request: URLRequest) {
         /// Empty URL fallback to cover edge case of nil URLRequest.url
         url = URL(string: "about:blank")!
         if let url = request.url {
@@ -1011,18 +1015,18 @@ extension HAR.Response {
     // MARK: Computed Properties
 
     /// Computed `cookies` from headers.
-    public var computedCookies: HAR.Cookies {
+    internal var computedCookies: HAR.Cookies {
         headers.values(forName: "Set-Cookie")
             .map(HAR.Cookie.init(fromSetCookieHeader:))
     }
 
     /// Computed `headersSize`.
-    public var computedHeadersSize: Int {
+    internal var computedHeadersSize: Int {
         Data(headerText.utf8).count
     }
 
     /// Compute text representation of header for computing it's size.
-    private var headerText: String {
+    internal var headerText: String {
         """
         \(status) \(statusText)\r
         \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
@@ -1030,7 +1034,7 @@ extension HAR.Response {
     }
 
     /// Computed `bodySize`.
-    public var computedBodySize: Int {
+    internal var computedBodySize: Int {
         content.size
     }
 }
@@ -1067,7 +1071,7 @@ extension HAR.Response {
 
     // MARK: Initializers
 
-    init(response: HTTPURLResponse, data: Data?) {
+    public init(response: HTTPURLResponse, data: Data?) {
         status = response.statusCode
         statusText = Self.statusText(forStatusCode: response.statusCode)
         headers = HAR.Headers(response.allHeaderFields)
@@ -1188,7 +1192,7 @@ extension HAR.Cookie {
     // MARK: Initializers
 
     /// Create Cookie from HTTP Response "Set-Cookie" header value.
-    init(fromSetCookieHeader header: String) {
+    fileprivate init(fromSetCookieHeader header: String) {
         var attributeValues = parseCookieAttributes(header)
 
         let (name, value) = attributeValues.removeFirst()
@@ -1263,14 +1267,14 @@ extension HAR.Header: Equatable {
     /// Returns a Boolean value indicating whether two headers are equal.
     ///
     /// Header names are case-insensitive.
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
+    private static func ==(lhs: Self, rhs: Self) -> Bool {
         lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame &&
             lhs.value == rhs.value &&
             lhs.comment == rhs.comment
     }
 
     /// Test if header matches case-insensitive name.
-    func isNamed(_ name: String) -> Bool {
+    fileprivate func isNamed(_ name: String) -> Bool {
         self.name.caseInsensitiveCompare(name) == .orderedSame
     }
 }
@@ -1307,7 +1311,7 @@ extension HAR.Header: Codable {}
 extension HAR.Headers {
     // MARK: Initializers
 
-    internal init(_ fields: [AnyHashable: Any]) {
+    public init(_ fields: [AnyHashable: Any]) {
         self = fields.flatMap { (name, value) -> Self in
             guard let name = name as? String, let value = value as? String else {
                 return []
@@ -1445,7 +1449,7 @@ extension HAR.PostData {
     }
 
     /// Create HAR PostData from data.
-    fileprivate init?(parsingData data: Data, mimeType: String?) {
+    public init?(parsingData data: Data, mimeType: String?) {
         guard let text = String(bytes: data, encoding: .utf8) else {
             return nil
         }
@@ -1455,12 +1459,12 @@ extension HAR.PostData {
     // MARK: Computed Properties
 
     /// Get text as UTF8 Data.
-    public var data: Data {
+    internal var data: Data {
         Data(text.utf8)
     }
 
     /// Get bytesize of text.
-    public var size: Int {
+    internal var size: Int {
         data.count
     }
 }
@@ -1635,7 +1639,7 @@ extension HAR.Timing {
     ///
     /// The time value for the request must be equal to the sum of the timings supplied
     /// in this section (excluding any -1 values).
-    public var total: Double {
+    internal var total: Double {
         [blocked, dns, connect, send, wait, receive]
             .map { $0 ?? -1 }
             .filter { $0 != -1 }
@@ -1644,7 +1648,7 @@ extension HAR.Timing {
 }
 
 extension HAR.Timing {
-    init() {
+    internal init() {
         self.send = -1
         self.wait = -1
         self.receive = -1
@@ -1654,7 +1658,7 @@ extension HAR.Timing {
 #if !os(Linux)
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
 extension HAR.Timing {
-    public init(metric: URLSessionTaskTransactionMetrics) {
+    fileprivate init(metric: URLSessionTaskTransactionMetrics) {
         if let start = metric.fetchStartDate, let end = metric.domainLookupStartDate {
             self.blocked = end.timeIntervalSince(start) * 1000
         }
@@ -1694,23 +1698,23 @@ extension HAR.Timing {
 
 // MARK: - Other
 
-class TaskDelegate: NSObject, URLSessionDataDelegate {
-    typealias CompletionHandler = (Result<HAR.Entry, Error>) -> Void
+private class TaskDelegate: NSObject, URLSessionDataDelegate {
+    fileprivate typealias CompletionHandler = (Result<HAR.Entry, Error>) -> Void
 
-    let completionHandler: CompletionHandler
+    private let completionHandler: CompletionHandler
 
-    init(_ completionHandler: @escaping CompletionHandler) {
+    fileprivate init(_ completionHandler: @escaping CompletionHandler) {
         self.completionHandler = completionHandler
     }
 
     private var data: Data = Data()
     private var metric: AnyObject?
 
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    fileprivate func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         self.data.append(data)
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+    fileprivate func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let request = task.currentRequest, let response = task.response as? HTTPURLResponse {
             var entry = HAR.Entry(
                 request: HAR.Request(request: request),
@@ -1747,7 +1751,7 @@ class TaskDelegate: NSObject, URLSessionDataDelegate {
 #if !os(Linux)
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
 extension TaskDelegate {
-    func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
+    fileprivate func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
         // Choose last metric, though there might be more accurate of handling multiple metrics.
         metric = metrics.transactionMetrics.last
     }
@@ -1766,12 +1770,12 @@ extension HAR {
     }
 
     /// Synchronously perform URL Request and create HTTP archive of the request and response.
-    public static func record(request: URLRequest) throws -> Self {
+    internal static func record(request: URLRequest) throws -> Self {
         try syncResult { Self.record(request: request, completionHandler: $0) }
     }
 }
 
-internal func syncResult<T>(
+private func syncResult<T>(
     _ asyncHandler: (@escaping (Result<T, Error>) -> Void) -> Void
 ) throws -> T {
     let semaphore = DispatchSemaphore(value: 0)
