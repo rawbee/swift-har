@@ -32,7 +32,16 @@ final class HARTests: XCTestCase {
         let url = try XCTUnwrap(URL(string: "http://example.com/"))
         let request = URLRequest(url: url)
 
-        let har = try HAR.record(request: request)
+        let expectation = self.expectation(description: "Record")
+        var result: Result<HAR, Error>?
+
+        HAR.record(request: request) {
+            result = $0
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 5, handler: nil)
+
+        let har = try XCTUnwrap(result?.get())
 
         guard let entry = har.log.entries.first else {
             XCTFail("no entries")

@@ -798,11 +798,6 @@ extension HAR.Entry {
         )
         session.dataTask(with: request).resume()
     }
-
-    /// Synchronously perform URL Request and create HTTP archive Entry of the request and response.
-    internal static func record(request: URLRequest) throws -> Self {
-        try syncResult { record(request: request, completionHandler: $0) }
-    }
 }
 
 // MARK: - Request
@@ -1768,24 +1763,4 @@ extension HAR {
             }
         )
     }
-
-    /// Synchronously perform URL Request and create HTTP archive of the request and response.
-    internal static func record(request: URLRequest) throws -> Self {
-        try syncResult { Self.record(request: request, completionHandler: $0) }
-    }
-}
-
-private func syncResult<T>(
-    _ asyncHandler: (@escaping (Result<T, Error>) -> Void) -> Void
-) throws -> T {
-    let semaphore = DispatchSemaphore(value: 0)
-    var result: Result<T, Error>?
-
-    asyncHandler { (asyncResult: Result<T, Error>) in
-        result = asyncResult
-        semaphore.signal()
-    }
-
-    _ = semaphore.wait(timeout: .distantFuture)
-    return try result!.get()
 }
