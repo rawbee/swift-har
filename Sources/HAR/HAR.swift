@@ -1111,8 +1111,7 @@ private func parseCookieAttributes(_ string: String) -> [(key: String, value: St
 /// as it's common for Expire values to include commas in the date string.
 ///
 /// Adapted from `HTTPCookie.cookies(withResponseHeaderFields:for:)`.
-/// https://github.com/apple/swift-corelibs-foundation/
-///   blob/616799784b6912ab60ec7d94343b3e83f5cfcfbb/Foundation/HTTPCookie.swift#L438
+/// https://github.com/apple/swift-corelibs-foundation/blob/6167997/Foundation/HTTPCookie.swift#L438
 ///
 private func splitCookieValue(_ cookies: String) -> [String] {
     var values: [String] = []
