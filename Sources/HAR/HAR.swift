@@ -1751,7 +1751,8 @@ private class TaskDelegate: NSObject, URLSessionDataDelegate {
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
 extension TaskDelegate {
     fileprivate func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        // Choose last metric, though there might be more accurate of handling multiple metrics.
+        // Choose last metric, though there might be more accurate of handling
+        // multiple metrics.
         metric = metrics.transactionMetrics.last
     }
 }
