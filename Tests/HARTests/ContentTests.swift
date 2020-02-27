@@ -18,7 +18,7 @@ final class ContentTests: XCTestCase {
 
         content = HAR.Content(text: "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=", encoding: "base64", mimeType: "text/html; charset=utf-8")
         XCTAssertEqual(content.size, 35)
-        XCTAssertEqual(content.data?.count, 35)
+        XCTAssertEqual(content.data.count, 35)
         XCTAssertEqual(content.text, "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=")
         XCTAssertEqual(content.encoding, "base64")
     }
@@ -28,7 +28,7 @@ final class ContentTests: XCTestCase {
         let content = HAR.Content(decoding: data, mimeType: "text/html; charset=utf-8")
 
         XCTAssertEqual(content.size, 35)
-        XCTAssertEqual(content.data?.count, 35)
+        XCTAssertEqual(content.data.count, 35)
         XCTAssertEqual(content.text, "<html><head></head><body/></html>\\n")
         XCTAssertEqual(content.encoding, nil)
     }

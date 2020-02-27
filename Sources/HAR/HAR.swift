@@ -1542,10 +1542,7 @@ extension HAR.Content {
 
         self.encoding = encoding
         self.text = text
-
-        if let data = data {
-            self.size = data.count
-        }
+        self.size = data.count
     }
 
     /// Create HAR Content decoding HTTP Body Data.
@@ -1568,12 +1565,15 @@ extension HAR.Content {
 
     // MARK: Computed Properties
 
-    /// Get content body as Data. May return nil if text is encoded improperly.
-    public var data: Data? {
-        guard let text = text else { return nil }
+    /// Empty data
+    private static let emptyData = Data(count: 0)
+
+    /// Get content body as Data. May return empty Data if text is encoded improperly.
+    public var data: Data {
+        guard let text = text else { return Self.emptyData }
         switch encoding {
         case "base64":
-            return Data(base64Encoded: text)
+            return Data(base64Encoded: text) ?? Self.emptyData
         default:
             return Data(text.utf8)
         }
