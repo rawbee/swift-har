@@ -581,6 +581,11 @@ extension HAR: Codable {
         try self.init(data: try Data(contentsOf: url))
     }
 
+    /// Writes the ecoded HAR to a location.
+    func write(to url: URL, options: Data.WritingOptions = []) throws {
+        try encoded().write(to: url, options: options)
+    }
+
     /// Return ISO 8601 date formatter.
     ///
     /// Uses the format `YYYY-MM-DDThh:mm:ss.sTZD` to return a date such as
