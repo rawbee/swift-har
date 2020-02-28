@@ -1843,8 +1843,14 @@ extension URLProtocolClient {
     }
 }
 
+#if canImport(FoundationNetworking)
+public typealias FoundationURLProtocol = FoundationNetworking.URLProtocol
+#else
+public typealias FoundationURLProtocol = Foundation.URLProtocol
+#endif
+
 extension HAR {
-    open class URLProtocol: Foundation.URLProtocol {
+    open class URLProtocol: FoundationURLProtocol {
         public static var configuration: URLSessionConfiguration {
             let config = URLSessionConfiguration.ephemeral
             config.protocolClasses = [Self.self]
