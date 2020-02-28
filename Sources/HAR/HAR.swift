@@ -640,6 +640,21 @@ extension HAR.Log: Hashable {}
 
 extension HAR.Log: Codable {}
 
+extension HAR.Log {
+    // MARK: Computed Properties
+
+    /// Access log's first entry.
+    ///
+    /// - Invariant: Log's must have at least one entry to be valid.
+    /// However, a log maybe empty on initial construction.
+    public var firstEntry: HAR.Entry {
+        guard let entry = entries.first else {
+            preconditionFailure("HAR.Log has no entries")
+        }
+        return entry
+    }
+}
+
 // MARK: - Creator
 
 extension HAR.Creator: Equatable {}
@@ -1772,13 +1787,92 @@ extension TaskDelegate {
 #endif
 
 extension HAR {
+    public typealias RecordResult = Result<Self, Error>
+
     /// Perform URL Request and create HTTP archive of the request and response.
-    public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
+    public static func record(request: URLRequest, completionHandler: @escaping (RecordResult) -> Void) {
         Self.Entry.record(
             request: request,
             completionHandler: {
                 completionHandler($0.map { Self(log: Self.Log(entries: [$0])) })
             }
         )
+    }
+
+    /// Perform URL Request, create HTTP archive and write encoded archive to file URL.
+    public static func record(request: URLRequest, to url: URL, completionHandler: @escaping (RecordResult) -> Void) {
+        record(request: request) { result in
+            do {
+                let har = try result.get()
+                try har.write(to: url)
+                completionHandler(.success(har))
+            } catch (let error) {
+                completionHandler(.failure(error))
+            }
+        }
+    }
+
+    /// Attempt to load HAR from file system, otherwise perform request and
+    /// write result to file system.
+    public static func load(contentsOf url: URL, orRecordRequest request: URLRequest, completionHandler: @escaping (RecordResult) -> Void) {
+        do {
+            completionHandler(.success(try HAR(contentsOf: url)))
+        } catch {
+            record(request: request, to: url, completionHandler: completionHandler)
+        }
+    }
+}
+
+extension URLProtocolClient {
+    /// Tells the client that the protocol implementation has created a HAR Entry or Error for the request.
+    public func urlProtocol(_ protocol: URLProtocol, didLoadEntryResult result: Result<HAR.Entry, Error>) {
+        switch result {
+        case .success(let entry):
+            urlProtocol(`protocol`, didLoadEntry: entry)
+        case .failure(let error):
+            urlProtocol(`protocol`, didFailWithError: error)
+        }
+    }
+
+    /// Tells the client that the protocol implementation has created a HAR Entry for the request.
+    public func urlProtocol(_ protocol: URLProtocol, didLoadEntry entry: HAR.Entry) {
+        let (_, response, data) = entry.toURLMessage()
+        urlProtocol(`protocol`, didReceive: response, cacheStoragePolicy: .notAllowed)
+        urlProtocol(`protocol`, didLoad: data)
+        urlProtocolDidFinishLoading(`protocol`)
+    }
+}
+
+extension HAR {
+    open class URLProtocol: Foundation.URLProtocol {
+        public static var configuration: URLSessionConfiguration {
+            let config = URLSessionConfiguration.ephemeral
+            config.protocolClasses = [Self.self]
+            return config
+        }
+
+        public static var session: URLSession {
+            URLSession(configuration: configuration)
+        }
+
+        public override class func canInit(with _: URLRequest) -> Bool {
+            true
+        }
+
+        public override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+            request
+        }
+
+        open override func startLoading() {
+            fatalError("URLProtocol.startLoading must be implemented")
+        }
+
+        public func startLoading(url: URL, entrySelector: @escaping (HAR.Log) -> HAR.Entry = { $0.firstEntry }) {
+            HAR.load(contentsOf: url, orRecordRequest: request) { result in
+                self.client?.urlProtocol(self, didLoadEntryResult: result.map { har in entrySelector(har.log) })
+            }
+        }
+
+        public override func stopLoading() {}
     }
 }
