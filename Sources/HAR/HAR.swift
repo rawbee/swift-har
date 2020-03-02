@@ -41,6 +41,13 @@ public struct HAR {
     /// Log data root.
     public var log: Log
 
+    // MARK: Initializers
+
+    /// Create HAR.
+    public init(log: HAR.Log) {
+        self.log = log
+    }
+
     // MARK: Structures
 
     /// This object represents the root of exported data.
@@ -53,10 +60,10 @@ public struct HAR {
         // MARK: Properties
 
         /// Version number of the format. If empty, string "1.1" is assumed by default.
-        public var version: String = "1.2"
+        public var version: String
 
         /// Name and version info of the log creator application.
-        public var creator: Creator = Creator.defaultCreator
+        public var creator: Creator
 
         /// Name and version info of used browser.
         public var browser: Browser?
@@ -66,12 +73,24 @@ public struct HAR {
         public var pages: Pages?
 
         /// List of all exported (tracked) requests.
-        public var entries: Entries = []
+        public var entries: Entries
 
         /// A comment provided by the user or the application.
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create log.
+        public init(version: String = "1.2", creator: HAR.Creator = Creator.defaultCreator, browser: HAR.Browser? = nil, pages: HAR.Pages? = nil, entries: Entries = [], comment: String? = nil) {
+            self.version = version
+            self.creator = creator
+            self.browser = browser
+            self.pages = pages
+            self.entries = entries
+            self.comment = comment
+        }
     }
 
     /// This object represents the log creator application.
@@ -93,6 +112,15 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create creator.
+        public init(name: String, version: String, comment: String? = nil) {
+            self.name = name
+            self.version = version
+            self.comment = comment
+        }
     }
 
     /// This object represents the web browser used.
@@ -109,6 +137,15 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create browser.
+        public init(name: String, version: String, comment: String? = nil) {
+            self.name = name
+            self.version = version
+            self.comment = comment
+        }
     }
 
     /// This object represents list of exported pages.
@@ -123,15 +160,26 @@ public struct HAR {
         public var id: String
 
         /// Page title.
-        public var title: String = ""
+        public var title: String
 
         /// Detailed timing info about page load.
-        public var pageTimings: PageTiming = PageTiming()
+        public var pageTimings: PageTiming
 
         /// A comment provided by the user or the application.
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create page.
+        public init(startedDateTime: Date, id: String, title: String = "", pageTimings: PageTiming = PageTiming(), comment: String? = nil) {
+            self.startedDateTime = startedDateTime
+            self.id = id
+            self.title = title
+            self.pageTimings = pageTimings
+            self.comment = comment
+        }
     }
 
     /// Array of Page objects.
@@ -160,6 +208,18 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create page timing.
+        public init() {}
+
+        /// Create page timing.
+        public init(onContentLoad: Double = -1, onLoad: Double = -1, comment: String? = nil) {
+            self.onContentLoad = onContentLoad
+            self.onLoad = onLoad
+            self.comment = comment
+        }
     }
 
     /// This object represents an array with all exported HTTP requests. Sorting entries
@@ -174,14 +234,14 @@ public struct HAR {
         public var pageref: String?
 
         /// Date and time stamp of the request start.
-        public var startedDateTime: Date = Date()
+        public var startedDateTime: Date
 
         /// Total elapsed time of the request in milliseconds. This is the sum of all
         /// timings available in the timings object (i.e. not including -1 values) .
         ///
         /// - Invariant: The time value for the request must be equal to the sum of the
         /// timings supplied in this section (excluding any -1 values).
-        public var time: Double = 0
+        public var time: Double
 
         /// Detailed info about the request.
         public var request: Request
@@ -190,10 +250,10 @@ public struct HAR {
         public var response: Response
 
         /// Info about cache usage.
-        public var cache: Cache = Cache()
+        public var cache: Cache
 
         /// Detailed timing info about request/response round trip.
-        public var timings: Timing = Timing()
+        public var timings: Timing
 
         /// IP address of the server that was connected (result of DNS resolution).
         ///
@@ -214,6 +274,22 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create entry.
+        public init(pageref: String? = nil, startedDateTime: Date = Date(), time: Double = 0, request: HAR.Request, response: HAR.Response, cache: Cache = Cache(), timings: Timing = Timing(), serverIPAddress: String? = nil, connection: String? = nil, comment: String? = nil) {
+            self.pageref = pageref
+            self.startedDateTime = startedDateTime
+            self.time = time
+            self.request = request
+            self.response = response
+            self.cache = cache
+            self.timings = timings
+            self.serverIPAddress = serverIPAddress
+            self.connection = connection
+            self.comment = comment
+        }
     }
 
     /// Array of Entry objects.
@@ -224,13 +300,13 @@ public struct HAR {
         // MARK: Properties
 
         /// Request method.
-        public var method: String = "GET"
+        public var method: String
 
         /// Absolute URL of the request (fragments are not included).
         public var url: URL
 
         /// Request HTTP Version.
-        public var httpVersion: String = "HTTP/1.1"
+        public var httpVersion: String
 
         /// List of cookie objects.
         public var cookies: Cookies = []
@@ -260,6 +336,70 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create request.
+        public init(method: String = "GET", url: URL, httpVersion: String = "HTTP/1.1", cookies: Cookies = [], headers: Headers = [], queryString: QueryStrings = [], postData: PostData? = nil, headersSize: Int = -1, bodySize: Int = -1, comment: String? = nil) {
+            self.method = method
+            self.url = url
+            self.httpVersion = httpVersion
+            self.cookies = cookies
+            self.headers = headers
+            self.queryString = queryString
+            self.postData = postData
+            self.headersSize = headersSize
+            self.bodySize = bodySize
+            self.comment = comment
+        }
+
+        /// Create `Request` with HTTP method and url.
+        ///
+        /// - Parameter method: An HTTP method.
+        /// - Parameter url: A URL.
+        public init(method: String, url: URL) {
+            self.method = method
+            self.url = url
+            self.httpVersion = "HTTP/1.1"
+
+            self.queryString = computedQueryString
+            self.headersSize = computedHeadersSize
+        }
+
+        /// Creates a HAR Request from a URL Request.
+        ///
+        /// - Parameter request: A URL Request.
+        public init(request: URLRequest) {
+            /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
+            self.method = request.httpMethod ?? "GET"
+
+            self.httpVersion = "HTTP/1.1"
+
+            /// Empty URL fallback to cover edge case of nil URLRequest.url
+            self.url = URL(string: "about:blank")!
+            if let url = request.url {
+                self.url = url
+            }
+
+            self.queryString = computedQueryString
+
+            if let headers = request.allHTTPHeaderFields {
+                self.headers = HAR.Headers(headers)
+            }
+
+            if let data = request.httpBody {
+                self.bodySize = data.count
+                self.postData = HAR.PostData(
+                    parsingData: data,
+                    mimeType: headers.value(forName: "Content-Type")
+                )
+            } else {
+                self.bodySize = 0
+            }
+
+            self.cookies = computedCookies
+            self.headersSize = computedHeadersSize
+        }
     }
 
     /// This object contains detailed info about the response.
@@ -267,13 +407,13 @@ public struct HAR {
         // MARK: Properties
 
         /// Response status.
-        public var status: Int = 200
+        public var status: Int
 
         /// Response status description.
-        public var statusText: String = "OK"
+        public var statusText: String
 
         /// Response HTTP Version.
-        public var httpVersion: String = "HTTP/1.1"
+        public var httpVersion: String
 
         /// List of cookie objects.
         public var cookies: Cookies = []
@@ -282,10 +422,10 @@ public struct HAR {
         public var headers: Headers = []
 
         /// Details about the response body.
-        public var content: Content = HAR.Content()
+        public var content: Content
 
         /// Redirection target URL from the Location response header.
-        public var redirectURL: String = ""
+        public var redirectURL: String
 
         /// Total number of bytes from the start of the HTTP response message until (and
         /// including) the double CRLF before the body. Set to -1 if the info is not
@@ -305,6 +445,40 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create response.
+        public init(status: Int = 200, statusText: String = "OK", httpVersion: String = "HTTP/1.1", cookies: Cookies = [], headers: Headers = [], content: Content = HAR.Content(), redirectURL: String = "", headersSize: Int = -1, bodySize: Int = -1, comment: String? = nil) {
+            self.status = status
+            self.statusText = statusText
+            self.httpVersion = httpVersion
+            self.cookies = cookies
+            self.headers = headers
+            self.content = content
+            self.redirectURL = redirectURL
+            self.headersSize = headersSize
+            self.bodySize = bodySize
+            self.comment = comment
+        }
+
+        public init(response: HTTPURLResponse, data: Data?) {
+            self.status = response.statusCode
+            self.statusText = Self.statusText(forStatusCode: response.statusCode)
+            self.httpVersion = "HTTP/1.1"
+            self.headers = HAR.Headers(response.allHeaderFields)
+            self.redirectURL = ""
+
+            if let data = data {
+                self.content = HAR.Content(decoding: data, mimeType: response.mimeType)
+            } else {
+                self.content = HAR.Content()
+            }
+
+            self.cookies = computedCookies
+            self.headersSize = computedHeadersSize
+            self.bodySize = computedBodySize
+        }
     }
 
     /// This object contains list of all cookies (used in `Request` and `Response`
@@ -346,6 +520,21 @@ public struct HAR {
         ///
         /// - Version: Unspecified
         public var sameSite: String?
+
+        // MARK: Initializers
+
+        /// Create cookie.
+        public init(name: String, value: String, path: String? = nil, domain: String? = nil, expires: Date? = nil, httpOnly: Bool? = nil, secure: Bool? = nil, comment: String? = nil, sameSite: String? = nil) {
+            self.name = name
+            self.value = value
+            self.path = path
+            self.domain = domain
+            self.expires = expires
+            self.httpOnly = httpOnly
+            self.secure = secure
+            self.comment = comment
+            self.sameSite = sameSite
+        }
     }
 
     /// Array of Cookie objects.
@@ -366,6 +555,15 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create header.
+        public init(name: String, value: String, comment: String? = nil) {
+            self.name = name
+            self.value = value
+            self.comment = comment
+        }
     }
 
     /// Array of Header objects.
@@ -386,6 +584,21 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create query string.
+        public init(name: String, value: String, comment: String? = nil) {
+            self.name = name
+            self.value = value
+            self.comment = comment
+        }
+
+        /// Create QueryString item from `URLQueryItem`.
+        internal init(_ queryItem: URLQueryItem) {
+            self.name = queryItem.name
+            self.value = queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? ""
+        }
     }
 
     /// Array of QueryString objects.
@@ -412,6 +625,52 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create post data.
+        public init(mimeType: String, params: HAR.Params, text: String, comment: String? = nil) {
+            self.mimeType = mimeType
+            self.params = params
+            self.text = text
+            self.comment = comment
+        }
+
+        /// Create HAR PostData from plain text.
+        public init(parsingText text: String, mimeType: String?) {
+            self.text = text
+
+            self.mimeType = "application/octet-stream"
+            if let mimeType = mimeType {
+                self.mimeType = mimeType
+            }
+
+            self.params = []
+            if self.mimeType.hasPrefix("application/x-www-form-urlencoded") {
+                self.params = parseFormUrlEncoded(self.text)
+            }
+        }
+
+        private func parseFormUrlEncoded(_ str: String) -> HAR.Params {
+            var components = URLComponents()
+            components.query = str
+            return components.queryItems?.map {
+                return HAR.Param(
+                    name: $0.name,
+                    value: $0.value?
+                        .replacingOccurrences(of: "+", with: "%20")
+                        .removingPercentEncoding ?? ""
+                )
+            } ?? []
+        }
+
+        /// Create HAR PostData from data.
+        public init?(parsingData data: Data, mimeType: String?) {
+            guard let text = String(bytes: data, encoding: .utf8) else {
+                return nil
+            }
+            self.init(parsingText: text, mimeType: mimeType)
+        }
     }
 
     /// List of posted parameters, if any (embedded in `PostData` object).
@@ -434,6 +693,17 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create param.
+        public init(name: String, value: String? = nil, fileName: String? = nil, contentType: String? = nil, comment: String? = nil) {
+            self.name = name
+            self.value = value
+            self.fileName = fileName
+            self.contentType = contentType
+            self.comment = comment
+        }
     }
 
     /// Array of Param objects.
@@ -483,6 +753,55 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create content.
+        public init(size: Int, compression: Int? = nil, mimeType: String, text: String? = nil, encoding: String? = nil, comment: String? = nil) {
+            self.size = size
+            self.compression = compression
+            self.mimeType = mimeType
+            self.text = text
+            self.encoding = encoding
+            self.comment = comment
+        }
+
+        /// Create empty unknown response body content.
+        public init() {
+            self.size = 0
+            self.mimeType = "application/octet-stream"
+        }
+
+        /// Create HAR Content from string.
+        public init(text: String, encoding: String? = nil, mimeType: String?) {
+            self.init()
+
+            if let mimeType = mimeType {
+                self.mimeType = mimeType
+            }
+
+            self.encoding = encoding
+            self.text = text
+            self.size = data.count
+        }
+
+        /// Create HAR Content decoding HTTP Body Data.
+        public init(decoding data: Data, mimeType: String?) {
+            self.init()
+
+            if let mimeType = mimeType {
+                self.mimeType = mimeType
+            }
+
+            self.size = data.count
+
+            if let text = String(bytes: data, encoding: .utf8) {
+                self.text = text
+            } else {
+                self.text = data.base64EncodedString()
+                self.encoding = "base64"
+            }
+        }
     }
 
     /// This objects contains info about a request coming from browser cache.
@@ -501,6 +820,18 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create cache.
+        public init() {}
+
+        /// Create cache.
+        public init(beforeRequest: HAR.CacheEntry? = nil, afterRequest: HAR.CacheEntry? = nil, comment: String? = nil) {
+            self.beforeRequest = beforeRequest
+            self.afterRequest = afterRequest
+            self.comment = comment
+        }
     }
 
     /// This objects contains cache entry state for the request.
@@ -523,6 +854,17 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create cache entry.
+        public init(expires: Date? = nil, lastAccess: Date, eTag: String, hitCount: Int, comment: String? = nil) {
+            self.expires = expires
+            self.lastAccess = lastAccess
+            self.eTag = eTag
+            self.hitCount = hitCount
+            self.comment = comment
+        }
     }
 
     /// This object describes various phases within request-response round trip. All
@@ -562,6 +904,27 @@ public struct HAR {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Initializers
+
+        /// Create timing.
+        public init(blocked: Double? = -1, dns: Double? = -1, connect: Double? = -1, send: Double, wait: Double, receive: Double, ssl: Double? = -1, comment: String? = nil) {
+            self.blocked = blocked
+            self.dns = dns
+            self.connect = connect
+            self.send = send
+            self.wait = wait
+            self.receive = receive
+            self.ssl = ssl
+            self.comment = comment
+        }
+
+        /// Create timing.
+        public init() {
+            self.send = -1
+            self.wait = -1
+            self.receive = -1
+        }
     }
 }
 
@@ -801,7 +1164,7 @@ extension HAR.Entry {
     // MARK: Computed Properties
 
     /// Computed `time` from timings.
-    public var computedTime: Double {
+    internal var computedTime: Double {
         timings.total
     }
 }
@@ -879,33 +1242,17 @@ extension HAR.Request: Codable {
 }
 
 extension HAR.Request {
-    // MARK: Initializers
-
-    /// Create `Request` with HTTP method and url.
-    ///
-    /// - Parameter method: An HTTP method.
-    /// - Parameter url: A URL.
-    public init(method: String, url: URL) {
-        self.method = method
-        self.url = url
-
-        self.queryString = computedQueryString
-        self.headersSize = computedHeadersSize
-    }
-}
-
-extension HAR.Request {
     // MARK: Computed Properties
 
     /// Computed `cookies` from headers.
-    public var computedCookies: HAR.Cookies {
+    internal var computedCookies: HAR.Cookies {
         headers.value(forName: "Cookie").map {
             HAR.Cookies(fromCookieHeader: $0)
         } ?? []
     }
 
     /// Computed `queryString` from URL query string.
-    public var computedQueryString: HAR.QueryStrings {
+    internal var computedQueryString: HAR.QueryStrings {
         if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?
             .queryItems {
             return queryItems.map { HAR.QueryString($0) }
@@ -914,12 +1261,12 @@ extension HAR.Request {
     }
 
     /// Computed `headersSize`.
-    public var computedHeadersSize: Int {
+    internal var computedHeadersSize: Int {
         Data(headerText.utf8).count
     }
 
     /// Compute text representation of header for computing it's size.
-    private var headerText: String {
+    internal var headerText: String {
         """
         \(method) \(url.relativePath) \(httpVersion)\r
         \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
@@ -927,7 +1274,7 @@ extension HAR.Request {
     }
 
     /// Computed `bodySize`.
-    public var computedBodySize: Int {
+    internal var computedBodySize: Int {
         postData?.size ?? -1
     }
 }
@@ -945,43 +1292,6 @@ extension URLRequest {
             addValue(header.value, forHTTPHeaderField: header.name)
         }
         httpBody = request.postData?.data
-    }
-}
-
-extension HAR.Request {
-    // MARK: Initializers
-
-    /// Creates a HAR Request from a URL Request.
-    ///
-    /// - Parameter request: A URL Request.
-    public init(request: URLRequest) {
-        /// Empty URL fallback to cover edge case of nil URLRequest.url
-        url = URL(string: "about:blank")!
-        if let url = request.url {
-            self.url = url
-        }
-
-        queryString = computedQueryString
-
-        /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
-        method = request.httpMethod ?? "GET"
-
-        if let headers = request.allHTTPHeaderFields {
-            self.headers = HAR.Headers(headers)
-        }
-
-        if let data = request.httpBody {
-            bodySize = data.count
-            postData = HAR.PostData(
-                parsingData: data,
-                mimeType: headers.value(forName: "Content-Type")
-            )
-        } else {
-            bodySize = 0
-        }
-
-        cookies = computedCookies
-        headersSize = computedHeadersSize
     }
 }
 
@@ -1043,18 +1353,18 @@ extension HAR.Response {
     // MARK: Computed Properties
 
     /// Computed `cookies` from headers.
-    public var computedCookies: HAR.Cookies {
+    internal var computedCookies: HAR.Cookies {
         headers.values(forName: "Set-Cookie")
             .map(HAR.Cookie.init(fromSetCookieHeader:))
     }
 
     /// Computed `headersSize`.
-    public var computedHeadersSize: Int {
+    internal var computedHeadersSize: Int {
         Data(headerText.utf8).count
     }
 
     /// Compute text representation of header for computing it's size.
-    private var headerText: String {
+    internal var headerText: String {
         """
         \(status) \(statusText)\r
         \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
@@ -1062,7 +1372,7 @@ extension HAR.Response {
     }
 
     /// Computed `bodySize`.
-    public var computedBodySize: Int {
+    internal var computedBodySize: Int {
         content.size
     }
 }
@@ -1095,24 +1405,6 @@ extension HAR.Response {
         default:
             return HTTPURLResponse.localizedString(forStatusCode: statusCode).capitalized
         }
-    }
-
-    // MARK: Initializers
-
-    public init(response: HTTPURLResponse, data: Data?) {
-        status = response.statusCode
-        statusText = Self.statusText(forStatusCode: response.statusCode)
-        headers = HAR.Headers(response.allHeaderFields)
-
-        if let data = data {
-            content = HAR.Content(decoding: data, mimeType: response.mimeType)
-        } else {
-            content = HAR.Content()
-        }
-
-        cookies = computedCookies
-        headersSize = computedHeadersSize
-        bodySize = computedBodySize
     }
 }
 
@@ -1414,16 +1706,6 @@ extension HAR.QueryString: CustomDebugStringConvertible {
 
 extension HAR.QueryString: Codable {}
 
-extension HAR.QueryString {
-    // MARK: Initializers
-
-    /// Create QueryString item from `URLQueryItem`.
-    internal init(_ queryItem: URLQueryItem) {
-        name = queryItem.name
-        self.value = queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? ""
-    }
-}
-
 // MARK: - PostData
 
 extension HAR.PostData: Equatable {}
@@ -1445,44 +1727,6 @@ extension HAR.PostData: Codable {
 }
 
 extension HAR.PostData {
-    // MARK: Initializers
-
-    /// Create HAR PostData from plain text.
-    public init(parsingText text: String, mimeType: String?) {
-        self.text = text
-
-        self.mimeType = "application/octet-stream"
-        if let mimeType = mimeType {
-            self.mimeType = mimeType
-        }
-
-        params = []
-        if self.mimeType.hasPrefix("application/x-www-form-urlencoded") {
-            params = parseFormUrlEncoded(self.text)
-        }
-    }
-
-    private func parseFormUrlEncoded(_ str: String) -> HAR.Params {
-        var components = URLComponents()
-        components.query = str
-        return components.queryItems?.map {
-            return HAR.Param(
-                name: $0.name,
-                value: $0.value?
-                    .replacingOccurrences(of: "+", with: "%20")
-                    .removingPercentEncoding ?? ""
-            )
-        } ?? []
-    }
-
-    /// Create HAR PostData from data.
-    public init?(parsingData data: Data, mimeType: String?) {
-        guard let text = String(bytes: data, encoding: .utf8) else {
-            return nil
-        }
-        self.init(parsingText: text, mimeType: mimeType)
-    }
-
     // MARK: Computed Properties
 
     /// Get text as UTF8 Data.
@@ -1557,45 +1801,6 @@ extension HAR.Content: Hashable {}
 extension HAR.Content: Codable {}
 
 extension HAR.Content {
-    // MARK: Initializers
-
-    /// Create empty unknown response body content.
-    public init() {
-        self.size = 0
-        mimeType = "application/octet-stream"
-    }
-
-    /// Create HAR Content from string.
-    public init(text: String, encoding: String? = nil, mimeType: String?) {
-        self.init()
-
-        if let mimeType = mimeType {
-            self.mimeType = mimeType
-        }
-
-        self.encoding = encoding
-        self.text = text
-        self.size = data.count
-    }
-
-    /// Create HAR Content decoding HTTP Body Data.
-    public init(decoding data: Data, mimeType: String?) {
-        self.init()
-
-        if let mimeType = mimeType {
-            self.mimeType = mimeType
-        }
-
-        self.size = data.count
-
-        if let text = String(bytes: data, encoding: .utf8) {
-            self.text = text
-        } else {
-            text = data.base64EncodedString()
-            encoding = "base64"
-        }
-    }
-
     // MARK: Computed Properties
 
     /// Empty data
@@ -1666,19 +1871,11 @@ extension HAR.Timing {
     ///
     /// The time value for the request must be equal to the sum of the timings supplied
     /// in this section (excluding any -1 values).
-    public var total: Double {
+    internal var total: Double {
         [blocked, dns, connect, send, wait, receive]
             .map { $0 ?? -1 }
             .filter { $0 != -1 }
             .reduce(0, +)
-    }
-}
-
-extension HAR.Timing {
-    internal init() {
-        self.send = -1
-        self.wait = -1
-        self.receive = -1
     }
 }
 
