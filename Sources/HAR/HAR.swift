@@ -801,7 +801,7 @@ extension HAR.Entry {
     // MARK: Computed Properties
 
     /// Computed `time` from timings.
-    internal var computedTime: Double {
+    public var computedTime: Double {
         timings.total
     }
 }
@@ -898,14 +898,14 @@ extension HAR.Request {
     // MARK: Computed Properties
 
     /// Computed `cookies` from headers.
-    internal var computedCookies: HAR.Cookies {
+    public var computedCookies: HAR.Cookies {
         headers.value(forName: "Cookie").map {
             HAR.Cookies(fromCookieHeader: $0)
         } ?? []
     }
 
     /// Computed `queryString` from URL query string.
-    internal var computedQueryString: HAR.QueryStrings {
+    public var computedQueryString: HAR.QueryStrings {
         if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?
             .queryItems {
             return queryItems.map { HAR.QueryString($0) }
@@ -914,12 +914,12 @@ extension HAR.Request {
     }
 
     /// Computed `headersSize`.
-    internal var computedHeadersSize: Int {
+    public var computedHeadersSize: Int {
         Data(headerText.utf8).count
     }
 
     /// Compute text representation of header for computing it's size.
-    internal var headerText: String {
+    private var headerText: String {
         """
         \(method) \(url.relativePath) \(httpVersion)\r
         \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
@@ -927,7 +927,7 @@ extension HAR.Request {
     }
 
     /// Computed `bodySize`.
-    internal var computedBodySize: Int {
+    public var computedBodySize: Int {
         postData?.size ?? -1
     }
 }
@@ -1043,18 +1043,18 @@ extension HAR.Response {
     // MARK: Computed Properties
 
     /// Computed `cookies` from headers.
-    internal var computedCookies: HAR.Cookies {
+    public var computedCookies: HAR.Cookies {
         headers.values(forName: "Set-Cookie")
             .map(HAR.Cookie.init(fromSetCookieHeader:))
     }
 
     /// Computed `headersSize`.
-    internal var computedHeadersSize: Int {
+    public var computedHeadersSize: Int {
         Data(headerText.utf8).count
     }
 
     /// Compute text representation of header for computing it's size.
-    internal var headerText: String {
+    private var headerText: String {
         """
         \(status) \(statusText)\r
         \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
@@ -1062,7 +1062,7 @@ extension HAR.Response {
     }
 
     /// Computed `bodySize`.
-    internal var computedBodySize: Int {
+    public var computedBodySize: Int {
         content.size
     }
 }
@@ -1666,7 +1666,7 @@ extension HAR.Timing {
     ///
     /// The time value for the request must be equal to the sum of the timings supplied
     /// in this section (excluding any -1 values).
-    internal var total: Double {
+    public var total: Double {
         [blocked, dns, connect, send, wait, receive]
             .map { $0 ?? -1 }
             .filter { $0 != -1 }
