@@ -153,7 +153,7 @@ public struct HAR: Equatable, Hashable, Codable {
     }
 
     /// This object represents the log creator application.
-    public struct Creator: Equatable, Hashable, Codable {
+    public struct Creator: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Static Properties
 
         /// Creator info used when this library creates a new HAR log.
@@ -180,10 +180,22 @@ public struct HAR: Equatable, Hashable, Codable {
             self.version = version
             self.comment = comment
         }
+
+        // MARK: Describing Creators
+
+        /// A human-readable description for the data.
+        public var description: String {
+            "\(name)/\(version)"
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.Browser { \(description) }"
+        }
     }
 
     /// This object represents the web browser used.
-    public struct Browser: Equatable, Hashable, Codable {
+    public struct Browser: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Name of the application/browser used to export the log.
@@ -205,10 +217,22 @@ public struct HAR: Equatable, Hashable, Codable {
             self.version = version
             self.comment = comment
         }
+
+        // MARK: Describing Browsers
+
+        /// A human-readable description for the data.
+        public var description: String {
+            "\(name)/\(version)"
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.Browser { \(description) }"
+        }
     }
 
     /// This object represents list of exported pages.
-    public struct Page: Equatable, Hashable, Codable {
+    public struct Page: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Date and time stamp for the beginning of the page load.
@@ -252,6 +276,35 @@ public struct HAR: Equatable, Hashable, Codable {
             self.pageTimings = try container.decode(HAR.PageTiming.self, forKey: .pageTimings)
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
         }
+
+        // MARK: Describing Pages
+
+        /// A human-readable description for the data.
+        public var description: String {
+            var strs: [String] = []
+
+            if let onLoad = pageTimings.onLoad {
+                strs.append("\(onLoad.rounded())ms")
+            }
+
+            strs.append(Self.startedDateFormatter.string(from: startedDateTime))
+            strs.append(title)
+
+            return strs.joined(separator: "  ")
+        }
+
+        internal static let startedDateFormatter = makeStartedDateFormatter()
+
+        private static func makeStartedDateFormatter() -> DateFormatter {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "M/d/yyyy, h:mm:ss a"
+            return formatter
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.Page { \(description) }"
+        }
     }
 
     /// Array of Page objects.
@@ -263,7 +316,7 @@ public struct HAR: Equatable, Hashable, Codable {
     ///
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad`
     /// event or `document.readyState == interactive`.
-    public struct PageTiming: Equatable, Hashable, Codable {
+    public struct PageTiming: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Content of the page loaded. Number of milliseconds since page load started
@@ -291,6 +344,18 @@ public struct HAR: Equatable, Hashable, Codable {
             self.onContentLoad = onContentLoad
             self.onLoad = onLoad
             self.comment = comment
+        }
+
+        // MARK: Describing Page Timings
+
+        /// A human-readable description for the data.
+        public var description: String {
+            "onContentLoad: \(onContentLoad ?? -1), onLoad: \(onLoad ?? -1)"
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.PageTiming { \(description) }"
         }
     }
 
@@ -368,7 +433,7 @@ public struct HAR: Equatable, Hashable, Codable {
     public typealias Entries = [Entry]
 
     /// This object contains detailed info about performed request.
-    public struct Request: Equatable, Hashable, Codable {
+    public struct Request: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Request method.
@@ -491,10 +556,22 @@ public struct HAR: Equatable, Hashable, Codable {
             self.bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
         }
+
+        // MARK: Describing Requests
+
+        /// A human-readable description for the data.
+        public var description: String {
+            "\(method) \(url.absoluteString)"
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.Request { \(description) }"
+        }
     }
 
     /// This object contains detailed info about the response.
-    public struct Response: Equatable, Hashable, Codable {
+    public struct Response: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Response status.
@@ -589,6 +666,27 @@ public struct HAR: Equatable, Hashable, Codable {
             self.bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
         }
+
+        // MARK: Describing Responses
+
+        /// A human-readable description for the data.
+        public var description: String {
+            var strs: [String] = []
+
+            strs.append("\(status) \(statusText)")
+            strs.append(content.mimeType)
+
+            let formatter = ByteCountFormatter()
+            formatter.countStyle = .binary
+            strs.append(formatter.string(fromByteCount: Int64(bodySize)))
+
+            return strs.joined(separator: "  ")
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.Response { \(description) }"
+        }
     }
 
     /// This object contains list of all cookies (used in `Request` and `Response`
@@ -652,7 +750,7 @@ public struct HAR: Equatable, Hashable, Codable {
 
     /// This object contains list of all headers (used in `Request` and `Response`
     /// objects).
-    public struct Header: Equatable, Hashable, Codable {
+    public struct Header: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// The header name.
@@ -695,6 +793,18 @@ public struct HAR: Equatable, Hashable, Codable {
         public func hash(into hasher: inout Hasher) {
             hasher.combine(name.lowercased())
         }
+
+        // MARK: Describing Headers
+
+        /// A human-readable description for the data.
+        public var description: String {
+            "\(name): \(value)"
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.Header { \(description) }"
+        }
     }
 
     /// Array of Header objects.
@@ -702,7 +812,7 @@ public struct HAR: Equatable, Hashable, Codable {
 
     /// This object contains list of all parameters & values parsed from a query string,
     /// if any (embedded in `Request` object).
-    public struct QueryString: Equatable, Hashable, Codable {
+    public struct QueryString: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// The query parameter name.
@@ -729,6 +839,18 @@ public struct HAR: Equatable, Hashable, Codable {
         internal init(_ queryItem: URLQueryItem) {
             self.name = queryItem.name
             self.value = queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? ""
+        }
+
+        // MARK: Describing Query Strings
+
+        /// A human-readable description for the data.
+        public var description: String {
+            "\(name)=\(value)"
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.QueryString { \(description) }"
         }
     }
 
@@ -817,7 +939,7 @@ public struct HAR: Equatable, Hashable, Codable {
     }
 
     /// List of posted parameters, if any (embedded in `PostData` object).
-    public struct Param: Equatable, Hashable, Codable {
+    public struct Param: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Name of a posted parameter.
@@ -860,6 +982,30 @@ public struct HAR: Equatable, Hashable, Codable {
             self.value = try container.decodeIfPresent(String.self, forKey: .value)
             self.fileName = try container.decodeIfPresent(String.self, forKey: .fileName)
             self.contentType = try container.decodeIfPresent(String.self, forKey: .contentType)
+        }
+
+        // MARK: Describing Params
+
+        /// A human-readable description for the data.
+        public var description: String {
+            var str = "\(name)"
+
+            if let fileName = fileName {
+                str += "=@\(fileName)"
+
+                if let contentType = contentType {
+                    str += ";type=\(contentType)"
+                }
+            } else if let value = value {
+                str += "=\(value)"
+            }
+
+            return str
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.Param { \(description) }"
         }
     }
 
@@ -1026,7 +1172,7 @@ public struct HAR: Equatable, Hashable, Codable {
 
     /// This object describes various phases within request-response round trip. All
     /// times are specified in milliseconds.
-    public struct Timing: Equatable, Hashable, Codable {
+    public struct Timing: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing
@@ -1082,6 +1228,26 @@ public struct HAR: Equatable, Hashable, Codable {
             self.wait = -1
             self.receive = -1
         }
+
+        // MARK: Describing Timings
+
+        /// A human-readable description for the data.
+        public var description: String {
+            """
+            Blocked: \(blocked ?? -1)ms
+            DNS: \(dns ?? -1)ms
+            SSL/TLS: \(ssl ?? -1)ms
+            Connect: \(connect ?? -1)ms
+            Send: \(send)ms
+            Wait: \(wait)ms
+            Receive: \(receive)ms
+            """
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
+            "HAR.Timing {\n\(description)\n}"
+        }
     }
 }
 
@@ -1099,103 +1265,6 @@ extension HAR.Log {
             preconditionFailure("HAR.Log has no entries")
         }
         return entry
-    }
-}
-
-// MARK: - Creator
-
-extension HAR.Creator: CustomStringConvertible {
-    // MARK: Describing Creators
-
-    /// A human-readable description for the data.
-    public var description: String {
-        "\(name)/\(version)"
-    }
-}
-
-extension HAR.Creator: CustomDebugStringConvertible {
-    // MARK: Describing Creators
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.Browser { \(description) }"
-    }
-}
-
-// MARK: - Browser
-
-extension HAR.Browser: CustomStringConvertible {
-    // MARK: Describing Browsers
-
-    /// A human-readable description for the data.
-    public var description: String {
-        "\(name)/\(version)"
-    }
-}
-
-extension HAR.Browser: CustomDebugStringConvertible {
-    // MARK: Describing Browsers
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.Browser { \(description) }"
-    }
-}
-
-// MARK: - Pages
-
-extension HAR.Page: CustomStringConvertible {
-    // MARK: Describing Pages
-
-    /// A human-readable description for the data.
-    public var description: String {
-        var strs: [String] = []
-
-        if let onLoad = pageTimings.onLoad {
-            strs.append("\(onLoad.rounded())ms")
-        }
-
-        strs.append(Self.startedDateFormatter.string(from: startedDateTime))
-        strs.append(title)
-
-        return strs.joined(separator: "  ")
-    }
-
-    internal static let startedDateFormatter = makeStartedDateFormatter()
-
-    private static func makeStartedDateFormatter() -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M/d/yyyy, h:mm:ss a"
-        return formatter
-    }
-}
-
-extension HAR.Page: CustomDebugStringConvertible {
-    // MARK: Describing Pages
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.Page { \(description) }"
-    }
-}
-
-// MARK: - PageTimings
-
-extension HAR.PageTiming: CustomStringConvertible {
-    // MARK: Describing Page Timings
-
-    /// A human-readable description for the data.
-    public var description: String {
-        "onContentLoad: \(onContentLoad ?? -1), onLoad: \(onLoad ?? -1)"
-    }
-}
-
-extension HAR.PageTiming: CustomDebugStringConvertible {
-    // MARK: Describing Page Timings
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.PageTiming { \(description) }"
     }
 }
 
@@ -1238,24 +1307,6 @@ extension HAR.Entry {
 }
 
 // MARK: - Request
-
-extension HAR.Request: CustomStringConvertible {
-    // MARK: Describing Requests
-
-    /// A human-readable description for the data.
-    public var description: String {
-        "\(method) \(url.absoluteString)"
-    }
-}
-
-extension HAR.Request: CustomDebugStringConvertible {
-    // MARK: Describing Requests
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.Request { \(description) }"
-    }
-}
 
 extension HAR.Request {
     // MARK: Computed Properties
@@ -1312,33 +1363,6 @@ extension URLRequest {
 }
 
 // MARK: - Response
-
-extension HAR.Response: CustomStringConvertible {
-    // MARK: Describing Responses
-
-    /// A human-readable description for the data.
-    public var description: String {
-        var strs: [String] = []
-
-        strs.append("\(status) \(statusText)")
-        strs.append(content.mimeType)
-
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .binary
-        strs.append(formatter.string(fromByteCount: Int64(bodySize)))
-
-        return strs.joined(separator: "  ")
-    }
-}
-
-extension HAR.Response: CustomDebugStringConvertible {
-    // MARK: Describing Responses
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.Response { \(description) }"
-    }
-}
 
 extension HAR.Response {
     // MARK: Computed Properties
@@ -1565,24 +1589,6 @@ extension HAR.Cookies {
 
 // MARK: - Headers
 
-extension HAR.Header: CustomStringConvertible {
-    // MARK: Describing Headers
-
-    /// A human-readable description for the data.
-    public var description: String {
-        "\(name): \(value)"
-    }
-}
-
-extension HAR.Header: CustomDebugStringConvertible {
-    // MARK: Describing Headers
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.Header { \(description) }"
-    }
-}
-
 extension HAR.Headers {
     // MARK: Initializers
 
@@ -1636,26 +1642,6 @@ extension HAR.Headers {
     }
 }
 
-// MARK: - QueryString
-
-extension HAR.QueryString: CustomStringConvertible {
-    // MARK: Describing Query Strings
-
-    /// A human-readable description for the data.
-    public var description: String {
-        "\(name)=\(value)"
-    }
-}
-
-extension HAR.QueryString: CustomDebugStringConvertible {
-    // MARK: Describing Query Strings
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.QueryString { \(description) }"
-    }
-}
-
 // MARK: - PostData
 
 extension HAR.PostData {
@@ -1669,38 +1655,6 @@ extension HAR.PostData {
     /// Get bytesize of text.
     internal var size: Int {
         data.count
-    }
-}
-
-// MARK: - Params
-
-extension HAR.Param: CustomStringConvertible {
-    // MARK: Describing Params
-
-    /// A human-readable description for the data.
-    public var description: String {
-        var str = "\(name)"
-
-        if let fileName = fileName {
-            str += "=@\(fileName)"
-
-            if let contentType = contentType {
-                str += ";type=\(contentType)"
-            }
-        } else if let value = value {
-            str += "=\(value)"
-        }
-
-        return str
-    }
-}
-
-extension HAR.Param: CustomDebugStringConvertible {
-    // MARK: Describing Params
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.Param { \(description) }"
     }
 }
 
@@ -1726,33 +1680,9 @@ extension HAR.Content {
 
 // MARK: - Timings
 
-extension HAR.Timing: CustomStringConvertible {
-    // MARK: Describing Timings
-
-    /// A human-readable description for the data.
-    public var description: String {
-        """
-        Blocked: \(blocked ?? -1)ms
-        DNS: \(dns ?? -1)ms
-        SSL/TLS: \(ssl ?? -1)ms
-        Connect: \(connect ?? -1)ms
-        Send: \(send)ms
-        Wait: \(wait)ms
-        Receive: \(receive)ms
-        """
-    }
-}
-
-extension HAR.Timing: CustomDebugStringConvertible {
-    // MARK: Describing Timings
-
-    /// A human-readable debug description for the data.
-    public var debugDescription: String {
-        "HAR.Timing {\n\(description)\n}"
-    }
-}
-
 extension HAR.Timing {
+    // MARK: Computed Properties
+
     /// Compute total request time.
     ///
     /// The time value for the request must be equal to the sum of the timings supplied
