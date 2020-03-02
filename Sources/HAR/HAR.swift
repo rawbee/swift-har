@@ -35,7 +35,7 @@ import FoundationNetworking
 /// - Version: 1.2
 ///
 /// http://www.softwareishard.com/blog/har-12-spec/
-public struct HAR {
+public struct HAR: Equatable, Hashable {
     // MARK: Properties
 
     /// Log data root.
@@ -56,7 +56,7 @@ public struct HAR {
     /// for every HTTP request. In case when an HTTP trace tool isn't able to group
     /// requests by a page, the `pages` object is empty and individual requests doesn't
     /// have a parent page.
-    public struct Log {
+    public struct Log: Equatable, Hashable {
         // MARK: Properties
 
         /// Version number of the format. If empty, string "1.1" is assumed by default.
@@ -94,7 +94,7 @@ public struct HAR {
     }
 
     /// This object represents the log creator application.
-    public struct Creator {
+    public struct Creator: Equatable, Hashable {
         // MARK: Static Properties
 
         /// Creator info used when this library creates a new HAR log.
@@ -124,7 +124,7 @@ public struct HAR {
     }
 
     /// This object represents the web browser used.
-    public struct Browser {
+    public struct Browser: Equatable, Hashable {
         // MARK: Properties
 
         /// Name of the application/browser used to export the log.
@@ -149,7 +149,7 @@ public struct HAR {
     }
 
     /// This object represents list of exported pages.
-    public struct Page {
+    public struct Page: Equatable, Hashable {
         // MARK: Properties
 
         /// Date and time stamp for the beginning of the page load.
@@ -191,7 +191,7 @@ public struct HAR {
     ///
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad`
     /// event or `document.readyState == interactive`.
-    public struct PageTiming {
+    public struct PageTiming: Equatable, Hashable {
         // MARK: Properties
 
         /// Content of the page loaded. Number of milliseconds since page load started
@@ -226,7 +226,7 @@ public struct HAR {
     /// by `startedDateTime` (starting from the oldest) is preferred way how to export
     /// data since it can make importing faster. However the reader application should
     /// always make sure the array is sorted (if required for the import).
-    public struct Entry {
+    public struct Entry: Equatable, Hashable {
         // MARK: Properties
 
         /// Reference to the parent page. Leave out this field if the application does
@@ -296,7 +296,7 @@ public struct HAR {
     public typealias Entries = [Entry]
 
     /// This object contains detailed info about performed request.
-    public struct Request {
+    public struct Request: Equatable, Hashable {
         // MARK: Properties
 
         /// Request method.
@@ -403,7 +403,7 @@ public struct HAR {
     }
 
     /// This object contains detailed info about the response.
-    public struct Response {
+    public struct Response: Equatable, Hashable {
         // MARK: Properties
 
         /// Response status.
@@ -483,7 +483,7 @@ public struct HAR {
 
     /// This object contains list of all cookies (used in `Request` and `Response`
     /// objects).
-    public struct Cookie {
+    public struct Cookie: Equatable, Hashable {
         // MARK: Properties
 
         /// The name of the cookie.
@@ -542,7 +542,7 @@ public struct HAR {
 
     /// This object contains list of all headers (used in `Request` and `Response`
     /// objects).
-    public struct Header {
+    public struct Header: Equatable, Hashable {
         // MARK: Properties
 
         /// The header name.
@@ -564,6 +564,27 @@ public struct HAR {
             self.value = value
             self.comment = comment
         }
+
+        // MARK: Comparing Headers
+
+        /// Returns a Boolean value indicating whether two headers are equal.
+        ///
+        /// Header names are case-insensitive.
+        public static func ==(lhs: Self, rhs: Self) -> Bool {
+            lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame &&
+                lhs.value == rhs.value &&
+                lhs.comment == rhs.comment
+        }
+
+        /// Test if header matches case-insensitive name.
+        fileprivate func isNamed(_ name: String) -> Bool {
+            self.name.caseInsensitiveCompare(name) == .orderedSame
+        }
+
+        /// Hashes the lower case name of the header by feeding them into the given hasher.
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(name.lowercased())
+        }
     }
 
     /// Array of Header objects.
@@ -571,7 +592,7 @@ public struct HAR {
 
     /// This object contains list of all parameters & values parsed from a query string,
     /// if any (embedded in `Request` object).
-    public struct QueryString {
+    public struct QueryString: Equatable, Hashable {
         // MARK: Properties
 
         /// The query parameter name.
@@ -605,7 +626,7 @@ public struct HAR {
     public typealias QueryStrings = [QueryString]
 
     /// This object describes posted data, if any (embedded in `Request` object).
-    public struct PostData {
+    public struct PostData: Equatable, Hashable {
         // MARK: Properties
 
         /// Mime type of posted data.
@@ -674,7 +695,7 @@ public struct HAR {
     }
 
     /// List of posted parameters, if any (embedded in `PostData` object).
-    public struct Param {
+    public struct Param: Equatable, Hashable {
         // MARK: Properties
 
         /// Name of a posted parameter.
@@ -711,7 +732,7 @@ public struct HAR {
 
     /// This object describes details about response content (embedded in `Response`
     /// object).
-    public struct Content {
+    public struct Content: Equatable, Hashable {
         // MARK: Properties
 
         /// Length of the returned content in bytes. Should be equal to
@@ -805,7 +826,7 @@ public struct HAR {
     }
 
     /// This objects contains info about a request coming from browser cache.
-    public struct Cache {
+    public struct Cache: Equatable, Hashable {
         // MARK: Properties
 
         /// State of a cache entry before the request. Leave out this field if the
@@ -835,7 +856,7 @@ public struct HAR {
     }
 
     /// This objects contains cache entry state for the request.
-    public struct CacheEntry {
+    public struct CacheEntry: Equatable, Hashable {
         // MARK: Properties
 
         /// Expiration time of the cache entry.
@@ -869,7 +890,7 @@ public struct HAR {
 
     /// This object describes various phases within request-response round trip. All
     /// times are specified in milliseconds.
-    public struct Timing {
+    public struct Timing: Equatable, Hashable {
         // MARK: Properties
 
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing
@@ -929,10 +950,6 @@ public struct HAR {
 }
 
 // MARK: - HAR
-
-extension HAR: Equatable {}
-
-extension HAR: Hashable {}
 
 extension HAR: Codable {
     // MARK: Encoding and Decoding
@@ -997,10 +1014,6 @@ extension HAR: Codable {
 
 // MARK: - Log
 
-extension HAR.Log: Equatable {}
-
-extension HAR.Log: Hashable {}
-
 extension HAR.Log: Codable {}
 
 extension HAR.Log {
@@ -1019,10 +1032,6 @@ extension HAR.Log {
 }
 
 // MARK: - Creator
-
-extension HAR.Creator: Equatable {}
-
-extension HAR.Creator: Hashable {}
 
 extension HAR.Creator: CustomStringConvertible {
     // MARK: Describing Creators
@@ -1046,10 +1055,6 @@ extension HAR.Creator: Codable {}
 
 // MARK: - Browser
 
-extension HAR.Browser: Equatable {}
-
-extension HAR.Browser: Hashable {}
-
 extension HAR.Browser: CustomStringConvertible {
     // MARK: Describing Browsers
 
@@ -1071,10 +1076,6 @@ extension HAR.Browser: CustomDebugStringConvertible {
 extension HAR.Browser: Codable {}
 
 // MARK: - Pages
-
-extension HAR.Page: Equatable {}
-
-extension HAR.Page: Hashable {}
 
 extension HAR.Page: CustomStringConvertible {
     // MARK: Describing Pages
@@ -1128,10 +1129,6 @@ extension HAR.Page: Codable {
 
 // MARK: - PageTimings
 
-extension HAR.PageTiming: Equatable {}
-
-extension HAR.PageTiming: Hashable {}
-
 extension HAR.PageTiming: CustomStringConvertible {
     // MARK: Describing Page Timings
 
@@ -1153,10 +1150,6 @@ extension HAR.PageTiming: CustomDebugStringConvertible {
 extension HAR.PageTiming: Codable {}
 
 // MARK: - Entries
-
-extension HAR.Entry: Equatable {}
-
-extension HAR.Entry: Hashable {}
 
 extension HAR.Entry: Codable {}
 
@@ -1197,10 +1190,6 @@ extension HAR.Entry {
 }
 
 // MARK: - Request
-
-extension HAR.Request: Equatable {}
-
-extension HAR.Request: Hashable {}
 
 extension HAR.Request: CustomStringConvertible {
     // MARK: Describing Requests
@@ -1296,10 +1285,6 @@ extension URLRequest {
 }
 
 // MARK: - Response
-
-extension HAR.Response: Equatable {}
-
-extension HAR.Response: Hashable {}
 
 extension HAR.Response: CustomStringConvertible {
     // MARK: Describing Responses
@@ -1409,10 +1394,6 @@ extension HAR.Response {
 }
 
 // MARK: - Cookies
-
-extension HAR.Cookie: Equatable {}
-
-extension HAR.Cookie: Hashable {}
 
 extension HAR.Cookie: Codable {}
 
@@ -1580,33 +1561,6 @@ extension HAR.Cookies {
 
 // MARK: - Headers
 
-extension HAR.Header: Equatable {
-    // MARK: Comparing Headers
-
-    /// Returns a Boolean value indicating whether two headers are equal.
-    ///
-    /// Header names are case-insensitive.
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
-        lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame &&
-            lhs.value == rhs.value &&
-            lhs.comment == rhs.comment
-    }
-
-    /// Test if header matches case-insensitive name.
-    fileprivate func isNamed(_ name: String) -> Bool {
-        self.name.caseInsensitiveCompare(name) == .orderedSame
-    }
-}
-
-extension HAR.Header: Hashable {
-    // MARK: Comparing Headers
-
-    /// Hashes the lower case name of the header by feeding them into the given hasher.
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(name.lowercased())
-    }
-}
-
 extension HAR.Header: CustomStringConvertible {
     // MARK: Describing Headers
 
@@ -1682,10 +1636,6 @@ extension HAR.Headers {
 
 // MARK: - QueryString
 
-extension HAR.QueryString: Equatable {}
-
-extension HAR.QueryString: Hashable {}
-
 extension HAR.QueryString: CustomStringConvertible {
     // MARK: Describing Query Strings
 
@@ -1707,10 +1657,6 @@ extension HAR.QueryString: CustomDebugStringConvertible {
 extension HAR.QueryString: Codable {}
 
 // MARK: - PostData
-
-extension HAR.PostData: Equatable {}
-
-extension HAR.PostData: Hashable {}
 
 extension HAR.PostData: Codable {
     // MARK: Encoding and Decoding
@@ -1741,10 +1687,6 @@ extension HAR.PostData {
 }
 
 // MARK: - Params
-
-extension HAR.Param: Equatable {}
-
-extension HAR.Param: Hashable {}
 
 extension HAR.Param: CustomStringConvertible {
     // MARK: Describing Params
@@ -1794,10 +1736,6 @@ extension HAR.Param: Codable {
 
 // MARK: - Content
 
-extension HAR.Content: Equatable {}
-
-extension HAR.Content: Hashable {}
-
 extension HAR.Content: Codable {}
 
 extension HAR.Content {
@@ -1820,23 +1758,11 @@ extension HAR.Content {
 
 // MARK: - Cache
 
-extension HAR.Cache: Equatable {}
-
-extension HAR.Cache: Hashable {}
-
 extension HAR.Cache: Codable {}
-
-extension HAR.CacheEntry: Equatable {}
-
-extension HAR.CacheEntry: Hashable {}
 
 extension HAR.CacheEntry: Codable {}
 
 // MARK: - Timings
-
-extension HAR.Timing: Equatable {}
-
-extension HAR.Timing: Hashable {}
 
 extension HAR.Timing: CustomStringConvertible {
     // MARK: Describing Timings
