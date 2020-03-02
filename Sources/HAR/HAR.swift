@@ -139,6 +139,19 @@ public struct HAR: Equatable, Hashable, Codable {
         /// - Version: 1.2
         public var comment: String?
 
+        // MARK: Computed Properties
+
+        /// Access log's first entry.
+        ///
+        /// - Invariant: Log's must have at least one entry to be valid.
+        /// However, a log maybe empty on initial construction.
+        public var firstEntry: HAR.Entry {
+            guard let entry = entries.first else {
+                preconditionFailure("HAR.Log has no entries")
+            }
+            return entry
+        }
+
         // MARK: Initializers
 
         /// Create log.
@@ -412,6 +425,13 @@ public struct HAR: Equatable, Hashable, Codable {
         /// - Version: 1.2
         public var comment: String?
 
+        // MARK: Computed Properties
+
+        /// Computed `time` from timings.
+        internal var computedTime: Double {
+            timings.total
+        }
+
         // MARK: Initializers
 
         /// Create entry.
@@ -473,6 +493,42 @@ public struct HAR: Equatable, Hashable, Codable {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Computed Properties
+
+        /// Computed `cookies` from headers.
+        internal var computedCookies: HAR.Cookies {
+            headers.value(forName: "Cookie").map {
+                HAR.Cookies(fromCookieHeader: $0)
+            } ?? []
+        }
+
+        /// Computed `queryString` from URL query string.
+        internal var computedQueryString: HAR.QueryStrings {
+            if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems {
+                return queryItems.map { HAR.QueryString($0) }
+            }
+            return []
+        }
+
+        /// Computed `headersSize`.
+        internal var computedHeadersSize: Int {
+            Data(headerText.utf8).count
+        }
+
+        /// Compute text representation of header for computing it's size.
+        internal var headerText: String {
+            """
+            \(method) \(url.relativePath) \(httpVersion)\r
+            \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
+            """
+        }
+
+        /// Computed `bodySize`.
+        internal var computedBodySize: Int {
+            postData?.size ?? -1
+        }
 
         // MARK: Initializers
 
@@ -613,6 +669,32 @@ public struct HAR: Equatable, Hashable, Codable {
         ///
         /// - Version: 1.2
         public var comment: String?
+
+        // MARK: Computed Properties
+
+        /// Computed `cookies` from headers.
+        internal var computedCookies: HAR.Cookies {
+            headers.values(forName: "Set-Cookie")
+                .map(HAR.Cookie.init(fromSetCookieHeader:))
+        }
+
+        /// Computed `headersSize`.
+        internal var computedHeadersSize: Int {
+            Data(headerText.utf8).count
+        }
+
+        /// Compute text representation of header for computing it's size.
+        internal var headerText: String {
+            """
+            \(status) \(statusText)\r
+            \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
+            """
+        }
+
+        /// Computed `bodySize`.
+        internal var computedBodySize: Int {
+            content.size
+        }
 
         // MARK: Initializers
 
@@ -879,6 +961,18 @@ public struct HAR: Equatable, Hashable, Codable {
         /// - Version: 1.2
         public var comment: String?
 
+        // MARK: Computed Properties
+
+        /// Get text as UTF8 Data.
+        internal var data: Data {
+            Data(text.utf8)
+        }
+
+        /// Get bytesize of text.
+        internal var size: Int {
+            data.count
+        }
+
         // MARK: Initializers
 
         /// Create post data.
@@ -1057,6 +1151,22 @@ public struct HAR: Equatable, Hashable, Codable {
         /// - Version: 1.2
         public var comment: String?
 
+        // MARK: Computed Properties
+
+        /// Empty data
+        private static let emptyData = Data(count: 0)
+
+        /// Get content body as Data. May return empty Data if text is encoded improperly.
+        public var data: Data {
+            guard let text = text else { return Self.emptyData }
+            switch encoding {
+            case "base64":
+                return Data(base64Encoded: text) ?? Self.emptyData
+            default:
+                return Data(text.utf8)
+            }
+        }
+
         // MARK: Initializers
 
         /// Create content.
@@ -1208,6 +1318,19 @@ public struct HAR: Equatable, Hashable, Codable {
         /// - Version: 1.2
         public var comment: String?
 
+        // MARK: Computed Properties
+
+        /// Compute total request time.
+        ///
+        /// The time value for the request must be equal to the sum of the timings supplied
+        /// in this section (excluding any -1 values).
+        internal var total: Double {
+            [blocked, dns, connect, send, wait, receive]
+                .map { $0 ?? -1 }
+                .filter { $0 != -1 }
+                .reduce(0, +)
+        }
+
         // MARK: Initializers
 
         /// Create timing.
@@ -1251,33 +1374,7 @@ public struct HAR: Equatable, Hashable, Codable {
     }
 }
 
-// MARK: - Log
-
-extension HAR.Log {
-    // MARK: Computed Properties
-
-    /// Access log's first entry.
-    ///
-    /// - Invariant: Log's must have at least one entry to be valid.
-    /// However, a log maybe empty on initial construction.
-    public var firstEntry: HAR.Entry {
-        guard let entry = entries.first else {
-            preconditionFailure("HAR.Log has no entries")
-        }
-        return entry
-    }
-}
-
 // MARK: - Entries
-
-extension HAR.Entry {
-    // MARK: Computed Properties
-
-    /// Computed `time` from timings.
-    internal var computedTime: Double {
-        timings.total
-    }
-}
 
 extension HAR.Entry {
     // MARK: Instance Methods
@@ -1308,44 +1405,6 @@ extension HAR.Entry {
 
 // MARK: - Request
 
-extension HAR.Request {
-    // MARK: Computed Properties
-
-    /// Computed `cookies` from headers.
-    internal var computedCookies: HAR.Cookies {
-        headers.value(forName: "Cookie").map {
-            HAR.Cookies(fromCookieHeader: $0)
-        } ?? []
-    }
-
-    /// Computed `queryString` from URL query string.
-    internal var computedQueryString: HAR.QueryStrings {
-        if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-            .queryItems {
-            return queryItems.map { HAR.QueryString($0) }
-        }
-        return []
-    }
-
-    /// Computed `headersSize`.
-    internal var computedHeadersSize: Int {
-        Data(headerText.utf8).count
-    }
-
-    /// Compute text representation of header for computing it's size.
-    internal var headerText: String {
-        """
-        \(method) \(url.relativePath) \(httpVersion)\r
-        \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
-        """
-    }
-
-    /// Computed `bodySize`.
-    internal var computedBodySize: Int {
-        postData?.size ?? -1
-    }
-}
-
 extension URLRequest {
     // MARK: Initializers
 
@@ -1363,34 +1422,6 @@ extension URLRequest {
 }
 
 // MARK: - Response
-
-extension HAR.Response {
-    // MARK: Computed Properties
-
-    /// Computed `cookies` from headers.
-    internal var computedCookies: HAR.Cookies {
-        headers.values(forName: "Set-Cookie")
-            .map(HAR.Cookie.init(fromSetCookieHeader:))
-    }
-
-    /// Computed `headersSize`.
-    internal var computedHeadersSize: Int {
-        Data(headerText.utf8).count
-    }
-
-    /// Compute text representation of header for computing it's size.
-    internal var headerText: String {
-        """
-        \(status) \(statusText)\r
-        \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
-        """
-    }
-
-    /// Computed `bodySize`.
-    internal var computedBodySize: Int {
-        content.size
-    }
-}
 
 extension HTTPURLResponse {
     // MARK: Initializers
@@ -1642,58 +1673,7 @@ extension HAR.Headers {
     }
 }
 
-// MARK: - PostData
-
-extension HAR.PostData {
-    // MARK: Computed Properties
-
-    /// Get text as UTF8 Data.
-    internal var data: Data {
-        Data(text.utf8)
-    }
-
-    /// Get bytesize of text.
-    internal var size: Int {
-        data.count
-    }
-}
-
-// MARK: - Content
-
-extension HAR.Content {
-    // MARK: Computed Properties
-
-    /// Empty data
-    private static let emptyData = Data(count: 0)
-
-    /// Get content body as Data. May return empty Data if text is encoded improperly.
-    public var data: Data {
-        guard let text = text else { return Self.emptyData }
-        switch encoding {
-        case "base64":
-            return Data(base64Encoded: text) ?? Self.emptyData
-        default:
-            return Data(text.utf8)
-        }
-    }
-}
-
 // MARK: - Timings
-
-extension HAR.Timing {
-    // MARK: Computed Properties
-
-    /// Compute total request time.
-    ///
-    /// The time value for the request must be equal to the sum of the timings supplied
-    /// in this section (excluding any -1 values).
-    internal var total: Double {
-        [blocked, dns, connect, send, wait, receive]
-            .map { $0 ?? -1 }
-            .filter { $0 != -1 }
-            .reduce(0, +)
-    }
-}
 
 #if !os(Linux)
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
