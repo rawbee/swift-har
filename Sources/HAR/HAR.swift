@@ -55,23 +55,19 @@ public struct HAR: Equatable, Hashable, Codable {
     }
 
     /// Writes the ecoded HAR to a location.
-    func write(to url: URL, options: Data.WritingOptions = []) throws {
+    public func write(to url: URL, options: Data.WritingOptions = []) throws {
         try encoded().write(to: url, options: options)
     }
 
-    /// Return ISO 8601 date formatter.
+    /// Initialize ISO 8601 date formatter.
     ///
     /// Uses the format `YYYY-MM-DDThh:mm:ss.sTZD` to return a date such as
-    /// `2009-07-24T19:20:30.45+01:00`.
-    private static func makeDateFormatter() -> DateFormatter {
+    private static let jsonDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSZZZZZ"
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
         return formatter
-    }
-
-    /// Initialize singleton ISO 8601 date formatter.
-    private static let dateFormatter: DateFormatter = makeDateFormatter()
+    }()
 
     /// Creates a `HAR` from JSON `Data`.
     ///
@@ -83,7 +79,7 @@ public struct HAR: Equatable, Hashable, Codable {
             let container = try decoder.singleValueContainer()
             let dateStr = try container.decode(String.self)
 
-            if let date = Self.dateFormatter.date(from: dateStr) {
+            if let date = Self.jsonDateFormatter.date(from: dateStr) {
                 return date
             }
 
@@ -100,7 +96,7 @@ public struct HAR: Equatable, Hashable, Codable {
     public func encoded() throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
-        encoder.dateEncodingStrategy = .formatted(Self.dateFormatter)
+        encoder.dateEncodingStrategy = .formatted(Self.jsonDateFormatter)
         return try encoder.encode(self)
     }
 
@@ -152,7 +148,7 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Initializers
 
         /// Create log.
-        public init(version: String = "1.2", creator: HAR.Creator = Creator.defaultCreator, browser: HAR.Browser? = nil, pages: HAR.Pages? = nil, entries: Entries = [], comment: String? = nil) {
+        public init(version: String = "1.2", creator: HAR.Creator = Creator.default, browser: HAR.Browser? = nil, pages: HAR.Pages? = nil, entries: Entries = [], comment: String? = nil) {
             self.version = version
             self.creator = creator
             self.browser = browser
@@ -167,7 +163,7 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Static Properties
 
         /// Creator info used when this library creates a new HAR log.
-        public static let defaultCreator = Creator(name: "SwiftHAR", version: "0.1.0")
+        public static let `default` = Creator(name: "SwiftHAR", version: "0.1.0")
 
         // MARK: Properties
 
@@ -289,6 +285,13 @@ public struct HAR: Equatable, Hashable, Codable {
 
         // MARK: Describing Pages
 
+        /// Date formatter for Page description.
+        private static let startedDateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "M/d/yyyy, h:mm:ss a"
+            return formatter
+        }()
+
         /// A human-readable description for the data.
         public var description: String {
             var strs: [String] = []
@@ -301,14 +304,6 @@ public struct HAR: Equatable, Hashable, Codable {
             strs.append(title)
 
             return strs.joined(separator: "  ")
-        }
-
-        internal static let startedDateFormatter = makeStartedDateFormatter()
-
-        private static func makeStartedDateFormatter() -> DateFormatter {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "M/d/yyyy, h:mm:ss a"
-            return formatter
         }
 
         /// A human-readable debug description for the data.
@@ -345,9 +340,6 @@ public struct HAR: Equatable, Hashable, Codable {
         public var comment: String?
 
         // MARK: Initializers
-
-        /// Create page timing.
-        public init() {}
 
         /// Create page timing.
         public init(onContentLoad: Double = -1, onLoad: Double = -1, comment: String? = nil) {
@@ -425,7 +417,7 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Computed Properties
 
         /// Computed `time` from timings.
-        internal var computedTime: Double {
+        public var computedTime: Double {
             timings.total
         }
 
@@ -460,7 +452,7 @@ public struct HAR: Equatable, Hashable, Codable {
         public var url: URL
 
         /// Request HTTP Version.
-        public var httpVersion: String
+        public var httpVersion: String = "HTTP/1.1"
 
         /// List of cookie objects.
         public var cookies: Cookies = []
@@ -494,28 +486,22 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Computed Properties
 
         /// Computed `cookies` from headers.
-        internal var computedCookies: HAR.Cookies {
-            headers.value(forName: "Cookie").map {
-                HAR.Cookies(fromCookieHeader: $0)
-            } ?? []
+        public var computedCookies: HAR.Cookies {
+            headers.value(forName: "Cookie").map { HAR.Cookies(fromCookieHeader: $0) } ?? []
         }
 
         /// Computed `queryString` from URL query string.
-        internal var computedQueryString: HAR.QueryStrings {
-            if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                .queryItems {
-                return queryItems.map { HAR.QueryString($0) }
-            }
-            return []
+        public var computedQueryString: HAR.QueryStrings {
+            URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.map(HAR.QueryString.init) ?? []
         }
 
         /// Computed `headersSize`.
-        internal var computedHeadersSize: Int {
+        public var computedHeadersSize: Int {
             Data(headerText.utf8).count
         }
 
         /// Compute text representation of header for computing it's size.
-        internal var headerText: String {
+        private var headerText: String {
             """
             \(method) \(url.relativePath) \(httpVersion)\r
             \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
@@ -523,37 +509,36 @@ public struct HAR: Equatable, Hashable, Codable {
         }
 
         /// Computed `bodySize`.
-        internal var computedBodySize: Int {
+        public var computedBodySize: Int {
             postData?.size ?? -1
         }
 
         // MARK: Initializers
 
-        /// Create request.
-        public init(method: String = "GET", url: URL, httpVersion: String = "HTTP/1.1", cookies: Cookies = [], headers: Headers = [], queryString: QueryStrings = [], postData: PostData? = nil, headersSize: Int = -1, bodySize: Int = -1, comment: String? = nil) {
-            self.method = method
-            self.url = url
-            self.httpVersion = httpVersion
-            self.cookies = cookies
-            self.headers = headers
-            self.queryString = queryString
-            self.postData = postData
-            self.headersSize = headersSize
-            self.bodySize = bodySize
-            self.comment = comment
-        }
-
         /// Create `Request` with HTTP method and url.
         ///
         /// - Parameter method: An HTTP method.
         /// - Parameter url: A URL.
-        public init(method: String, url: URL) {
+        public init(method: String = "GET",
+                    url: URL,
+                    httpVersion: String = "HTTP/1.1",
+                    cookies: Cookies? = nil,
+                    headers: Headers = [],
+                    queryString: QueryStrings? = nil,
+                    postData: PostData? = nil,
+                    headersSize: Int? = nil,
+                    bodySize: Int? = nil,
+                    comment: String? = nil) {
             self.method = method
             self.url = url
-            self.httpVersion = "HTTP/1.1"
-
-            self.queryString = computedQueryString
-            self.headersSize = computedHeadersSize
+            self.httpVersion = httpVersion
+            self.cookies = cookies ?? computedCookies
+            self.headers = headers
+            self.postData = postData
+            self.queryString = queryString ?? computedQueryString
+            self.headersSize = headersSize ?? computedHeadersSize
+            self.bodySize = bodySize ?? computedBodySize
+            self.comment = comment
         }
 
         // MARK: Encoding and Decoding
@@ -635,18 +620,18 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Computed Properties
 
         /// Computed `cookies` from headers.
-        internal var computedCookies: HAR.Cookies {
+        public var computedCookies: HAR.Cookies {
             headers.values(forName: "Set-Cookie")
                 .map(HAR.Cookie.init(fromSetCookieHeader:))
         }
 
         /// Computed `headersSize`.
-        internal var computedHeadersSize: Int {
+        public var computedHeadersSize: Int {
             Data(headerText.utf8).count
         }
 
         /// Compute text representation of header for computing it's size.
-        internal var headerText: String {
+        private var headerText: String {
             """
             \(status) \(statusText)\r
             \(headers.map { "\($0.name): \($0.value)\r\n" }.joined())\r\n
@@ -654,23 +639,23 @@ public struct HAR: Equatable, Hashable, Codable {
         }
 
         /// Computed `bodySize`.
-        internal var computedBodySize: Int {
+        public var computedBodySize: Int {
             content.size
         }
 
         // MARK: Initializers
 
         /// Create response.
-        public init(status: Int = 200, statusText: String = "OK", httpVersion: String = "HTTP/1.1", cookies: Cookies = [], headers: Headers = [], content: Content = HAR.Content(), redirectURL: String = "", headersSize: Int = -1, bodySize: Int = -1, comment: String? = nil) {
+        public init(status: Int = 200, statusText: String = "OK", httpVersion: String = "HTTP/1.1", cookies: Cookies? = nil, headers: Headers = [], content: Content = HAR.Content(), redirectURL: String = "", headersSize: Int? = nil, bodySize: Int? = nil, comment: String? = nil) {
             self.status = status
             self.statusText = statusText
             self.httpVersion = httpVersion
-            self.cookies = cookies
-            self.headers = headers
             self.content = content
             self.redirectURL = redirectURL
-            self.headersSize = headersSize
-            self.bodySize = bodySize
+            self.headers = headers
+            self.cookies = cookies ?? computedCookies
+            self.headersSize = headersSize ?? computedHeadersSize
+            self.bodySize = bodySize ?? computedBodySize
             self.comment = comment
         }
 
@@ -771,7 +756,7 @@ public struct HAR: Equatable, Hashable, Codable {
         }
 
         /// Create Cookie from HTTP Response "Set-Cookie" header value.
-        fileprivate init(fromSetCookieHeader header: String) {
+        internal init(fromSetCookieHeader header: String) {
             var attributeValues = Self.parseCookieAttributes(header)
 
             let (name, value) = attributeValues.removeFirst()
@@ -829,7 +814,7 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Static Methods
 
         /// Parse cookie style attribute pairs seperated by `;` and `=`
-        fileprivate static func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] {
+        internal static func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] {
             string.split(separator: ";").compactMap {
                 let parts = $0.split(separator: "=", maxSplits: 1)
                 let key = String(parts[0])
@@ -979,12 +964,12 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Computed Properties
 
         /// Get text as UTF8 Data.
-        internal var data: Data {
+        public var data: Data {
             Data(text.utf8)
         }
 
         /// Get bytesize of text.
-        internal var size: Int {
+        public var size: Int {
             data.count
         }
 
@@ -1168,15 +1153,12 @@ public struct HAR: Equatable, Hashable, Codable {
 
         // MARK: Computed Properties
 
-        /// Empty data
-        private static let emptyData = Data(count: 0)
-
         /// Get content body as Data. May return empty Data if text is encoded improperly.
         public var data: Data {
-            guard let text = text else { return Self.emptyData }
+            guard let text = text else { return Data(count: 0) }
             switch encoding {
             case "base64":
-                return Data(base64Encoded: text) ?? Self.emptyData
+                return Data(base64Encoded: text) ?? Data(count: 0)
             default:
                 return Data(text.utf8)
             }
@@ -1339,7 +1321,7 @@ public struct HAR: Equatable, Hashable, Codable {
         ///
         /// The time value for the request must be equal to the sum of the timings supplied
         /// in this section (excluding any -1 values).
-        internal var total: Double {
+        public var total: Double {
             [blocked, dns, connect, send, wait, receive]
                 .map { $0 ?? -1 }
                 .filter { $0 != -1 }
@@ -1349,7 +1331,7 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Initializers
 
         /// Create timing.
-        public init(blocked: Double? = -1, dns: Double? = -1, connect: Double? = -1, send: Double, wait: Double, receive: Double, ssl: Double? = -1, comment: String? = nil) {
+        public init(blocked: Double? = -1, dns: Double? = -1, connect: Double? = -1, send: Double = -1, wait: Double = -1, receive: Double = -1, ssl: Double? = -1, comment: String? = nil) {
             self.blocked = blocked
             self.dns = dns
             self.connect = connect
@@ -1358,13 +1340,6 @@ public struct HAR: Equatable, Hashable, Codable {
             self.receive = receive
             self.ssl = ssl
             self.comment = comment
-        }
-
-        /// Create timing.
-        public init() {
-            self.send = -1
-            self.wait = -1
-            self.receive = -1
         }
 
         // MARK: Describing Timings
