@@ -532,13 +532,13 @@ public struct HAR: Equatable, Hashable, Codable {
             self.method = method
             self.url = url
             self.httpVersion = httpVersion
-            self.cookies = cookies ?? computedCookies
             self.headers = headers
             self.postData = postData
+            self.comment = comment
+            self.cookies = cookies ?? computedCookies
             self.queryString = queryString ?? computedQueryString
             self.headersSize = headersSize ?? computedHeadersSize
             self.bodySize = bodySize ?? computedBodySize
-            self.comment = comment
         }
 
         // MARK: Encoding and Decoding
@@ -653,10 +653,10 @@ public struct HAR: Equatable, Hashable, Codable {
             self.content = content
             self.redirectURL = redirectURL
             self.headers = headers
+            self.comment = comment
             self.cookies = cookies ?? computedCookies
             self.headersSize = headersSize ?? computedHeadersSize
             self.bodySize = bodySize ?? computedBodySize
-            self.comment = comment
         }
 
         // MARK: Encoding and Decoding
@@ -867,7 +867,7 @@ public struct HAR: Equatable, Hashable, Codable {
         }
 
         /// Test if header matches case-insensitive name.
-        internal func isNamed(_ name: String) -> Bool {
+        public func isNamed(_ name: String) -> Bool {
             self.name.caseInsensitiveCompare(name) == .orderedSame
         }
 
@@ -1378,7 +1378,7 @@ extension HAR.Cookies {
 extension HAR.Headers {
     // MARK: Computed Properties
 
-    internal var headersAsDictionary: [String: String] {
+    public var headersAsDictionary: [String: String] {
         reduce(into: [:]) { result, header in
             if result[header.name] == nil {
                 result[header.name] = header.value
@@ -1395,7 +1395,7 @@ extension HAR.Headers {
     /// Header names are case-insensitive.
     ///
     /// - Parameter name: The HTTP Header name.
-    internal func values(forName name: String) -> [String] {
+    public func values(forName name: String) -> [String] {
         filter { $0.isNamed(name) }.map { $0.value }
     }
 
@@ -1404,7 +1404,7 @@ extension HAR.Headers {
     /// Header names are case-insensitive.
     ///
     /// - Parameter name: The HTTP Header name.
-    internal func value(forName name: String) -> String? {
+    public func value(forName name: String) -> String? {
         values(forName: name).first
     }
 }

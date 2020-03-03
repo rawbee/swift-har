@@ -63,40 +63,25 @@ extension HAR.Request {
     ///
     /// - Parameter request: A URL Request.
     public init(request: URLRequest) {
-        self.postData = nil
-        self.headersSize = -1
-        self.bodySize = -1
-        self.comment = nil
-
         /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
-        self.method = request.httpMethod ?? "GET"
-
-        self.httpVersion = "HTTP/1.1"
+        let method = request.httpMethod ?? "GET"
 
         /// Empty URL fallback to cover edge case of nil URLRequest.url
-        self.url = URL(string: "about:blank")!
-        if let url = request.url {
-            self.url = url
-        }
+        let url = request.url ?? URL(string: "about:blank")!
 
-        self.queryString = computedQueryString
+        let headers: HAR.Headers = request.allHTTPHeaderFields.map { HAR.Headers($0) } ?? []
 
-        if let headers = request.allHTTPHeaderFields {
-            self.headers = HAR.Headers(headers)
-        }
-
+        var bodySize = 0
+        var postData: HAR.PostData?
         if let data = request.httpBody {
-            self.bodySize = data.count
-            self.postData = HAR.PostData(
+            bodySize = data.count
+            postData = HAR.PostData(
                 parsingData: data,
                 mimeType: headers.value(forName: "Content-Type")
             )
-        } else {
-            self.bodySize = 0
         }
 
-        self.cookies = computedCookies
-        self.headersSize = computedHeadersSize
+        self.init(method: method, url: url, headers: headers, postData: postData, bodySize: bodySize)
     }
 }
 
@@ -121,25 +106,12 @@ extension HAR.Response {
 
     /// Creates a archived Response from a `HTTPURLResponse` and HTTP Body `Data`.
     public init(response: HTTPURLResponse, data: Data?) {
-        self.status = response.statusCode
-        self.statusText = Self.statusText(forStatusCode: response.statusCode)
-        self.httpVersion = "HTTP/1.1"
-        self.cookies = []
-        self.headers = HAR.Headers(response.allHeaderFields)
-        self.redirectURL = ""
-        self.headersSize = -1
-        self.bodySize = -1
-        self.comment = nil
+        let status = response.statusCode
+        let statusText = Self.statusText(forStatusCode: response.statusCode)
+        let headers = HAR.Headers(response.allHeaderFields)
+        let content = data.map { HAR.Content(decoding: $0, mimeType: response.mimeType) } ?? HAR.Content()
 
-        if let data = data {
-            self.content = HAR.Content(decoding: data, mimeType: response.mimeType)
-        } else {
-            self.content = HAR.Content()
-        }
-
-        self.cookies = computedCookies
-        self.headersSize = computedHeadersSize
-        self.bodySize = computedBodySize
+        self.init(status: status, statusText: statusText, headers: headers, content: content)
     }
 
     // MARK: Type Methods
@@ -277,6 +249,8 @@ extension HAR.Timing {
     // MARK: Initializers
 
     fileprivate init(metric: URLSessionTaskTransactionMetrics) {
+        self.init()
+
         if let start = metric.fetchStartDate, let end = metric.domainLookupStartDate {
             self.blocked = end.timeIntervalSince(start) * 1000
         }
@@ -291,27 +265,19 @@ extension HAR.Timing {
 
         if let start = metric.requestStartDate, let end = metric.requestEndDate {
             self.send = end.timeIntervalSince(start) * 1000
-        } else {
-            self.send = 0
         }
 
         if let start = metric.requestEndDate, let end = metric.responseStartDate {
             self.wait = end.timeIntervalSince(start) * 1000
-        } else {
-            self.wait = 0
         }
 
         if let start = metric.responseStartDate, let end = metric.responseEndDate {
             self.receive = end.timeIntervalSince(start) * 1000
-        } else {
-            self.receive = 0
         }
 
         if let start = metric.secureConnectionStartDate, let end = metric.secureConnectionEndDate {
             self.ssl = end.timeIntervalSince(start) * 1000
         }
-
-        self.comment = nil
     }
 }
 #endif
