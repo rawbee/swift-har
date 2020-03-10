@@ -32,7 +32,7 @@ import Foundation
 /// - Version: 1.2
 ///
 /// http://www.softwareishard.com/blog/har-12-spec/
-public struct HAR: Equatable, Hashable, Codable, Redactable {
+public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     // MARK: Properties
 
     /// Log data root.
@@ -1430,6 +1430,8 @@ public struct HAR: Equatable, Hashable, Codable, Redactable {
             "HAR.Timing {\n\(description)\n}"
         }
     }
+
+    public typealias Redactable = __HARRedactable
 }
 
 extension HAR.Cookies {
@@ -1443,7 +1445,7 @@ extension HAR.Cookies {
     }
 }
 
-extension HAR.Headers: Redactable {
+extension HAR.Headers: HAR.Redactable {
     // MARK: Computed Properties
 
     public var headersAsDictionary: [String: String] {
@@ -1484,7 +1486,7 @@ extension HAR.Headers: Redactable {
     }
 }
 
-internal protocol Redactable {
+public protocol __HARRedactable {
     /// Replace matched data with placeholder text.
     mutating func redact(_ pattern: NSRegularExpression, placeholder: String)
 
@@ -1492,7 +1494,7 @@ internal protocol Redactable {
     func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self
 }
 
-extension Redactable {
+extension HAR.Redactable {
     /// Replace matched data with placeholder text.
     public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
         self = redacting(pattern, placeholder: placeholder)
