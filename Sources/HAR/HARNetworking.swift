@@ -368,10 +368,10 @@ extension HAR {
     }
 
     /// Perform URL Request, create HTTP archive and write encoded archive to file URL.
-    public static func record(request: URLRequest, to url: URL, completionHandler: @escaping (RecordResult) -> Void) {
+    public static func record(request: URLRequest, to url: URL, transform: @escaping (Self) -> Self = { $0 }, completionHandler: @escaping (RecordResult) -> Void) {
         record(request: request) { result in
             do {
-                let har = try result.get()
+                let har = transform(try result.get())
                 try har.write(to: url)
                 completionHandler(.success(har))
             } catch (let error) {
@@ -382,11 +382,11 @@ extension HAR {
 
     /// Attempt to load HAR from file system, otherwise perform request and
     /// write result to file system.
-    public static func load(contentsOf url: URL, orRecordRequest request: URLRequest, completionHandler: @escaping (RecordResult) -> Void) {
+    public static func load(contentsOf url: URL, orRecordRequest request: URLRequest, transform: @escaping (Self) -> Self = { $0 }, completionHandler: @escaping (RecordResult) -> Void) {
         do {
             completionHandler(.success(try HAR(contentsOf: url)))
         } catch {
-            record(request: request, to: url, completionHandler: completionHandler)
+            record(request: request, to: url, transform: transform, completionHandler: completionHandler)
         }
     }
 }
@@ -447,8 +447,8 @@ extension HAR {
             fatalError("URLProtocol.startLoading must be implemented")
         }
 
-        public func startLoading(url: URL, entrySelector: @escaping (HAR.Log) -> HAR.Entry = { $0.firstEntry }) {
-            HAR.load(contentsOf: url, orRecordRequest: request) { result in
+        public func startLoading(url: URL, transform: @escaping (HAR) -> HAR = { $0 }, entrySelector: @escaping (HAR.Log) -> HAR.Entry = { $0.firstEntry }) {
+            HAR.load(contentsOf: url, orRecordRequest: request, transform: transform) { result in
                 self.client?.urlProtocol(self, didLoadEntryResult: result.map { har in entrySelector(har.log) })
             }
         }
