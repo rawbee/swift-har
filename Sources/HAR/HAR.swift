@@ -866,9 +866,15 @@ public struct HAR: Equatable, Hashable, Codable {
                 lhs.comment == rhs.comment
         }
 
-        /// Test if header matches case-insensitive name.
+        /// Test if header name matches case-insensitive name.
         public func isNamed(_ name: String) -> Bool {
             self.name.caseInsensitiveCompare(name) == .orderedSame
+        }
+        
+        /// Test if header name matches Regular Expression.
+        public func isNamed(_ pattern: NSRegularExpression) -> Bool {
+            let range = NSRange(self.name.startIndex..<self.name.endIndex, in: self.name)
+            return pattern.firstMatch(in: self.name, options: [], range: range) != nil
         }
 
         /// Hashes the lower case name of the header by feeding them into the given hasher.

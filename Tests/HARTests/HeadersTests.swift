@@ -106,4 +106,18 @@ final class HeadersTests: XCTestCase {
             ])
         )
     }
+    
+    func testIsNamedString() {
+        XCTAssertTrue(HAR.Header(name: "Content-Type", value: "text/html").isNamed("Content-Type"))
+        XCTAssertTrue(HAR.Header(name: "Content-Type", value: "text/html").isNamed("content-type"))
+        XCTAssertTrue(HAR.Header(name: "content-type", value: "text/html").isNamed("Content-Type"))
+        XCTAssertFalse(HAR.Header(name: "Content-Length", value: "text/html").isNamed("Content-Type"))
+    }
+    
+    func testIsNamedRegexp() throws {
+        XCTAssertTrue(HAR.Header(name: "Content-Type", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
+        XCTAssertTrue(HAR.Header(name: "content-type", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
+        XCTAssertTrue(HAR.Header(name: "Content-Length", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
+        XCTAssertFalse(HAR.Header(name: "Accept", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
+    }
 }
