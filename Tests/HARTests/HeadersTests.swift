@@ -120,4 +120,31 @@ final class HeadersTests: XCTestCase {
         XCTAssertTrue(HAR.Header(name: "Content-Length", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
         XCTAssertFalse(HAR.Header(name: "Accept", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
     }
+
+    func testRedacting() throws {
+        XCTAssertEqual(
+            HAR.Header(name: "Content-Type", value: "text/html")
+                .redacting(try NSRegularExpression(pattern: #"Authorization"#, options: .caseInsensitive), placeholder: "***"),
+            HAR.Header(name: "Content-Type", value: "text/html")
+        )
+
+        XCTAssertEqual(
+            HAR.Header(name: "Authorization", value: "basic user:pass")
+                .redacting(try NSRegularExpression(pattern: #"Authorization"#, options: .caseInsensitive), placeholder: "***"),
+            HAR.Header(name: "Authorization", value: "***")
+        )
+
+        XCTAssertEqual(
+            Set(HAR.Headers([
+                "Content-Type": "text/html",
+                "Content-Length": "348",
+                "Set-Cookie": "theme=light, sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT",
+            ]).redacting(try NSRegularExpression(pattern: #"Cookie"#, options: .caseInsensitive), placeholder: "redacted")),
+            Set(HAR.Headers([
+                "Content-Type": "text/html",
+                "Content-Length": "348",
+                "Set-Cookie": "redacted",
+            ]))
+        )
+    }
 }

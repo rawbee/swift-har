@@ -69,4 +69,31 @@ final class ResponseTests: XCTestCase {
             .map { HAR.Header(name: $0.name.lowercased(), value: $0.value) }
             .sorted { $0.name < $1.name }
     }
+
+    func testRedacting() throws {
+        let response = HAR.Response(status: 200, statusText: "OK", headers: HAR.Headers([
+            "Content-Type": "text/plain",
+            "Content-Length": "12",
+            "Set-Cookie": "A=1, B=2",
+        ]))
+        XCTAssertEqual(response.cookies.count, 2)
+
+        let redactedResponse = response.redacting(try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted")
+
+        XCTAssertEqual(
+            Set(redactedResponse.headers),
+            Set(HAR.Headers([
+                "Content-Type": "text/plain",
+                "Content-Length": "12",
+                "Set-Cookie": "redacted",
+            ]))
+        )
+        XCTAssertEqual(
+            redactedResponse.cookies,
+            [
+                HAR.Cookie(name: "A", value: "redacted", httpOnly: false, secure: false),
+                HAR.Cookie(name: "B", value: "redacted", httpOnly: false, secure: false),
+            ]
+        )
+    }
 }

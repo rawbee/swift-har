@@ -32,7 +32,7 @@ import Foundation
 /// - Version: 1.2
 ///
 /// http://www.softwareishard.com/blog/har-12-spec/
-public struct HAR: Equatable, Hashable, Codable {
+public struct HAR: Equatable, Hashable, Codable, Redactable {
     // MARK: Properties
 
     /// Log data root.
@@ -100,6 +100,13 @@ public struct HAR: Equatable, Hashable, Codable {
         return try encoder.encode(self)
     }
 
+    // MARK: Redacting sensitive data
+
+    /// Replace entry request/response headers with placeholder text.
+    public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
+        log.redact(pattern, placeholder: placeholder)
+    }
+
     // MARK: Structures
 
     /// This object represents the root of exported data.
@@ -108,7 +115,7 @@ public struct HAR: Equatable, Hashable, Codable {
     /// for every HTTP request. In case when an HTTP trace tool isn't able to group
     /// requests by a page, the `pages` object is empty and individual requests doesn't
     /// have a parent page.
-    public struct Log: Equatable, Hashable, Codable {
+    public struct Log: Equatable, Hashable, Codable, Redactable {
         // MARK: Properties
 
         /// Version number of the format. If empty, string "1.1" is assumed by default.
@@ -155,6 +162,13 @@ public struct HAR: Equatable, Hashable, Codable {
             self.pages = pages
             self.entries = entries
             self.comment = comment
+        }
+
+        // MARK: Redacting sensitive data
+
+        /// Replace entry request/response headers with placeholder text.
+        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
+            entries = entries.map { $0.redacting(pattern, placeholder: placeholder) }
         }
     }
 
@@ -365,7 +379,7 @@ public struct HAR: Equatable, Hashable, Codable {
     /// by `startedDateTime` (starting from the oldest) is preferred way how to export
     /// data since it can make importing faster. However the reader application should
     /// always make sure the array is sorted (if required for the import).
-    public struct Entry: Equatable, Hashable, Codable {
+    public struct Entry: Equatable, Hashable, Codable, Redactable {
         // MARK: Properties
 
         /// Reference to the parent page. Leave out this field if the application does
@@ -436,13 +450,21 @@ public struct HAR: Equatable, Hashable, Codable {
             self.connection = connection
             self.comment = comment
         }
+
+        // MARK: Redacting sensitive data
+
+        /// Replace request/response headers with placeholder text.
+        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
+            request.redact(pattern, placeholder: placeholder)
+            response.redact(pattern, placeholder: placeholder)
+        }
     }
 
     /// Array of Entry objects.
     public typealias Entries = [Entry]
 
     /// This object contains detailed info about performed request.
-    public struct Request: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct Request: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible, Redactable {
         // MARK: Properties
 
         /// Request method.
@@ -560,6 +582,17 @@ public struct HAR: Equatable, Hashable, Codable {
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
         }
 
+        // MARK: Redacting sensitive data
+
+        /// Replace matched request headers with placeholder text.
+        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
+            headers.redact(pattern, placeholder: placeholder)
+
+            if headers.value(forName: "Cookie") == placeholder {
+                cookies = cookies.map { $0.redacting(placeholder: placeholder) }
+            }
+        }
+
         // MARK: Describing Requests
 
         /// A human-readable description for the data.
@@ -574,7 +607,7 @@ public struct HAR: Equatable, Hashable, Codable {
     }
 
     /// This object contains detailed info about the response.
-    public struct Response: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct Response: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible, Redactable {
         // MARK: Properties
 
         /// Response status.
@@ -676,6 +709,17 @@ public struct HAR: Equatable, Hashable, Codable {
             self.headersSize = try container.decodeIfPresent(Int.self, forKey: .headersSize) ?? -1
             self.bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
+        }
+
+        // MARK: Redacting sensitive data
+
+        /// Replace matched response headers with placeholder text.
+        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
+            headers.redact(pattern, placeholder: placeholder)
+
+            if headers.value(forName: "Set-Cookie") == placeholder {
+                cookies = cookies.map { $0.redacting(placeholder: placeholder) }
+            }
         }
 
         // MARK: Describing Responses
@@ -811,6 +855,15 @@ public struct HAR: Equatable, Hashable, Codable {
             return nil
         }
 
+        // MARK: Describing Requests
+
+        /// Return cookie replacing value with placeholder.
+        internal func redacting(placeholder: String) -> Self {
+            var copy = self
+            copy.value = placeholder
+            return copy
+        }
+
         // MARK: Static Methods
 
         /// Parse cookie style attribute pairs seperated by `;` and `=`
@@ -832,7 +885,7 @@ public struct HAR: Equatable, Hashable, Codable {
 
     /// This object contains list of all headers (used in `Request` and `Response`
     /// objects).
-    public struct Header: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct Header: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible, Redactable {
         // MARK: Properties
 
         /// The header name.
@@ -880,6 +933,15 @@ public struct HAR: Equatable, Hashable, Codable {
         /// Hashes the lower case name of the header by feeding them into the given hasher.
         public func hash(into hasher: inout Hasher) {
             hasher.combine(name.lowercased())
+        }
+
+        // MARK: Describing Requests
+
+        /// Replace value with placeholder text if name matches pattern.
+        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
+            if isNamed(pattern) {
+                value = placeholder
+            }
         }
 
         // MARK: Describing Headers
@@ -1381,7 +1443,7 @@ extension HAR.Cookies {
     }
 }
 
-extension HAR.Headers {
+extension HAR.Headers: Redactable {
     // MARK: Computed Properties
 
     public var headersAsDictionary: [String: String] {
@@ -1412,5 +1474,34 @@ extension HAR.Headers {
     /// - Parameter name: The HTTP Header name.
     public func value(forName name: String) -> String? {
         values(forName: name).first
+    }
+
+    // MARK: Redacting sensitive data
+
+    /// Return new headers replacing matched headers with placeholder text.
+    public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
+        map { $0.redacting(pattern, placeholder: placeholder) }
+    }
+}
+
+internal protocol Redactable {
+    /// Replace matched data with placeholder text.
+    mutating func redact(_ pattern: NSRegularExpression, placeholder: String)
+
+    /// Return new redacted data with placeholder text.
+    func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self
+}
+
+extension Redactable {
+    /// Replace matched data with placeholder text.
+    public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
+        self = redacting(pattern, placeholder: placeholder)
+    }
+
+    /// Return new redacted data with placeholder text.
+    public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
+        var copy = self
+        copy.redact(pattern, placeholder: placeholder)
+        return copy
     }
 }

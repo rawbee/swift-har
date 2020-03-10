@@ -177,4 +177,32 @@ final class RequestTests: XCTestCase {
             .map { HAR.Header(name: $0.name.lowercased(), value: $0.value) }
             .sorted { $0.name < $1.name }
     }
+
+    func testRedacting() throws {
+        let url = try XCTUnwrap(URL(string: "http://example.com/"))
+        let request = HAR.Request(method: "GET", url: url, headers: HAR.Headers([
+            "Content-Type": "text/html",
+            "Content-Length": "348",
+            "Cookie": "foo=1; bar=2",
+        ]))
+        XCTAssertEqual(request.cookies.count, 2)
+
+        let redactedRequest = request.redacting(try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted")
+
+        XCTAssertEqual(
+            Set(redactedRequest.headers),
+            Set(HAR.Headers([
+                "Content-Type": "text/html",
+                "Content-Length": "348",
+                "Cookie": "redacted",
+            ]))
+        )
+        XCTAssertEqual(
+            redactedRequest.cookies,
+            [
+                HAR.Cookie(name: "foo", value: "redacted"),
+                HAR.Cookie(name: "bar", value: "redacted"),
+            ]
+        )
+    }
 }
