@@ -41,7 +41,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     // MARK: Initializers
 
     /// Create HAR.
-    public init(log: HAR.Log) {
+    public init(log: Log) {
         self.log = log
     }
 
@@ -145,7 +145,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         ///
         /// - Invariant: Log's must have at least one entry to be valid.
         /// However, a log maybe empty on initial construction.
-        public var firstEntry: HAR.Entry {
+        public var firstEntry: Entry {
             guard let entry = entries.first else {
                 preconditionFailure("HAR.Log has no entries")
             }
@@ -156,8 +156,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
 
         /// Create log.
         public init(
-            version: String = "1.2", creator: HAR.Creator = Creator.default, browser: HAR.Browser? = nil,
-            pages: HAR.Pages? = nil, entries: Entries = [], comment: String? = nil
+            version: String = "1.2", creator: Creator = Creator.default, browser: Browser? = nil,
+            pages: Pages? = nil, entries: Entries = [], comment: String? = nil
         ) {
             self.version = version
             self.creator = creator
@@ -302,7 +302,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
             startedDateTime = try container.decode(Date.self, forKey: .startedDateTime)
             id = try container.decode(String.self, forKey: .id)
             title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
-            self.pageTimings = try container.decode(HAR.PageTiming.self, forKey: .pageTimings)
+            self.pageTimings = try container.decode(PageTiming.self, forKey: .pageTimings)
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
         }
 
@@ -450,7 +450,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         /// Create entry.
         public init(
             pageref: String? = nil, startedDateTime: Date = Date(), time: Double = 0,
-            request: HAR.Request, response: HAR.Response, cache: Cache = Cache(),
+            request: Request, response: Response, cache: Cache = Cache(),
             timings: Timing = Timing(), serverIPAddress: String? = nil, connection: String? = nil,
             comment: String? = nil
         ) {
@@ -524,13 +524,13 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Computed Properties
 
         /// Computed `cookies` from headers.
-        public var computedCookies: HAR.Cookies {
-            headers.value(forName: "Cookie").map { HAR.Cookies(fromCookieHeader: $0) } ?? []
+        public var computedCookies: Cookies {
+            headers.value(forName: "Cookie").map { Cookies(fromCookieHeader: $0) } ?? []
         }
 
         /// Computed `queryString` from URL query string.
-        public var computedQueryString: HAR.QueryStrings {
-            URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.map(HAR.QueryString.init)
+        public var computedQueryString: QueryStrings {
+            URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.map(QueryString.init)
                 ?? []
         }
 
@@ -592,10 +592,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
             url = try container.decode(URL.self, forKey: .url)
             httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion)
                 ?? "HTTP/1.1"
-            self.cookies = try container.decode(HAR.Cookies.self, forKey: .cookies)
-            self.headers = try container.decode(HAR.Headers.self, forKey: .headers)
-            self.queryString = try container.decode(HAR.QueryStrings.self, forKey: .queryString)
-            self.postData = try container.decodeIfPresent(HAR.PostData.self, forKey: .postData)
+            self.cookies = try container.decode(Cookies.self, forKey: .cookies)
+            self.headers = try container.decode(Headers.self, forKey: .headers)
+            self.queryString = try container.decode(QueryStrings.self, forKey: .queryString)
+            self.postData = try container.decodeIfPresent(PostData.self, forKey: .postData)
             self.headersSize = try container.decodeIfPresent(Int.self, forKey: .headersSize) ?? -1
             self.bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
@@ -625,7 +625,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         }
 
         public var curlDescription: String {
-            String(describing: HAR.CurlCommand(request: self))
+            String(describing: CurlCommand(request: self))
         }
     }
 
@@ -677,9 +677,9 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Computed Properties
 
         /// Computed `cookies` from headers.
-        public var computedCookies: HAR.Cookies {
+        public var computedCookies: Cookies {
             headers.values(forName: "Set-Cookie")
-                .map(HAR.Cookie.init(fromSetCookieHeader:))
+                .map(Cookie.init(fromSetCookieHeader:))
         }
 
         /// Computed `headersSize`.
@@ -705,7 +705,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         /// Create response.
         public init(
             status: Int = 200, statusText: String = "OK", httpVersion: String = "HTTP/1.1",
-            cookies: Cookies? = nil, headers: Headers = [], content: Content = HAR.Content(),
+            cookies: Cookies? = nil, headers: Headers = [], content: Content = Content(),
             redirectURL: String = "", headersSize: Int? = nil, bodySize: Int? = nil,
             comment: String? = nil
         ) {
@@ -731,9 +731,9 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
             statusText = try container.decode(String.self, forKey: .statusText)
             httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion)
                 ?? "HTTP/1.1"
-            self.cookies = try container.decode(HAR.Cookies.self, forKey: .cookies)
-            self.headers = try container.decode(HAR.Headers.self, forKey: .headers)
-            self.content = try container.decode(HAR.Content.self, forKey: .content)
+            self.cookies = try container.decode(Cookies.self, forKey: .cookies)
+            self.headers = try container.decode(Headers.self, forKey: .headers)
+            self.content = try container.decode(Content.self, forKey: .content)
             self.redirectURL = try container.decode(String.self, forKey: .redirectURL)
             self.headersSize = try container.decodeIfPresent(Int.self, forKey: .headersSize) ?? -1
             self.bodySize = try container.decodeIfPresent(Int.self, forKey: .bodySize) ?? -1
@@ -1077,7 +1077,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create post data.
-        public init(mimeType: String, params: HAR.Params, text: String, comment: String? = nil) {
+        public init(mimeType: String, params: Params, text: String, comment: String? = nil) {
             self.mimeType = mimeType
             self.params = params
             self.text = text
@@ -1099,11 +1099,11 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
             }
         }
 
-        private func parseFormUrlEncoded(_ str: String) -> HAR.Params {
+        private func parseFormUrlEncoded(_ str: String) -> Params {
             var components = URLComponents()
             components.query = str
             return components.queryItems?.map {
-                return HAR.Param(
+                return Param(
                     name: $0.name,
                     value:
                     $0.value?
@@ -1128,7 +1128,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
             let container = try decoder.container(keyedBy: Self.CodingKeys.self)
 
             mimeType = try container.decodeIfPresent(String.self, forKey: .mimeType) ?? ""
-            self.params = try container.decodeIfPresent(HAR.Params.self, forKey: .params) ?? []
+            self.params = try container.decodeIfPresent(Params.self, forKey: .params) ?? []
             self.text = try container.decodeIfPresent(String.self, forKey: .text) ?? ""
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
         }
@@ -1347,7 +1347,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
 
         /// Create cache.
         public init(
-            beforeRequest: HAR.CacheEntry? = nil, afterRequest: HAR.CacheEntry? = nil,
+            beforeRequest: CacheEntry? = nil, afterRequest: CacheEntry? = nil,
             comment: String? = nil
         ) {
             self.beforeRequest = beforeRequest
@@ -1492,7 +1492,7 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
             self.headers = headers
         }
 
-        init(request: HAR.Request) {
+        init(request: Request) {
             self.url = request.url
             self.method = request.method
             self.headers = request.headers.map { (name: $0.name, value: $0.value) }
