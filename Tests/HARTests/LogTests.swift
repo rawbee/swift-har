@@ -1,4 +1,5 @@
-@testable import HAR
 import XCTest
+
+@testable import HAR
 
 final class LogTests: XCTestCase {}

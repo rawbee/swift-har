@@ -1,5 +1,6 @@
-@testable import HAR
 import XCTest
+
+@testable import HAR
 
 final class PageTimingsTests: XCTestCase {
     func testCustomStringConvertible() {

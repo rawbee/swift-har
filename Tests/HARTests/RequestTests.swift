@@ -1,5 +1,6 @@
-@testable import HAR
 import XCTest
+
+@testable import HAR
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -45,7 +46,10 @@ final class RequestTests: XCTestCase {
     func testURLRequestGet() throws {
         let url = try XCTUnwrap(URL(string: "http://example.com"))
         var urlRequest = URLRequest(url: url)
-        urlRequest.setValue("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forHTTPHeaderField: "Accept")
+        urlRequest.setValue(
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            forHTTPHeaderField: "Accept"
+        )
         urlRequest.setValue("session=123", forHTTPHeaderField: "Cookie")
 
         let request = HAR.Request(request: urlRequest)
@@ -53,7 +57,12 @@ final class RequestTests: XCTestCase {
         XCTAssertEqual(request.url.absoluteString, "http://example.com")
         XCTAssertEqual(request.httpVersion, "HTTP/1.1")
         XCTAssert(request.cookies.contains(HAR.Cookie(name: "session", value: "123")))
-        XCTAssert(request.headers.contains(HAR.Header(name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
+        XCTAssert(
+            request.headers.contains(
+                HAR.Header(
+                    name: "Accept", value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+                ))
+        )
         XCTAssertEqual(request.headersSize, 111)
         XCTAssertEqual(request.bodySize, 0)
     }
@@ -94,7 +103,9 @@ final class RequestTests: XCTestCase {
     func testURLRequestWithFormUrlEncodedBody() throws {
         let url = try XCTUnwrap(URL(string: "http://example.com"))
         var urlRequest = URLRequest(url: url)
-        urlRequest.setValue("application/x-www-form-urlencoded; charset=UTF-8", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue(
+            "application/x-www-form-urlencoded; charset=UTF-8", forHTTPHeaderField: "Content-Type"
+        )
         urlRequest.httpMethod = "POST"
         urlRequest.httpBody = "foo=bar".data(using: .utf8)
 
@@ -141,7 +152,10 @@ final class RequestTests: XCTestCase {
         XCTAssertEqual(urlRequest.httpMethod, "GET")
         XCTAssertEqual(urlRequest.url?.absoluteString, "http://example.com/")
         XCTAssertNil(urlRequest.httpBody)
-        XCTAssertEqual(urlRequest.value(forHTTPHeaderField: "User-Agent"), "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15")
+        XCTAssertEqual(
+            urlRequest.value(forHTTPHeaderField: "User-Agent"),
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15"
+        )
     }
 
     func testURLRequestFromJSBinPOSTFixture() throws {
@@ -152,7 +166,10 @@ final class RequestTests: XCTestCase {
         XCTAssertEqual(urlRequest.httpMethod, "POST")
         XCTAssertEqual(urlRequest.url?.absoluteString, "https://jsbin.com/save")
         XCTAssertEqual(urlRequest.httpBody?.count, 531)
-        XCTAssertEqual(urlRequest.value(forHTTPHeaderField: "Content-Type"), "application/x-www-form-urlencoded; charset=UTF-8")
+        XCTAssertEqual(
+            urlRequest.value(forHTTPHeaderField: "Content-Type"),
+            "application/x-www-form-urlencoded; charset=UTF-8"
+        )
     }
 
     func testURLRequestFromFixtures() throws {
@@ -180,22 +197,28 @@ final class RequestTests: XCTestCase {
 
     func testRedacting() throws {
         let url = try XCTUnwrap(URL(string: "http://example.com/"))
-        let request = HAR.Request(method: "GET", url: url, headers: HAR.Headers([
-            "Content-Type": "text/html",
-            "Content-Length": "348",
-            "Cookie": "foo=1; bar=2",
-        ]))
+        let request = HAR.Request(
+            method: "GET", url: url,
+            headers: HAR.Headers([
+                "Content-Type": "text/html",
+                "Content-Length": "348",
+                "Cookie": "foo=1; bar=2",
+            ])
+        )
         XCTAssertEqual(request.cookies.count, 2)
 
-        let redactedRequest = request.redacting(try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted")
+        let redactedRequest = request.redacting(
+            try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted"
+        )
 
         XCTAssertEqual(
             Set(redactedRequest.headers),
-            Set(HAR.Headers([
-                "Content-Type": "text/html",
-                "Content-Length": "348",
-                "Cookie": "redacted",
-            ]))
+            Set(
+                HAR.Headers([
+                    "Content-Type": "text/html",
+                    "Content-Length": "348",
+                    "Cookie": "redacted",
+                ]))
         )
         XCTAssertEqual(
             redactedRequest.cookies,

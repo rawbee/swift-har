@@ -1,5 +1,6 @@
-@testable import HAR
 import XCTest
+
+@testable import HAR
 
 final class QueryStringTests: XCTestCase {
     func testCustomStringConvertible() {
@@ -17,7 +18,8 @@ final class QueryStringTests: XCTestCase {
     }
 
     func testInitFromURLQueryItem() throws {
-        let queryComponents = try XCTUnwrap(URLComponents(string: "http://example.com/?foo=bar&query=%40swift&message=hello+world"))
+        let queryComponents = try XCTUnwrap(
+            URLComponents(string: "http://example.com/?foo=bar&query=%40swift&message=hello+world"))
         XCTAssertEqual(queryComponents.query, "foo=bar&query=@swift&message=hello+world")
         XCTAssertEqual(
             queryComponents.queryItems,

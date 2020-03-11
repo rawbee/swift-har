@@ -27,6 +27,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -48,7 +49,9 @@ extension HAR.Entry {
     // MARK: Recording an Entry
 
     /// Perform URL Request and create HTTP archive Entry of the request and response.
-    public static func record(request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void) {
+    public static func record(
+        request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void
+    ) {
         let session = URLSession(
             configuration: URLSessionConfiguration.ephemeral,
             delegate: TaskDelegate(completionHandler),
@@ -109,7 +112,8 @@ extension HAR.Response {
         let status = response.statusCode
         let statusText = Self.statusText(forStatusCode: response.statusCode)
         let headers = HAR.Headers(response.allHeaderFields)
-        let content = data.map { HAR.Content(decoding: $0, mimeType: response.mimeType) } ?? HAR.Content()
+        let content = data.map { HAR.Content(decoding: $0, mimeType: response.mimeType) }
+            ?? HAR.Content()
 
         self.init(status: status, statusText: statusText, headers: headers, content: content)
     }
@@ -296,16 +300,21 @@ private class TaskDelegate: NSObject, URLSessionDataDelegate {
     // MARK: Instance Properties
 
     private let completionHandler: CompletionHandler
+
     private var data: Data = Data()
     private var metric: AnyObject?
 
     // MARK: Instance Methods
 
-    fileprivate func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    fileprivate func urlSession(
+        _ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data
+    ) {
         self.data.append(data)
     }
 
-    fileprivate func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+    fileprivate func urlSession(
+        _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?
+    ) {
         if let request = task.currentRequest, let response = task.response as? HTTPURLResponse {
             var entry = HAR.Entry(
                 request: HAR.Request(request: request),
@@ -344,7 +353,10 @@ private class TaskDelegate: NSObject, URLSessionDataDelegate {
 extension TaskDelegate {
     // MARK: Instance Methods
 
-    fileprivate func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
+    fileprivate func urlSession(
+        _ session: URLSession, task: URLSessionTask,
+        didFinishCollecting metrics: URLSessionTaskMetrics
+    ) {
         // Choose last metric, though there might be more accurate of handling
         // multiple metrics.
         metric = metrics.transactionMetrics.last
@@ -358,7 +370,9 @@ extension HAR {
     public typealias RecordResult = Result<Self, Error>
 
     /// Perform URL Request and create HTTP archive of the request and response.
-    public static func record(request: URLRequest, completionHandler: @escaping (RecordResult) -> Void) {
+    public static func record(
+        request: URLRequest, completionHandler: @escaping (RecordResult) -> Void
+    ) {
         Self.Entry.record(
             request: request,
             completionHandler: {
@@ -368,7 +382,10 @@ extension HAR {
     }
 
     /// Perform URL Request, create HTTP archive and write encoded archive to file URL.
-    public static func record(request: URLRequest, to url: URL, transform: @escaping (Self) -> Self = { $0 }, completionHandler: @escaping (RecordResult) -> Void) {
+    public static func record(
+        request: URLRequest, to url: URL, transform: @escaping (Self) -> Self = { $0 },
+        completionHandler: @escaping (RecordResult) -> Void
+    ) {
         record(request: request) { result in
             do {
                 let har = transform(try result.get())
@@ -382,7 +399,11 @@ extension HAR {
 
     /// Attempt to load HAR from file system, otherwise perform request and
     /// write result to file system.
-    public static func load(contentsOf url: URL, orRecordRequest request: URLRequest, transform: @escaping (Self) -> Self = { $0 }, completionHandler: @escaping (RecordResult) -> Void) {
+    public static func load(
+        contentsOf url: URL, orRecordRequest request: URLRequest,
+        transform: @escaping (Self) -> Self = { $0 },
+        completionHandler: @escaping (RecordResult) -> Void
+    ) {
         do {
             completionHandler(.success(try HAR(contentsOf: url)))
         } catch {
@@ -395,7 +416,9 @@ extension URLProtocolClient {
     // MARK: Instance Methods
 
     /// Tells the client that the protocol implementation has created a HAR Entry or Error for the request.
-    public func urlProtocol(_ protocol: URLProtocol, didLoadEntryResult result: Result<HAR.Entry, Error>) {
+    public func urlProtocol(
+        _ protocol: URLProtocol, didLoadEntryResult result: Result<HAR.Entry, Error>
+    ) {
         switch result {
         case .success(let entry):
             urlProtocol(`protocol`, didLoadEntry: entry)
@@ -447,9 +470,14 @@ extension HAR {
             fatalError("URLProtocol.startLoading must be implemented")
         }
 
-        public func startLoading(url: URL, transform: @escaping (HAR) -> HAR = { $0 }, entrySelector: @escaping (HAR.Log) -> HAR.Entry = { $0.firstEntry }) {
+        public func startLoading(
+            url: URL, transform: @escaping (HAR) -> HAR = { $0 },
+            entrySelector: @escaping (HAR.Log) -> HAR.Entry = { $0.firstEntry }
+        ) {
             HAR.load(contentsOf: url, orRecordRequest: request, transform: transform) { result in
-                self.client?.urlProtocol(self, didLoadEntryResult: result.map { har in entrySelector(har.log) })
+                self.client?.urlProtocol(
+                    self, didLoadEntryResult: result.map { har in entrySelector(har.log) }
+                )
             }
         }
 

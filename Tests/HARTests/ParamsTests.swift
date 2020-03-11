@@ -1,5 +1,6 @@
-@testable import HAR
 import XCTest
+
+@testable import HAR
 
 final class ParamsTests: XCTestCase {
     func testEquatable() {
@@ -24,7 +25,8 @@ final class ParamsTests: XCTestCase {
             "foo=1"
         )
         XCTAssertEqual(
-            String(describing: HAR.Param(name: "foo", fileName: "example.pdf", contentType: "application/pdf")),
+            String(
+                describing: HAR.Param(name: "foo", fileName: "example.pdf", contentType: "application/pdf")),
             #"foo=@example.pdf;type=application/pdf"#
         )
     }
@@ -35,7 +37,10 @@ final class ParamsTests: XCTestCase {
             "HAR.Param { foo=1 }"
         )
         XCTAssertEqual(
-            String(reflecting: HAR.Param(name: "foo", value: "1", fileName: "example.pdf", contentType: "application/pdf")),
+            String(
+                reflecting: HAR.Param(
+                    name: "foo", value: "1", fileName: "example.pdf", contentType: "application/pdf"
+                )),
             #"HAR.Param { foo=@example.pdf;type=application/pdf }"#
         )
     }

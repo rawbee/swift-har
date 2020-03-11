@@ -1,13 +1,26 @@
-@testable import HAR
 import XCTest
+
+@testable import HAR
 
 final class HeadersTests: XCTestCase {
     func testEquatable() {
-        XCTAssertEqual(HAR.Header(name: "Content-Type", value: "text/html"), HAR.Header(name: "Content-Type", value: "text/html"))
-        XCTAssertEqual(HAR.Header(name: "Content-Type", value: "text/html"), HAR.Header(name: "content-type", value: "text/html"))
+        XCTAssertEqual(
+            HAR.Header(name: "Content-Type", value: "text/html"),
+            HAR.Header(name: "Content-Type", value: "text/html")
+        )
+        XCTAssertEqual(
+            HAR.Header(name: "Content-Type", value: "text/html"),
+            HAR.Header(name: "content-type", value: "text/html")
+        )
 
-        XCTAssertNotEqual(HAR.Header(name: "Content-Type", value: "text/html"), HAR.Header(name: "Content-Type", value: "text/plain"))
-        XCTAssertNotEqual(HAR.Header(name: "Accept", value: "text/html"), HAR.Header(name: "Content-Type", value: "text/html"))
+        XCTAssertNotEqual(
+            HAR.Header(name: "Content-Type", value: "text/html"),
+            HAR.Header(name: "Content-Type", value: "text/plain")
+        )
+        XCTAssertNotEqual(
+            HAR.Header(name: "Accept", value: "text/html"),
+            HAR.Header(name: "Content-Type", value: "text/html")
+        )
     }
 
     func testHashable() {
@@ -38,14 +51,19 @@ final class HeadersTests: XCTestCase {
             HAR.Header(name: "Content-Type", value: "text/html"),
             HAR.Header(name: "Content-Length", value: "348"),
             HAR.Header(name: "Set-Cookie", value: "theme=light"),
-            HAR.Header(name: "Set-Cookie", value: "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT"),
+            HAR.Header(
+                name: "Set-Cookie", value: "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT"
+            ),
         ]
 
         XCTAssertEqual(headers.values(forName: "Content-Type"), ["text/html"])
-        XCTAssertEqual(headers.values(forName: "set-cookie"), [
-            "theme=light",
-            "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT",
-        ])
+        XCTAssertEqual(
+            headers.values(forName: "set-cookie"),
+            [
+                "theme=light",
+                "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT",
+            ]
+        )
     }
 
     func testHeadersAsDictionary() {
@@ -68,7 +86,9 @@ final class HeadersTests: XCTestCase {
                 HAR.Header(name: "Content-Type", value: "text/html"),
                 HAR.Header(name: "Content-Length", value: "348"),
                 HAR.Header(name: "Set-Cookie", value: "theme=light"),
-                HAR.Header(name: "Set-Cookie", value: "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT"),
+                HAR.Header(
+                    name: "Set-Cookie", value: "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT"
+                ),
             ].headersAsDictionary,
             [
                 "Content-Type": "text/html",
@@ -80,11 +100,12 @@ final class HeadersTests: XCTestCase {
 
     func testHeadersFromDictionary() {
         XCTAssertEqual(
-            Set(HAR.Headers([
-                "Accept": "text/html",
-                "Content-Length": "348",
-                "Cache-Control": "no-cache, no-store",
-            ])),
+            Set(
+                HAR.Headers([
+                    "Accept": "text/html",
+                    "Content-Length": "348",
+                    "Cache-Control": "no-cache, no-store",
+                ])),
             Set([
                 HAR.Header(name: "Accept", value: "text/html"),
                 HAR.Header(name: "Content-Length", value: "348"),
@@ -93,16 +114,19 @@ final class HeadersTests: XCTestCase {
         )
 
         XCTAssertEqual(
-            Set(HAR.Headers([
-                "Content-Type": "text/html",
-                "Content-Length": "348",
-                "Set-Cookie": "theme=light, sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT",
-            ])),
+            Set(
+                HAR.Headers([
+                    "Content-Type": "text/html",
+                    "Content-Length": "348",
+                    "Set-Cookie": "theme=light, sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT",
+                ])),
             Set([
                 HAR.Header(name: "Content-Type", value: "text/html"),
                 HAR.Header(name: "Content-Length", value: "348"),
                 HAR.Header(name: "Set-Cookie", value: "theme=light"),
-                HAR.Header(name: "Set-Cookie", value: "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT"),
+                HAR.Header(
+                    name: "Set-Cookie", value: "sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT"
+                ),
             ])
         )
     }
@@ -115,36 +139,55 @@ final class HeadersTests: XCTestCase {
     }
 
     func testIsNamedRegexp() throws {
-        XCTAssertTrue(HAR.Header(name: "Content-Type", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
-        XCTAssertTrue(HAR.Header(name: "content-type", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
-        XCTAssertTrue(HAR.Header(name: "Content-Length", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
-        XCTAssertFalse(HAR.Header(name: "Accept", value: "text/html").isNamed(try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
+        XCTAssertTrue(
+            HAR.Header(name: "Content-Type", value: "text/html").isNamed(
+                try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
+        XCTAssertTrue(
+            HAR.Header(name: "content-type", value: "text/html").isNamed(
+                try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
+        XCTAssertTrue(
+            HAR.Header(name: "Content-Length", value: "text/html").isNamed(
+                try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
+        XCTAssertFalse(
+            HAR.Header(name: "Accept", value: "text/html").isNamed(
+                try NSRegularExpression(pattern: #"content"#, options: .caseInsensitive)))
     }
 
     func testRedacting() throws {
         XCTAssertEqual(
             HAR.Header(name: "Content-Type", value: "text/html")
-                .redacting(try NSRegularExpression(pattern: #"Authorization"#, options: .caseInsensitive), placeholder: "***"),
+                .redacting(
+                    try NSRegularExpression(pattern: #"Authorization"#, options: .caseInsensitive),
+                    placeholder: "***"
+                ),
             HAR.Header(name: "Content-Type", value: "text/html")
         )
 
         XCTAssertEqual(
             HAR.Header(name: "Authorization", value: "basic user:pass")
-                .redacting(try NSRegularExpression(pattern: #"Authorization"#, options: .caseInsensitive), placeholder: "***"),
+                .redacting(
+                    try NSRegularExpression(pattern: #"Authorization"#, options: .caseInsensitive),
+                    placeholder: "***"
+                ),
             HAR.Header(name: "Authorization", value: "***")
         )
 
         XCTAssertEqual(
-            Set(HAR.Headers([
-                "Content-Type": "text/html",
-                "Content-Length": "348",
-                "Set-Cookie": "theme=light, sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT",
-            ]).redacting(try NSRegularExpression(pattern: #"Cookie"#, options: .caseInsensitive), placeholder: "redacted")),
-            Set(HAR.Headers([
-                "Content-Type": "text/html",
-                "Content-Length": "348",
-                "Set-Cookie": "redacted",
-            ]))
+            Set(
+                HAR.Headers([
+                    "Content-Type": "text/html",
+                    "Content-Length": "348",
+                    "Set-Cookie": "theme=light, sessionToken=abc123; Expires=Wed, 09 Jun 2021 10:18:14 GMT",
+                ]).redacting(
+                    try NSRegularExpression(pattern: #"Cookie"#, options: .caseInsensitive),
+                    placeholder: "redacted"
+                )),
+            Set(
+                HAR.Headers([
+                    "Content-Type": "text/html",
+                    "Content-Length": "348",
+                    "Set-Cookie": "redacted",
+                ]))
         )
     }
 }

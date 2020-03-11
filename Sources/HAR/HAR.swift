@@ -155,7 +155,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create log.
-        public init(version: String = "1.2", creator: HAR.Creator = Creator.default, browser: HAR.Browser? = nil, pages: HAR.Pages? = nil, entries: Entries = [], comment: String? = nil) {
+        public init(
+            version: String = "1.2", creator: HAR.Creator = Creator.default, browser: HAR.Browser? = nil,
+            pages: HAR.Pages? = nil, entries: Entries = [], comment: String? = nil
+        ) {
             self.version = version
             self.creator = creator
             self.browser = browser
@@ -173,7 +176,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     }
 
     /// This object represents the log creator application.
-    public struct Creator: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct Creator: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible {
         // MARK: Static Properties
 
         /// Creator info used when this library creates a new HAR log.
@@ -215,7 +219,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     }
 
     /// This object represents the web browser used.
-    public struct Browser: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct Browser: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Name of the application/browser used to export the log.
@@ -252,7 +257,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     }
 
     /// This object represents list of exported pages.
-    public struct Page: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct Page: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Date and time stamp for the beginning of the page load.
@@ -276,7 +282,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create page.
-        public init(startedDateTime: Date, id: String, title: String = "", pageTimings: PageTiming = PageTiming(), comment: String? = nil) {
+        public init(
+            startedDateTime: Date, id: String, title: String = "", pageTimings: PageTiming = PageTiming(),
+            comment: String? = nil
+        ) {
             self.startedDateTime = startedDateTime
             self.id = id
             self.title = title
@@ -335,7 +344,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     ///
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad`
     /// event or `document.readyState == interactive`.
-    public struct PageTiming: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct PageTiming: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Content of the page loaded. Number of milliseconds since page load started
@@ -438,7 +448,12 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create entry.
-        public init(pageref: String? = nil, startedDateTime: Date = Date(), time: Double = 0, request: HAR.Request, response: HAR.Response, cache: Cache = Cache(), timings: Timing = Timing(), serverIPAddress: String? = nil, connection: String? = nil, comment: String? = nil) {
+        public init(
+            pageref: String? = nil, startedDateTime: Date = Date(), time: Double = 0,
+            request: HAR.Request, response: HAR.Response, cache: Cache = Cache(),
+            timings: Timing = Timing(), serverIPAddress: String? = nil, connection: String? = nil,
+            comment: String? = nil
+        ) {
             self.pageref = pageref
             self.startedDateTime = startedDateTime
             self.time = time
@@ -464,7 +479,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     public typealias Entries = [Entry]
 
     /// This object contains detailed info about performed request.
-    public struct Request: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible, Redactable {
+    public struct Request: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible, Redactable {
         // MARK: Properties
 
         /// Request method.
@@ -514,7 +530,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
 
         /// Computed `queryString` from URL query string.
         public var computedQueryString: HAR.QueryStrings {
-            URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.map(HAR.QueryString.init) ?? []
+            URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.map(HAR.QueryString.init)
+                ?? []
         }
 
         /// Computed `headersSize`.
@@ -541,16 +558,18 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         ///
         /// - Parameter method: An HTTP method.
         /// - Parameter url: A URL.
-        public init(method: String = "GET",
-                    url: URL,
-                    httpVersion: String = "HTTP/1.1",
-                    cookies: Cookies? = nil,
-                    headers: Headers = [],
-                    queryString: QueryStrings? = nil,
-                    postData: PostData? = nil,
-                    headersSize: Int? = nil,
-                    bodySize: Int? = nil,
-                    comment: String? = nil) {
+        public init(
+            method: String = "GET",
+            url: URL,
+            httpVersion: String = "HTTP/1.1",
+            cookies: Cookies? = nil,
+            headers: Headers = [],
+            queryString: QueryStrings? = nil,
+            postData: PostData? = nil,
+            headersSize: Int? = nil,
+            bodySize: Int? = nil,
+            comment: String? = nil
+        ) {
             self.method = method
             self.url = url
             self.httpVersion = httpVersion
@@ -607,7 +626,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     }
 
     /// This object contains detailed info about the response.
-    public struct Response: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible, Redactable {
+    public struct Response: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible, Redactable {
         // MARK: Properties
 
         /// Response status.
@@ -679,7 +699,12 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create response.
-        public init(status: Int = 200, statusText: String = "OK", httpVersion: String = "HTTP/1.1", cookies: Cookies? = nil, headers: Headers = [], content: Content = HAR.Content(), redirectURL: String = "", headersSize: Int? = nil, bodySize: Int? = nil, comment: String? = nil) {
+        public init(
+            status: Int = 200, statusText: String = "OK", httpVersion: String = "HTTP/1.1",
+            cookies: Cookies? = nil, headers: Headers = [], content: Content = HAR.Content(),
+            redirectURL: String = "", headersSize: Int? = nil, bodySize: Int? = nil,
+            comment: String? = nil
+        ) {
             self.status = status
             self.statusText = statusText
             self.httpVersion = httpVersion
@@ -787,7 +812,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create cookie.
-        public init(name: String, value: String, path: String? = nil, domain: String? = nil, expires: Date? = nil, httpOnly: Bool? = nil, secure: Bool? = nil, comment: String? = nil, sameSite: String? = nil) {
+        public init(
+            name: String, value: String, path: String? = nil, domain: String? = nil, expires: Date? = nil,
+            httpOnly: Bool? = nil, secure: Bool? = nil, comment: String? = nil, sameSite: String? = nil
+        ) {
             self.name = name
             self.value = value
             self.path = path
@@ -885,7 +913,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
 
     /// This object contains list of all headers (used in `Request` and `Response`
     /// objects).
-    public struct Header: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible, Redactable {
+    public struct Header: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible, Redactable {
         // MARK: Properties
 
         /// The header name.
@@ -914,9 +943,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         ///
         /// Header names are case-insensitive.
         public static func ==(lhs: Self, rhs: Self) -> Bool {
-            lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame &&
-                lhs.value == rhs.value &&
-                lhs.comment == rhs.comment
+            lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame && lhs.value == rhs.value
+                && lhs.comment == rhs.comment
         }
 
         /// Test if header name matches case-insensitive name.
@@ -962,7 +990,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
 
     /// This object contains list of all parameters & values parsed from a query string,
     /// if any (embedded in `Request` object).
-    public struct QueryString: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct QueryString: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible {
         // MARK: Properties
 
         /// The query parameter name.
@@ -1072,7 +1101,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
             return components.queryItems?.map {
                 return HAR.Param(
                     name: $0.name,
-                    value: $0.value?
+                    value:
+                    $0.value?
                         .replacingOccurrences(of: "+", with: "%20")
                         .removingPercentEncoding ?? ""
                 )
@@ -1101,7 +1131,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
     }
 
     /// List of posted parameters, if any (embedded in `PostData` object).
-    public struct Param: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct Param: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Name of a posted parameter.
@@ -1124,7 +1155,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create param.
-        public init(name: String, value: String? = nil, fileName: String? = nil, contentType: String? = nil, comment: String? = nil) {
+        public init(
+            name: String, value: String? = nil, fileName: String? = nil, contentType: String? = nil,
+            comment: String? = nil
+        ) {
             self.name = name
             self.value = value
             self.fileName = fileName
@@ -1235,7 +1269,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create content.
-        public init(size: Int, compression: Int? = nil, mimeType: String, text: String? = nil, encoding: String? = nil, comment: String? = nil) {
+        public init(
+            size: Int, compression: Int? = nil, mimeType: String, text: String? = nil,
+            encoding: String? = nil, comment: String? = nil
+        ) {
             self.size = size
             self.compression = compression
             self.mimeType = mimeType
@@ -1305,7 +1342,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         public init() {}
 
         /// Create cache.
-        public init(beforeRequest: HAR.CacheEntry? = nil, afterRequest: HAR.CacheEntry? = nil, comment: String? = nil) {
+        public init(
+            beforeRequest: HAR.CacheEntry? = nil, afterRequest: HAR.CacheEntry? = nil,
+            comment: String? = nil
+        ) {
             self.beforeRequest = beforeRequest
             self.afterRequest = afterRequest
             self.comment = comment
@@ -1336,7 +1376,9 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create cache entry.
-        public init(expires: Date? = nil, lastAccess: Date, eTag: String, hitCount: Int, comment: String? = nil) {
+        public init(
+            expires: Date? = nil, lastAccess: Date, eTag: String, hitCount: Int, comment: String? = nil
+        ) {
             self.expires = expires
             self.lastAccess = lastAccess
             self.eTag = eTag
@@ -1347,7 +1389,8 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
 
     /// This object describes various phases within request-response round trip. All
     /// times are specified in milliseconds.
-    public struct Timing: Equatable, Hashable, Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct Timing: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing
@@ -1399,7 +1442,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         // MARK: Initializers
 
         /// Create timing.
-        public init(blocked: Double? = -1, dns: Double? = -1, connect: Double? = -1, send: Double = -1, wait: Double = -1, receive: Double = -1, ssl: Double? = -1, comment: String? = nil) {
+        public init(
+            blocked: Double? = -1, dns: Double? = -1, connect: Double? = -1, send: Double = -1,
+            wait: Double = -1, receive: Double = -1, ssl: Double? = -1, comment: String? = nil
+        ) {
             self.blocked = blocked
             self.dns = dns
             self.connect = connect

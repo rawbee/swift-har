@@ -1,5 +1,6 @@
-@testable import HAR
 import XCTest
+
+@testable import HAR
 
 final class ContentTests: XCTestCase {
     func testInitEmpty() {
@@ -16,7 +17,10 @@ final class ContentTests: XCTestCase {
         XCTAssertEqual(content.text, "foo=bar")
         XCTAssertEqual(content.size, 7)
 
-        content = HAR.Content(text: "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=", encoding: "base64", mimeType: "text/html; charset=utf-8")
+        content = HAR.Content(
+            text: "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=", encoding: "base64",
+            mimeType: "text/html; charset=utf-8"
+        )
         XCTAssertEqual(content.size, 35)
         XCTAssertEqual(content.data.count, 35)
         XCTAssertEqual(content.text, "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4=")
@@ -24,7 +28,8 @@ final class ContentTests: XCTestCase {
     }
 
     func testInitDecodingData() throws {
-        let data = try XCTUnwrap(Data(base64Encoded: "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4="))
+        let data = try XCTUnwrap(
+            Data(base64Encoded: "PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5Lz48L2h0bWw+XG4="))
         let content = HAR.Content(decoding: data, mimeType: "text/html; charset=utf-8")
 
         XCTAssertEqual(content.size, 35)

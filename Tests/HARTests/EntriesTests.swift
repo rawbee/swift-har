@@ -1,5 +1,6 @@
-@testable import HAR
 import XCTest
+
+@testable import HAR
 
 final class EntriesTests: XCTestCase {
     func testURLMessage() throws {
@@ -16,7 +17,9 @@ final class EntriesTests: XCTestCase {
         let har = try HAR(data: XCTUnwrap(fixtureData["Safari jsbin.com.har"]))
         let entry = try XCTUnwrap(har.log.entries.first)
 
-        let redactedEntry = entry.redacting(try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted")
+        let redactedEntry = entry.redacting(
+            try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted"
+        )
 
         XCTAssertEqual(
             redactedEntry.request.headers.value(forName: "Cookie"),
