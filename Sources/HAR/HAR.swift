@@ -623,6 +623,10 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         public var debugDescription: String {
             "HAR.Request { \(description) }"
         }
+
+        public var curlDescription: String {
+            String(describing: HAR.CurlCommand(request: self))
+        }
     }
 
     /// This object contains detailed info about the response.
@@ -1474,6 +1478,40 @@ public struct HAR: Equatable, Hashable, Codable, HAR.Redactable {
         /// A human-readable debug description for the data.
         public var debugDescription: String {
             "HAR.Timing {\n\(description)\n}"
+        }
+    }
+
+    public struct CurlCommand: CustomStringConvertible {
+        var url: URL
+        var method: String
+        var headers: [(name: String, value: String)]
+
+        init(url: URL, method: String = "GET", headers: [(name: String, value: String)] = []) {
+            self.url = url
+            self.method = method
+            self.headers = headers
+        }
+
+        init(request: HAR.Request) {
+            self.url = request.url
+            self.method = request.method
+            self.headers = request.headers.map { (name: $0.name, value: $0.value) }
+        }
+
+        public var description: String {
+            var lines: [String] = []
+
+            lines.append("curl '\(url)'")
+
+            if method != "GET" {
+                lines.append("--request \(method)")
+            }
+
+            for (name, value) in headers {
+                lines.append("--header '\(name): \(value)'")
+            }
+
+            return lines.joined(separator: " \\\n  ")
         }
     }
 
