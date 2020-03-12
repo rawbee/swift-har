@@ -90,7 +90,7 @@ final class ResponseTests: XCTestCase {
             .sorted { $0.name < $1.name }
     }
 
-    func testRedacting() throws {
+    func testScrubbing() throws {
         let response = HAR.Response(
             status: 200, statusText: "OK",
             headers: HAR.Headers([
@@ -101,12 +101,14 @@ final class ResponseTests: XCTestCase {
         )
         XCTAssertEqual(response.cookies.count, 2)
 
-        let redactedResponse = response.redacting(
-            try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted"
-        )
+        let scrubbedResponse = response.scrubbing([
+            .redactHeaderMatching(
+                pattern: try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted"
+            ),
+        ])
 
         XCTAssertEqual(
-            Set(redactedResponse.headers),
+            Set(scrubbedResponse.headers),
             Set(
                 HAR.Headers([
                     "Content-Type": "text/plain",
@@ -115,7 +117,7 @@ final class ResponseTests: XCTestCase {
                 ]))
         )
         XCTAssertEqual(
-            redactedResponse.cookies,
+            scrubbedResponse.cookies,
             [
                 HAR.Cookie(name: "A", value: "redacted", httpOnly: false, secure: false),
                 HAR.Cookie(name: "B", value: "redacted", httpOnly: false, secure: false),

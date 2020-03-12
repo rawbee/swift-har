@@ -102,25 +102,26 @@ public struct HAR: Equatable, Hashable, Codable {
 
     // MARK: Redacting sensitive data
 
-    /// Replace entry request/response headers with placeholder text.
-    public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
-        log.redact(pattern, placeholder: placeholder)
+    public static let sensitiveHeaders = try! NSRegularExpression(
+        pattern: #"auth|cookie|key|passsword|secret|token"#,
+        options: .caseInsensitive
+    )
+
+    public enum ScrubOperation {
+        case redactHeader(name: String, placeholder: String)
+        case redactHeaderMatching(pattern: NSRegularExpression, placeholder: String)
+        case removeHeader(name: String)
+        case removeHeaderMatching(pattern: NSRegularExpression)
+        case stripTimmings
     }
 
-    /// Return new redacted data with placeholder text.
-    public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
+    public mutating func scrub(_ operations: [ScrubOperation]) {
+        log.scrub(operations)
+    }
+
+    public func scrubbing(_ operations: [ScrubOperation]) -> Self {
         var copy = self
-        copy.redact(pattern, placeholder: placeholder)
-        return copy
-    }
-
-    public mutating func strip(timings: Bool = false) {
-        log.strip(timings: timings)
-    }
-
-    public func stripping(timings: Bool = false) -> Self {
-        var copy = self
-        copy.strip(timings: timings)
+        copy.scrub(operations)
         return copy
     }
 
@@ -186,29 +187,22 @@ public struct HAR: Equatable, Hashable, Codable {
 
         // MARK: Redacting sensitive data
 
-        /// Replace entry request/response headers with placeholder text.
-        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
+        public mutating func scrub(_ operations: [ScrubOperation]) {
+            if var pages = pages {
+                for (index, _) in pages.enumerated() {
+                    pages[index].scrub(operations)
+                }
+                self.pages = pages
+            }
+
             for (index, _) in entries.enumerated() {
-                entries[index].redact(pattern, placeholder: placeholder)
+                entries[index].scrub(operations)
             }
         }
 
-        /// Return new redacted data with placeholder text.
-        public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
+        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
             var copy = self
-            copy.redact(pattern, placeholder: placeholder)
-            return copy
-        }
-
-        public mutating func strip(timings: Bool = false) {
-            for (index, _) in entries.enumerated() {
-                entries[index].strip(timings: timings)
-            }
-        }
-
-        public func stripping(timings: Bool = false) -> Self {
-            var copy = self
-            copy.strip(timings: timings)
+            copy.scrub(operations)
             return copy
         }
     }
@@ -342,6 +336,25 @@ public struct HAR: Equatable, Hashable, Codable {
             title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
             self.pageTimings = try container.decode(PageTiming.self, forKey: .pageTimings)
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
+        }
+
+        // MARK: Redacting sensitive data
+
+        public mutating func scrub(_ operations: [ScrubOperation]) {
+            for operation in operations {
+                switch operation {
+                case .stripTimmings:
+                    pageTimings = PageTiming()
+                default:
+                    continue
+                }
+            }
+        }
+
+        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
+            var copy = self
+            copy.scrub(operations)
+            return copy
         }
 
         // MARK: Describing Pages
@@ -506,29 +519,24 @@ public struct HAR: Equatable, Hashable, Codable {
 
         // MARK: Redacting sensitive data
 
-        /// Replace request/response headers with placeholder text.
-        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
-            request.redact(pattern, placeholder: placeholder)
-            response.redact(pattern, placeholder: placeholder)
-        }
-
-        /// Return new redacted data with placeholder text.
-        public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
-            var copy = self
-            copy.redact(pattern, placeholder: placeholder)
-            return copy
-        }
-
-        public mutating func strip(timings: Bool = false) {
-            if timings == true {
-                time = -1
-                self.timings = Timing()
+        public mutating func scrub(_ operations: [ScrubOperation]) {
+            for operation in operations {
+                switch operation {
+                case .stripTimmings:
+                    time = -1
+                    timings = Timing()
+                default:
+                    continue
+                }
             }
+
+            request.scrub(operations)
+            response.scrub(operations)
         }
 
-        public func stripping(timings: Bool = false) -> Self {
+        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
             var copy = self
-            copy.strip(timings: timings)
+            copy.scrub(operations)
             return copy
         }
     }
@@ -661,19 +669,21 @@ public struct HAR: Equatable, Hashable, Codable {
 
         // MARK: Redacting sensitive data
 
-        /// Replace matched request headers with placeholder text.
-        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
-            headers.redact(pattern, placeholder: placeholder)
+        public mutating func scrub(_ operations: [ScrubOperation]) {
+            let oldCookieValue = headers.value(forName: "Cookie")
 
-            if headers.value(forName: "Cookie") == placeholder {
-                cookies = cookies.map { $0.redacting(placeholder: placeholder) }
+            headers.scrub(operations)
+
+            if let newCookieValue = headers.value(forName: "Cookie"), newCookieValue != oldCookieValue {
+                for (index, _) in cookies.enumerated() {
+                    cookies[index].value = newCookieValue
+                }
             }
         }
 
-        /// Return new redacted data with placeholder text.
-        public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
+        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
             var copy = self
-            copy.redact(pattern, placeholder: placeholder)
+            copy.scrub(operations)
             return copy
         }
 
@@ -807,19 +817,22 @@ public struct HAR: Equatable, Hashable, Codable {
 
         // MARK: Redacting sensitive data
 
-        /// Replace matched response headers with placeholder text.
-        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
-            headers.redact(pattern, placeholder: placeholder)
+        public mutating func scrub(_ operations: [ScrubOperation]) {
+            let oldSetCookieValue = headers.value(forName: "Set-Cookie")
 
-            if headers.value(forName: "Set-Cookie") == placeholder {
-                cookies = cookies.map { $0.redacting(placeholder: placeholder) }
+            headers.scrub(operations)
+
+            if let newSetCookieValue = headers.value(forName: "Set-Cookie"),
+                newSetCookieValue != oldSetCookieValue {
+                for (index, _) in cookies.enumerated() {
+                    cookies[index].value = newSetCookieValue
+                }
             }
         }
 
-        /// Return new redacted data with placeholder text.
-        public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
+        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
             var copy = self
-            copy.redact(pattern, placeholder: placeholder)
+            copy.scrub(operations)
             return copy
         }
 
@@ -959,20 +972,6 @@ public struct HAR: Equatable, Hashable, Codable {
             return nil
         }
 
-        // MARK: Describing Requests
-
-        /// Replace matched data with placeholder text.
-        internal mutating func redact(placeholder: String) {
-            self = redacting(placeholder: placeholder)
-        }
-
-        /// Return cookie replacing value with placeholder.
-        internal func redacting(placeholder: String) -> Self {
-            var copy = self
-            copy.value = placeholder
-            return copy
-        }
-
         // MARK: Static Methods
 
         /// Parse cookie style attribute pairs seperated by `;` and `=`
@@ -1086,27 +1085,6 @@ public struct HAR: Equatable, Hashable, Codable {
         /// Hashes the lower case name of the header by feeding them into the given hasher.
         public func hash(into hasher: inout Hasher) {
             hasher.combine(name.lowercased())
-        }
-
-        // MARK: Redacting sensitive data
-
-        public static let sensitiveHeaders = try! NSRegularExpression(
-            pattern: #"auth|cookie|key|passsword|secret|token"#,
-            options: .caseInsensitive
-        )
-
-        /// Replace value with placeholder text if name matches pattern.
-        public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
-            if isNamed(pattern) {
-                value = placeholder
-            }
-        }
-
-        /// Return new redacted data with placeholder text.
-        public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
-            var copy = self
-            copy.redact(pattern, placeholder: placeholder)
-            return copy
         }
 
         // MARK: Describing Headers
@@ -1707,16 +1685,6 @@ extension HAR.Headers {
 
     // MARK: Redacting sensitive data
 
-    /// Replace matched data with placeholder text.
-    public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
-        self = redacting(pattern, placeholder: placeholder)
-    }
-
-    /// Return new headers replacing matched headers with placeholder text.
-    public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
-        map { $0.redacting(pattern, placeholder: placeholder) }
-    }
-
     public mutating func removeAll(name: String) {
         removeAll(where: { $0.isNamed(name) })
     }
@@ -1724,6 +1692,37 @@ extension HAR.Headers {
     public func removingAll(name: String) -> Self {
         var copy = self
         copy.removeAll(name: name)
+        return copy
+    }
+
+    public mutating func scrub(_ operations: [HAR.ScrubOperation]) {
+        for operation in operations {
+            switch operation {
+            case .redactHeader(let name, let placeholder):
+                for (index, _) in enumerated() {
+                    if self[index].isNamed(name) {
+                        self[index].value = placeholder
+                    }
+                }
+            case .redactHeaderMatching(let pattern, let placeholder):
+                for (index, _) in enumerated() {
+                    if self[index].isNamed(pattern) {
+                        self[index].value = placeholder
+                    }
+                }
+            case .removeHeader(let name):
+                removeAll(where: { $0.isNamed(name) })
+            case .removeHeaderMatching(let pattern):
+                removeAll(where: { $0.isNamed(pattern) })
+            case .stripTimmings:
+                continue
+            }
+        }
+    }
+
+    public func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
+        var copy = self
+        copy.scrub(operations)
         return copy
     }
 }

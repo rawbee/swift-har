@@ -29,27 +29,32 @@ final class HARTests: XCTestCase {
         XCTAssertEqual(har.log.entries.first?.response.statusText, "OK")
     }
 
-    func testRedacting() throws {
+    func testScrubbingHeaders() throws {
         let har = try HAR(data: XCTUnwrap(fixtureData["Safari jsbin.com.har"]))
-        let redacted = har.redacting(
-            try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted"
-        )
+        let scrubbed = har.scrubbing([
+            .redactHeaderMatching(
+                pattern: try NSRegularExpression(pattern: #"Cookie"#), placeholder: "redacted"
+            ),
+        ])
 
         XCTAssertEqual(
-            redacted.log.entries.first?.request.headers.value(forName: "Cookie"),
+            scrubbed.log.entries.first?.request.headers.value(forName: "Cookie"),
             "redacted"
         )
         XCTAssertEqual(
-            redacted.log.entries.first?.request.cookies.first,
+            scrubbed.log.entries.first?.request.cookies.first,
             HAR.Cookie(name: "last", value: "redacted")
         )
     }
 
     func testStrippingTimings() throws {
         let har = try HAR(data: XCTUnwrap(fixtureData["Safari jsbin.com.har"]))
-        let strippedHar = har.stripping(timings: true)
+        let scrubbed = har.scrubbing([.stripTimmings])
 
-        XCTAssertEqual(strippedHar.log.entries.first?.time, -1)
-        XCTAssertEqual(strippedHar.log.entries.first?.timings, HAR.Timing())
+        XCTAssertEqual(scrubbed.log.pages?.first?.pageTimings.onContentLoad, -1)
+        XCTAssertEqual(scrubbed.log.pages?.first?.pageTimings.onLoad, -1)
+
+        XCTAssertEqual(scrubbed.log.entries.first?.time, -1)
+        XCTAssertEqual(scrubbed.log.entries.first?.timings, HAR.Timing())
     }
 }
