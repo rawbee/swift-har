@@ -1581,17 +1581,25 @@ public struct HAR: Equatable, Hashable, Codable {
         var url: URL
         var method: String
         var headers: [(name: String, value: String)]
+        var cookies: [(name: String, value: String)]
 
-        init(url: URL, method: String = "GET", headers: [(name: String, value: String)] = []) {
+        init(
+            url: URL, method: String = "GET", headers: [(name: String, value: String)] = [],
+            cookies: [(name: String, value: String)] = []
+        ) {
             self.url = url
             self.method = method
             self.headers = headers
+            self.cookies = cookies
         }
 
         init(request: Request) {
             self.url = request.url
             self.method = request.method
-            self.headers = request.headers.map { (name: $0.name, value: $0.value) }
+            self.headers = request.headers.removingAll(name: "Cookie").map {
+                (name: $0.name, value: $0.value)
+            }
+            self.cookies = request.cookies.map { (name: $0.name, value: $0.value) }
         }
 
         public var description: String {
@@ -1605,6 +1613,10 @@ public struct HAR: Equatable, Hashable, Codable {
 
             for (name, value) in headers {
                 lines.append("--header '\(name): \(value)'")
+            }
+
+            for (name, value) in cookies {
+                lines.append("--cookie '\(name)=\(value)'")
             }
 
             return lines.joined(separator: " \\\n  ")
@@ -1666,5 +1678,15 @@ extension HAR.Headers {
     /// Return new headers replacing matched headers with placeholder text.
     public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
         map { $0.redacting(pattern, placeholder: placeholder) }
+    }
+
+    public mutating func removeAll(name: String) {
+        removeAll(where: { $0.isNamed(name) })
+    }
+
+    public func removingAll(name: String) -> Self {
+        var copy = self
+        copy.removeAll(name: name)
+        return copy
     }
 }

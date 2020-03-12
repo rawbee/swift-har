@@ -26,9 +26,11 @@ final class CurlCommandTests: XCTestCase {
               --header 'Referer: https://jsbin.com/?html,output' \\
               --header 'Content-Length: 531' \\
               --header 'Connection: keep-alive' \\
-              --header 'Cookie: last=https%3A%2F%2Fjsbin.com%2F; session=eyJ2ZXJzaW9uIjoiNC4xLjciLCJjc3JmU2VjcmV0IjoiNWliY3oyLXBMOWZodFdPSzREZFR2VWcwIiwiZmxhc2hDYWNoZSI6e30sInJlZmVyZXIiOiIvbG9naW4ifQ==; session.sig=Ng96KW4oa1ujL6JKhHIB-jPzJcg' \\
               --header 'X-Requested-With: XMLHttpRequest' \\
-              --header 'x-csrf-token: mrwblExI-ERMW3vuKeJMLqZA7Zn389jb0EhQ'
+              --header 'x-csrf-token: mrwblExI-ERMW3vuKeJMLqZA7Zn389jb0EhQ' \\
+              --cookie 'last=https%3A%2F%2Fjsbin.com%2F' \\
+              --cookie 'session=eyJ2ZXJzaW9uIjoiNC4xLjciLCJjc3JmU2VjcmV0IjoiNWliY3oyLXBMOWZodFdPSzREZFR2VWcwIiwiZmxhc2hDYWNoZSI6e30sInJlZmVyZXIiOiIvbG9naW4ifQ==' \\
+              --cookie 'session.sig=Ng96KW4oa1ujL6JKhHIB-jPzJcg'
             """
         )
     }
