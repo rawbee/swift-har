@@ -178,7 +178,9 @@ public struct HAR: Equatable, Hashable, Codable {
 
         /// Replace entry request/response headers with placeholder text.
         public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
-            entries = entries.map { $0.redacting(pattern, placeholder: placeholder) }
+            for (index, _) in entries.enumerated() {
+                entries[index].redact(pattern, placeholder: placeholder)
+            }
         }
 
         /// Return new redacted data with placeholder text.
