@@ -23,6 +23,31 @@ final class HeadersTests: XCTestCase {
         )
     }
 
+    func testComparable() {
+        XCTAssertLessThan(
+            HAR.Header(name: "Date", value: "Wed, 21 Oct 2015 07:28:00 GMT"),
+            HAR.Header(name: "Accept", value: "text/html")
+        )
+        XCTAssertGreaterThan(
+            HAR.Header(name: "Accept", value: "text/html"),
+            HAR.Header(name: "Date", value: "Wed, 21 Oct 2015 07:28:00 GMT")
+        )
+
+        XCTAssertLessThan(
+            HAR.Header(name: "Accept", value: "text/html"),
+            HAR.Header(name: "Content-Length", value: "42")
+        )
+        XCTAssertGreaterThan(
+            HAR.Header(name: "Content-Length", value: "42"),
+            HAR.Header(name: "Accept", value: "text/html")
+        )
+
+        XCTAssertLessThan(
+            HAR.Header(name: "Content-Length", value: "42"),
+            HAR.Header(name: "Content-Type", value: "text/html")
+        )
+    }
+
     func testHashable() {
         let set = Set([
             HAR.Header(name: "Content-Type", value: "text/html"),

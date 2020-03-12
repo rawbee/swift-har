@@ -72,7 +72,7 @@ extension HAR.Request {
         /// Empty URL fallback to cover edge case of nil URLRequest.url
         let url = request.url ?? URL(string: "about:blank")!
 
-        let headers: HAR.Headers = request.allHTTPHeaderFields.map { HAR.Headers($0) } ?? []
+        let headers: HAR.Headers = request.allHTTPHeaderFields.map { HAR.Headers($0) }?.sorted() ?? []
 
         var bodySize = 0
         var postData: HAR.PostData?
@@ -111,7 +111,7 @@ extension HAR.Response {
     public init(response: HTTPURLResponse, data: Data?) {
         let status = response.statusCode
         let statusText = Self.statusText(forStatusCode: response.statusCode)
-        let headers = HAR.Headers(response.allHeaderFields)
+        let headers = HAR.Headers(response.allHeaderFields).sorted()
         let content = data.map { HAR.Content(decoding: $0, mimeType: response.mimeType) }
             ?? HAR.Content()
 
