@@ -3,6 +3,10 @@ import XCTest
 @testable import HAR
 
 final class HARTests: XCTestCase {
+    override func setUp() {
+        _ = fixtureData
+    }
+
     func testCodable() throws {
         for (name, data) in fixtureData {
             do {
@@ -39,5 +43,13 @@ final class HARTests: XCTestCase {
             redacted.log.entries.first?.request.cookies.first,
             HAR.Cookie(name: "last", value: "redacted")
         )
+    }
+
+    func testStrippingTimings() throws {
+        let har = try HAR(data: XCTUnwrap(fixtureData["Safari jsbin.com.har"]))
+        let strippedHar = har.stripping(timings: true)
+
+        XCTAssertEqual(strippedHar.log.entries.first?.time, -1)
+        XCTAssertEqual(strippedHar.log.entries.first?.timings, HAR.Timing())
     }
 }

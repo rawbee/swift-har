@@ -114,6 +114,16 @@ public struct HAR: Equatable, Hashable, Codable {
         return copy
     }
 
+    public mutating func strip(timings: Bool = false) {
+        log.strip(timings: timings)
+    }
+
+    public func stripping(timings: Bool = false) -> Self {
+        var copy = self
+        copy.strip(timings: timings)
+        return copy
+    }
+
     // MARK: Structures
 
     /// This object represents the root of exported data.
@@ -187,6 +197,18 @@ public struct HAR: Equatable, Hashable, Codable {
         public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
             var copy = self
             copy.redact(pattern, placeholder: placeholder)
+            return copy
+        }
+
+        public mutating func strip(timings: Bool = false) {
+            for (index, _) in entries.enumerated() {
+                entries[index].strip(timings: timings)
+            }
+        }
+
+        public func stripping(timings: Bool = false) -> Self {
+            var copy = self
+            copy.strip(timings: timings)
             return copy
         }
     }
@@ -494,6 +516,19 @@ public struct HAR: Equatable, Hashable, Codable {
         public func redacting(_ pattern: NSRegularExpression, placeholder: String) -> Self {
             var copy = self
             copy.redact(pattern, placeholder: placeholder)
+            return copy
+        }
+
+        public mutating func strip(timings: Bool = false) {
+            if timings == true {
+                time = -1
+                self.timings = Timing()
+            }
+        }
+
+        public func stripping(timings: Bool = false) -> Self {
+            var copy = self
+            copy.strip(timings: timings)
             return copy
         }
     }
