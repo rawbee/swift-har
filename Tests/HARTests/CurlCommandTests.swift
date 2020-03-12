@@ -3,6 +3,10 @@ import XCTest
 @testable import HAR
 
 final class CurlCommandTests: XCTestCase {
+    override func setUp() {
+        _ = fixtureData
+    }
+
     func testInitRequest() throws {
         let har = try HAR(data: XCTUnwrap(fixtureData["Safari jsbin.com.har"]))
         let request = try XCTUnwrap(har.log.entries[25...].first).request
