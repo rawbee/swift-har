@@ -1051,7 +1051,12 @@ public struct HAR: Equatable, Hashable, Codable {
             hasher.combine(name.lowercased())
         }
 
-        // MARK: Describing Requests
+        // MARK: Redacting sensitive data
+
+        public static let sensitiveHeaders = try! NSRegularExpression(
+            pattern: #"auth|cookie|key|passsword|secret|token"#,
+            options: .caseInsensitive
+        )
 
         /// Replace value with placeholder text if name matches pattern.
         public mutating func redact(_ pattern: NSRegularExpression, placeholder: String) {
