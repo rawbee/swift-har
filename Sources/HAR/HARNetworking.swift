@@ -437,13 +437,7 @@ extension URLProtocolClient {
 }
 
 extension HAR {
-#if canImport(FoundationNetworking)
-    public typealias FoundationURLProtocol = FoundationNetworking.URLProtocol
-#else
-    public typealias FoundationURLProtocol = Foundation.URLProtocol
-#endif
-
-    open class URLProtocol: FoundationURLProtocol {
+    open class MockURLProtocol: URLProtocol {
         // MARK: Instance Properties
 
         public static var configuration: URLSessionConfiguration {
