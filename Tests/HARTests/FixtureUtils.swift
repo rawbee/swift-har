@@ -9,8 +9,22 @@ let fixtureURL: URL = {
 
 let fixtureData: [String: Data] = {
     try! FileManager.default
-        .contentsOfDirectory(atPath: fixtureURL.path)
-        .reduce(into: [String: Data]()) { fixtures, name in
-            fixtures[name] = try! Data(contentsOf: fixtureURL.appendingPathComponent(name))
+        .contentsOfDirectory(at: fixtureURL)
+        .reduce(into: [String: Data]()) { fixtures, url in
+            fixtures[url.lastPathComponent] = try! Data(contentsOf: url)
         }
 }()
+
+extension FileManager {
+    /// - Bug: Reading directories seems buggy under Xcode's XCTest. Try a few things 🤷🏻‍♂️
+    fileprivate func contentsOfDirectory(at url: URL, tries: Int = 3) throws -> [URL] {
+        do {
+            return try contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [])
+        } catch (let error) {
+            if tries <= 1 {
+                throw error
+            }
+            return try contentsOfDirectory(at: url, tries: tries - 1)
+        }
+    }
+}

@@ -3,10 +3,6 @@ import XCTest
 @testable import HAR
 
 final class HARTests: XCTestCase {
-    override func setUp() {
-        _ = fixtureData
-    }
-
     func testCodable() throws {
         for (name, data) in fixtureData {
             do {

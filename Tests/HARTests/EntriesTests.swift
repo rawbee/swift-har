@@ -3,10 +3,6 @@ import XCTest
 @testable import HAR
 
 final class EntriesTests: XCTestCase {
-    override func setUp() {
-        _ = fixtureData
-    }
-
     func testURLMessage() throws {
         let har = try HAR(data: XCTUnwrap(fixtureData["Safari example.com.har"]))
         let harEntry = try XCTUnwrap(har.log.entries.first)
