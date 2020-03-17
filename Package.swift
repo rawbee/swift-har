@@ -9,6 +9,10 @@ let package = Package(
             name: "HAR",
             targets: ["HAR"]
         ),
+        .library(
+            name: "HARNetworking",
+            targets: ["HARNetworking"]
+        ),
     ],
     targets: [
         .target(name: "HAR"),
