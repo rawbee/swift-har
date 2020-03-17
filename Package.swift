@@ -12,9 +12,10 @@ let package = Package(
     ],
     targets: [
         .target(name: "HAR"),
+        .target(name: "HARNetworking", dependencies: ["HAR"]),
         .testTarget(
             name: "HARTests",
-            dependencies: ["HAR"]
+            dependencies: ["HAR", "HARNetworking"]
         ),
     ]
 )

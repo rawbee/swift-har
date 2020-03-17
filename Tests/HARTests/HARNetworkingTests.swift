@@ -1,6 +1,7 @@
+// TODO: Remove this
 import XCTest
 
-@testable import HAR
+@testable import HARNetworking
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking

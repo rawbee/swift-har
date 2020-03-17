@@ -27,6 +27,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+@_exported import HAR
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
