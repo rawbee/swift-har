@@ -174,7 +174,7 @@ public struct HAR: Equatable, Hashable, Codable {
 
         /// Create log.
         public init(
-            version: String = "1.2", creator: Creator = Creator.default, browser: Browser? = nil,
+            version: String = "1.2", creator: Creator = .default, browser: Browser? = nil,
             pages: Pages? = nil, entries: Entries = [], comment: String? = nil
         ) {
             self.version = version
@@ -213,7 +213,7 @@ public struct HAR: Equatable, Hashable, Codable {
         // MARK: Static Properties
 
         /// Creator info used when this library creates a new HAR log.
-        public static let `default` = Creator(name: "SwiftHAR", version: "0.1.0")
+        public static let `default` = Self(name: "SwiftHAR", version: "0.1.0")
 
         // MARK: Properties
 
@@ -315,7 +315,7 @@ public struct HAR: Equatable, Hashable, Codable {
 
         /// Create page.
         public init(
-            startedDateTime: Date, id: String, title: String = "", pageTimings: PageTiming = PageTiming(),
+            startedDateTime: Date, id: String, title: String = "", pageTimings: PageTiming = .init(),
             comment: String? = nil
         ) {
             self.startedDateTime = startedDateTime
@@ -500,9 +500,9 @@ public struct HAR: Equatable, Hashable, Codable {
 
         /// Create entry.
         public init(
-            pageref: String? = nil, startedDateTime: Date = Date(), time: Double = 0,
-            request: Request, response: Response, cache: Cache = Cache(),
-            timings: Timing = Timing(), serverIPAddress: String? = nil, connection: String? = nil,
+            pageref: String? = nil, startedDateTime: Date = .init(), time: Double = 0,
+            request: Request, response: Response, cache: Cache = .init(),
+            timings: Timing = .init(), serverIPAddress: String? = nil, connection: String? = nil,
             comment: String? = nil
         ) {
             self.pageref = pageref
@@ -780,7 +780,7 @@ public struct HAR: Equatable, Hashable, Codable {
         /// Create response.
         public init(
             status: Int = 200, statusText: String = "OK", httpVersion: String = "HTTP/1.1",
-            cookies: Cookies? = nil, headers: Headers = [], content: Content = Content(),
+            cookies: Cookies? = nil, headers: Headers = [], content: Content = .init(),
             redirectURL: String = "", headersSize: Int? = nil, bodySize: Int? = nil,
             comment: String? = nil
         ) {
@@ -1051,16 +1051,16 @@ public struct HAR: Equatable, Hashable, Codable {
             }
         }
 
+        internal var group: Group {
+            Group(name: name)
+        }
+
         /// Returns a Boolean value indicating whether two headers are equal.
         ///
         /// Header names are case-insensitive.
         public static func ==(lhs: Self, rhs: Self) -> Bool {
             lhs.name.caseInsensitiveCompare(rhs.name) == .orderedSame && lhs.value == rhs.value
                 && lhs.comment == rhs.comment
-        }
-
-        internal var group: Group {
-            Group(name: name)
         }
 
         public static func <(lhs: Self, rhs: Self) -> Bool {
@@ -1458,7 +1458,8 @@ public struct HAR: Equatable, Hashable, Codable {
 
         /// Create cache.
         public init(
-            beforeRequest: CacheEntry? = nil, afterRequest: CacheEntry? = nil,
+            beforeRequest: CacheEntry? = nil,
+            afterRequest: CacheEntry? = nil,
             comment: String? = nil
         ) {
             self.beforeRequest = beforeRequest
@@ -1599,7 +1600,9 @@ public struct HAR: Equatable, Hashable, Codable {
         var cookies: [(name: String, value: String)]
 
         init(
-            url: URL, method: String = "GET", headers: [(name: String, value: String)] = [],
+            url: URL,
+            method: String = "GET",
+            headers: [(name: String, value: String)] = [],
             cookies: [(name: String, value: String)] = []
         ) {
             self.url = url
