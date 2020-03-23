@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "HAR",
+    name: "swift-har",
     products: [
         .library(
             name: "HAR",
