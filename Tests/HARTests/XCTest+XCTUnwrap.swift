@@ -11,8 +11,9 @@ func XCTUnwrap<T>(
     }
 
     let providedMessage = message()
-    let failureMessage = providedMessage.isEmpty
-        ? "Expected non-nil value of type \"\(String(describing: T.self))\"" : providedMessage
+    let failureMessage =
+        providedMessage.isEmpty
+            ? "Expected non-nil value of type \"\(String(describing: T.self))\"" : providedMessage
 
     XCTFail(failureMessage, file: file, line: line)
     throw XCTestErrorWhileUnwrappingOptional()

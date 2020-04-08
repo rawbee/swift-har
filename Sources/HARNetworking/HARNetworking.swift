@@ -113,8 +113,9 @@ extension HAR.Response {
         let status = response.statusCode
         let statusText = Self.statusText(forStatusCode: response.statusCode)
         let headers = HAR.Headers(response.allHeaderFields).sorted()
-        let content = data.map { HAR.Content(decoding: $0, mimeType: response.mimeType) }
-            ?? HAR.Content()
+        let content =
+            data.map { HAR.Content(decoding: $0, mimeType: response.mimeType) }
+                ?? HAR.Content()
 
         self.init(status: status, statusText: statusText, headers: headers, content: content)
     }

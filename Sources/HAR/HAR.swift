@@ -656,8 +656,9 @@ public struct HAR: Equatable, Hashable, Codable {
 
             method = try container.decode(String.self, forKey: .method)
             url = try container.decode(URL.self, forKey: .url)
-            httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion)
-                ?? "HTTP/1.1"
+            httpVersion =
+                try container.decodeIfPresent(String.self, forKey: .httpVersion)
+                    ?? "HTTP/1.1"
             self.cookies = try container.decode(Cookies.self, forKey: .cookies)
             self.headers = try container.decode(Headers.self, forKey: .headers)
             self.queryString = try container.decode(QueryStrings.self, forKey: .queryString)
@@ -804,8 +805,9 @@ public struct HAR: Equatable, Hashable, Codable {
 
             status = try container.decode(Int.self, forKey: .status)
             statusText = try container.decode(String.self, forKey: .statusText)
-            httpVersion = try container.decodeIfPresent(String.self, forKey: .httpVersion)
-                ?? "HTTP/1.1"
+            httpVersion =
+                try container.decodeIfPresent(String.self, forKey: .httpVersion)
+                    ?? "HTTP/1.1"
             self.cookies = try container.decode(Cookies.self, forKey: .cookies)
             self.headers = try container.decode(Headers.self, forKey: .headers)
             self.content = try container.decode(Content.self, forKey: .content)
