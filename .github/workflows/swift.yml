@@ -30,9 +30,7 @@ jobs:
         run: swift test --enable-test-discovery --verbose
 
   lint:
-    runs-on: ubuntu-latest
-    container:
-      image: swift:latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout project
@@ -47,8 +45,5 @@ jobs:
           ref: 0.44.7
           path: SwiftFormat
 
-      - name: Build SwiftFormat
-        run: cd SwiftFormat && swift build -c release
-
       - name: Run linter
-        run: ./SwiftFormat/.build/release/swiftformat --lint ./Project
+        run: ./SwiftFormat/CommandLineTool/swiftformat --lint ./Project
