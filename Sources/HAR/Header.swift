@@ -163,13 +163,13 @@ extension HAR.Headers {
         for operation in operations {
             switch operation {
             case .redactHeader(let name, let placeholder):
-                for (index, _) in enumerated() {
+                for index in indices {
                     if self[index].isNamed(name) {
                         self[index].value = placeholder
                     }
                 }
             case .redactHeaderMatching(let pattern, let placeholder):
-                for (index, _) in enumerated() {
+                for index in indices {
                     if self[index].isNamed(pattern) {
                         self[index].value = placeholder
                     }

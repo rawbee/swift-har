@@ -61,13 +61,13 @@ extension HAR {
 
         public mutating func scrub(_ operations: [ScrubOperation]) {
             if var pages = pages {
-                for (index, _) in pages.enumerated() {
+                for index in pages.indices {
                     pages[index].scrub(operations)
                 }
                 self.pages = pages
             }
 
-            for (index, _) in entries.enumerated() {
+            for index in entries.indices {
                 entries[index].scrub(operations)
             }
         }

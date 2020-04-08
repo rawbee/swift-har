@@ -133,7 +133,7 @@ extension HAR {
             headers.scrub(operations)
 
             if let newCookieValue = headers.value(forName: "Cookie"), newCookieValue != oldCookieValue {
-                for (index, _) in cookies.enumerated() {
+                for index in cookies.indices {
                     cookies[index].value = newCookieValue
                 }
             }
