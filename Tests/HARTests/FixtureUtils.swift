@@ -20,7 +20,7 @@ extension FileManager {
     fileprivate func contentsOfDirectory(at url: URL, tries: Int = 3) throws -> [URL] {
         do {
             return try contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [])
-        } catch (let error) {
+        } catch {
             if tries <= 1 {
                 throw error
             }

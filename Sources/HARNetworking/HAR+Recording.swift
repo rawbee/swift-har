@@ -32,7 +32,7 @@ extension HAR {
                 let har = transform(try result.get())
                 try har.write(to: url)
                 completionHandler(.success(har))
-            } catch (let error) {
+            } catch {
                 completionHandler(.failure(error))
             }
         }
