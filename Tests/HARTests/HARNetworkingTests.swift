@@ -1,4 +1,3 @@
-// TODO: Remove this
 import XCTest
 
 @testable import HARNetworking
