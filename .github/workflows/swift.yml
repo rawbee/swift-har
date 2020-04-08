@@ -47,5 +47,8 @@ jobs:
           ref: 0.44.7
           path: SwiftFormat
 
+      - name: Build SwiftFormat
+        run: cd SwiftFormat && swift build -c release
+
       - name: Run linter
-        run: ./SwiftFormat/CommandLineTool/swiftformat --lint ./Project
+        run: ./SwiftFormat/.build/release/swiftformat --lint ./Project
