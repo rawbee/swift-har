@@ -42,7 +42,7 @@ extension HAR {
 
         /// Create Page from Decoder.
         public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
 
             startedDateTime = try container.decode(Date.self, forKey: .startedDateTime)
             id = try container.decode(String.self, forKey: .id)

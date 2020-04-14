@@ -109,7 +109,7 @@ extension HAR {
 
         /// Create Request from Decoder.
         public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
 
             method = try container.decode(String.self, forKey: .method)
             url = try container.decode(URL.self, forKey: .url)

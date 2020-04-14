@@ -97,7 +97,7 @@ extension HAR {
 
         /// Create Response from Decoder.
         public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
 
             status = try container.decode(Int.self, forKey: .status)
             statusText = try container.decode(String.self, forKey: .statusText)

@@ -86,7 +86,7 @@ extension HAR {
 
         /// Create PostData from Decoder.
         public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
 
             mimeType = try container.decodeIfPresent(String.self, forKey: .mimeType) ?? ""
             self.params = try container.decodeIfPresent(Params.self, forKey: .params) ?? []

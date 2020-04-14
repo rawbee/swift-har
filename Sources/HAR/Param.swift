@@ -39,7 +39,7 @@ extension HAR {
 
         /// Create Param from Decoder.
         public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
 
             /// Override synthesised decoder to handle empty `name`.
             name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
