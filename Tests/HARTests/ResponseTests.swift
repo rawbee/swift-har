@@ -84,8 +84,6 @@ final class ResponseTests: XCTestCase {
 
     func normalizedHeaders(_ headers: [HAR.Header]) -> [HAR.Header] {
         headers
-            // FIXME: Multiple Set-Cookie is broken
-            .filter { $0.name.lowercased() != "set-cookie" }
             .map { HAR.Header(name: $0.name.lowercased(), value: $0.value) }
             .sorted { $0.name < $1.name }
     }
