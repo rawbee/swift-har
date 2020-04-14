@@ -146,47 +146,4 @@ extension HAR.Headers {
     public func value(forName name: String) -> String? {
         values(forName: name).first
     }
-
-    // MARK: Redacting sensitive data
-
-    public mutating func removeAll(name: String) {
-        removeAll(where: { $0.isNamed(name) })
-    }
-
-    public func removingAll(name: String) -> Self {
-        var copy = self
-        copy.removeAll(name: name)
-        return copy
-    }
-
-    public mutating func scrub(_ operations: [HAR.ScrubOperation]) {
-        for operation in operations {
-            switch operation {
-            case .redactHeader(let name, let placeholder):
-                for index in indices {
-                    if self[index].isNamed(name) {
-                        self[index].value = placeholder
-                    }
-                }
-            case .redactHeaderMatching(let pattern, let placeholder):
-                for index in indices {
-                    if self[index].isNamed(pattern) {
-                        self[index].value = placeholder
-                    }
-                }
-            case .removeHeader(let name):
-                removeAll(where: { $0.isNamed(name) })
-            case .removeHeaderMatching(let pattern):
-                removeAll(where: { $0.isNamed(pattern) })
-            case .stripTimmings:
-                continue
-            }
-        }
-    }
-
-    public func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
-        var copy = self
-        copy.scrub(operations)
-        return copy
-    }
 }

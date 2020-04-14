@@ -71,29 +71,4 @@ public struct HAR: Equatable, Hashable, Codable {
         encoder.dateEncodingStrategy = .formatted(Self.jsonDateFormatter)
         return try encoder.encode(self)
     }
-
-    // MARK: Redacting sensitive data
-
-    public static let sensitiveHeaders = try! NSRegularExpression(
-        pattern: #"auth|cookie|key|passsword|secret|token"#,
-        options: .caseInsensitive
-    )
-
-    public enum ScrubOperation {
-        case redactHeader(name: String, placeholder: String)
-        case redactHeaderMatching(pattern: NSRegularExpression, placeholder: String)
-        case removeHeader(name: String)
-        case removeHeaderMatching(pattern: NSRegularExpression)
-        case stripTimmings
-    }
-
-    public mutating func scrub(_ operations: [ScrubOperation]) {
-        log.scrub(operations)
-    }
-
-    public func scrubbing(_ operations: [ScrubOperation]) -> Self {
-        var copy = self
-        copy.scrub(operations)
-        return copy
-    }
 }

@@ -125,26 +125,6 @@ extension HAR {
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
         }
 
-        // MARK: Redacting sensitive data
-
-        public mutating func scrub(_ operations: [ScrubOperation]) {
-            let oldCookieValue = headers.value(forName: "Cookie")
-
-            headers.scrub(operations)
-
-            if let newCookieValue = headers.value(forName: "Cookie"), newCookieValue != oldCookieValue {
-                for index in cookies.indices {
-                    cookies[index].value = newCookieValue
-                }
-            }
-        }
-
-        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
-            var copy = self
-            copy.scrub(operations)
-            return copy
-        }
-
         // MARK: Describing Requests
 
         /// A human-readable description for the data.

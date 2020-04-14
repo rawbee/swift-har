@@ -51,25 +51,6 @@ extension HAR {
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
         }
 
-        // MARK: Redacting sensitive data
-
-        public mutating func scrub(_ operations: [ScrubOperation]) {
-            for operation in operations {
-                switch operation {
-                case .stripTimmings:
-                    pageTimings = PageTiming()
-                default:
-                    continue
-                }
-            }
-        }
-
-        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
-            var copy = self
-            copy.scrub(operations)
-            return copy
-        }
-
         // MARK: Describing Pages
 
         /// Date formatter for Page description.

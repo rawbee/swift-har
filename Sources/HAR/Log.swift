@@ -56,26 +56,5 @@ extension HAR {
             self.entries = entries
             self.comment = comment
         }
-
-        // MARK: Redacting sensitive data
-
-        public mutating func scrub(_ operations: [ScrubOperation]) {
-            if var pages = pages {
-                for index in pages.indices {
-                    pages[index].scrub(operations)
-                }
-                self.pages = pages
-            }
-
-            for index in entries.indices {
-                entries[index].scrub(operations)
-            }
-        }
-
-        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
-            var copy = self
-            copy.scrub(operations)
-            return copy
-        }
     }
 }

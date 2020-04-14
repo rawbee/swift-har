@@ -81,29 +81,6 @@ extension HAR {
             self.connection = connection
             self.comment = comment
         }
-
-        // MARK: Redacting sensitive data
-
-        public mutating func scrub(_ operations: [ScrubOperation]) {
-            for operation in operations {
-                switch operation {
-                case .stripTimmings:
-                    time = -1
-                    timings = Timing()
-                default:
-                    continue
-                }
-            }
-
-            request.scrub(operations)
-            response.scrub(operations)
-        }
-
-        public func scrubbing(_ operations: [ScrubOperation]) -> Self {
-            var copy = self
-            copy.scrub(operations)
-            return copy
-        }
     }
 
     /// Array of Entry objects.
