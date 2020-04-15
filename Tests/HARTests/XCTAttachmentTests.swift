@@ -1,3 +1,4 @@
+#if !os(Linux)
 import HARTesting
 import XCTest
 
@@ -9,3 +10,4 @@ final class XCTAttachmentTests: XCTestCase {
         XCTAssertEqual(har.attachment.lifetime, .deleteOnSuccess)
     }
 }
+#endif
