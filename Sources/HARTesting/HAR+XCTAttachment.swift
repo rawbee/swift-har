@@ -1,3 +1,4 @@
+#if !os(Linux)
 import HAR
 import XCTest
 
@@ -14,3 +15,4 @@ extension HAR {
         }
     }
 }
+#endif
