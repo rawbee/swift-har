@@ -7,11 +7,9 @@ import FoundationNetworking
 
 extension HAR {
     open class MockURLProtocol: URLProtocol {
-        // MARK: Instance Properties
-
         public static var configuration: URLSessionConfiguration {
             let config = URLSessionConfiguration.ephemeral
-            config.protocolClasses = [Self.self]
+            config.protocolClasses = [self]
             return config
         }
 
