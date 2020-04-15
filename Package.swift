@@ -13,13 +13,18 @@ let package = Package(
             name: "HARNetworking",
             targets: ["HARNetworking"]
         ),
+        .library(
+            name: "HARTesting",
+            targets: ["HARTesting"]
+        ),
     ],
     targets: [
         .target(name: "HAR"),
         .target(name: "HARNetworking", dependencies: ["HAR"]),
+        .target(name: "HARTesting", dependencies: ["HAR", "HARNetworking"]),
         .testTarget(
             name: "HARTests",
-            dependencies: ["HAR", "HARNetworking"]
+            dependencies: ["HAR", "HARNetworking", "HARTesting"]
         ),
     ]
 )

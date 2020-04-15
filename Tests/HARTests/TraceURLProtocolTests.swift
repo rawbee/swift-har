@@ -7,7 +7,7 @@ import FoundationNetworking
 #endif
 
 final class TraceURLProtocolTests: XCTestCase {
-    func testRecord() throws {
+    func testTrace() throws {
         let session = HAR.TraceURLProtocol.setUp()
 
         let url = try XCTUnwrap(URL(string: "http://example.com/"))
