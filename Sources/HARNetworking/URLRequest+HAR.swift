@@ -30,6 +30,15 @@ extension HAR.Request {
 
         self.init(method: method, url: url, headers: headers, postData: postData, bodySize: bodySize)
     }
+
+    /// Create a HAR Request from a URL Request consuming it's httpBodyStream.
+    ///
+    /// - Parameter request: A URL Request.
+    public init(consuming request: URLRequest) {
+        var bufferedRequest = request
+        bufferedRequest.bufferHTTPBodyStream()
+        self.init(request: bufferedRequest)
+    }
 }
 
 extension URLRequest {
