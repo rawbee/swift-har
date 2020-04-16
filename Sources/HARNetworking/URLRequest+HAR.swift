@@ -9,7 +9,7 @@ extension HAR.Request {
     /// Creates a HAR Request from a URL Request.
     ///
     /// - Parameter request: A URL Request.
-    public init(request: URLRequest) {
+    public init(request: URLRequest, data: Data? = nil) {
         /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
         let method = request.httpMethod ?? "GET"
 
@@ -20,7 +20,7 @@ extension HAR.Request {
 
         var bodySize = 0
         var postData: HAR.PostData?
-        if let data = request.httpBody {
+        if let data = (data ?? request.httpBody) {
             bodySize = data.count
             postData = HAR.PostData(
                 parsingData: data,
@@ -45,5 +45,20 @@ extension URLRequest {
             addValue(header.value, forHTTPHeaderField: header.name)
         }
         httpBody = request.postData?.data
+    }
+
+    /// If body is represented as a stream, buffer it as Data on `httpBody`.
+    mutating func bufferHTTPBodyStream() {
+        // Ensure non-GET and body is already set
+        guard httpMethod != "GET", httpBody == nil else {
+            return
+        }
+
+        // Ensure bodyStream is available
+        guard let httpBodyStream = self.httpBodyStream else {
+            return
+        }
+
+        httpBody = try? Data(reading: httpBodyStream)
     }
 }

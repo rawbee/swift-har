@@ -60,12 +60,15 @@ extension HAR.Entry {
     public static func record(
         request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void
     ) {
+        var req = request
+        req.bufferHTTPBodyStream()
+
         let session = URLSession(
             configuration: URLSessionConfiguration.ephemeral,
             delegate: TaskDelegate(completionHandler),
             delegateQueue: nil
         )
-        session.dataTask(with: request).resume()
+        session.dataTask(with: req).resume()
     }
 }
 
