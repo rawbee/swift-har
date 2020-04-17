@@ -65,7 +65,7 @@ extension HAR.Entry {
             delegate: TaskDelegate(completionHandler),
             delegateQueue: nil
         )
-        
+
         var bufferedRequest = request
         bufferedRequest.bufferHTTPBodyStream()
         session.dataTask(with: bufferedRequest).resume()
