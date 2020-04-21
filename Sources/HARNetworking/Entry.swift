@@ -7,8 +7,6 @@ import FoundationNetworking
 
 extension HAR.Entry {
     init?(_ request: URLRequest, _ response: URLResponse?, _ data: Data?, _ error: Error?) {
-        /// - TODO: Record network errors as entries
-
         guard let response = response as? HTTPURLResponse else {
             return nil
         }
