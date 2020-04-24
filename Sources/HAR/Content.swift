@@ -3,7 +3,7 @@ import Foundation
 extension HAR {
     /// This object describes details about response content (embedded in `Response`
     /// object).
-    public struct Content: Equatable, Hashable, Codable {
+    public struct Content: Equatable, Hashable, Codable, CustomStringConvertible {
         // MARK: Properties
 
         /// Length of the returned content in bytes. Should be equal to
@@ -109,6 +109,16 @@ extension HAR {
                 self.text = data.base64EncodedString()
                 self.encoding = "base64"
             }
+        }
+
+        /// Create HAR Content from text string.
+        public init(_ description: String) {
+            self.init(text: description, mimeType: "text/plain")
+        }
+
+        /// A human-readable description for the data.
+        public var description: String {
+            String(decoding: data, as: UTF8.self)
         }
     }
 }

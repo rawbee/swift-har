@@ -16,7 +16,7 @@ final class ResponseTests: XCTestCase {
 
         XCTAssertEqual(
             String(describing: response),
-            "200 OK  text/plain  12 bytes"
+            "200 OK\r\n\r\nHello, World"
         )
     }
 

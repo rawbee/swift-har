@@ -117,6 +117,11 @@ extension HAR {
 
         /// A human-readable description for the data.
         public var description: String {
+            [headerText, content.description].joined()
+        }
+
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
             var strs: [String] = []
 
             strs.append("\(status) \(statusText)")
@@ -126,12 +131,7 @@ extension HAR {
             formatter.countStyle = .binary
             strs.append(formatter.string(fromByteCount: Int64(bodySize)))
 
-            return strs.joined(separator: "  ")
-        }
-
-        /// A human-readable debug description for the data.
-        public var debugDescription: String {
-            "HAR.Response { \(description) }"
+            return "HAR.Response { \(strs.joined(separator: "  ")) }"
         }
     }
 }

@@ -2,8 +2,7 @@ import Foundation
 
 extension HAR {
     /// This object represents list of exported pages.
-    public struct Page: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    public struct Page: Equatable, Hashable, Codable, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Date and time stamp for the beginning of the page load.
@@ -60,8 +59,8 @@ extension HAR {
             return formatter
         }()
 
-        /// A human-readable description for the data.
-        public var description: String {
+        /// A human-readable debug description for the data.
+        public var debugDescription: String {
             var strs: [String] = []
 
             if let onLoad = pageTimings.onLoad {
@@ -71,12 +70,7 @@ extension HAR {
             strs.append(Self.startedDateFormatter.string(from: startedDateTime))
             strs.append(title)
 
-            return strs.joined(separator: "  ")
-        }
-
-        /// A human-readable debug description for the data.
-        public var debugDescription: String {
-            "HAR.Page { \(description) }"
+            return "HAR.Page { \(strs.joined(separator: "  ")) }"
         }
     }
 

@@ -13,7 +13,7 @@ final class RequestTests: XCTestCase {
 
         XCTAssertEqual(
             String(describing: request),
-            "GET http://example.com/"
+            "GET / HTTP/1.1\r\n\r\n"
         )
     }
 

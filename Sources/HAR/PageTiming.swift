@@ -5,8 +5,7 @@ extension HAR {
     ///
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad`
     /// event or `document.readyState == interactive`.
-    public struct PageTiming: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    public struct PageTiming: Equatable, Hashable, Codable, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Content of the page loaded. Number of milliseconds since page load started
@@ -35,14 +34,9 @@ extension HAR {
 
         // MARK: Describing Page Timings
 
-        /// A human-readable description for the data.
-        public var description: String {
-            "onContentLoad: \(onContentLoad ?? -1), onLoad: \(onLoad ?? -1)"
-        }
-
         /// A human-readable debug description for the data.
         public var debugDescription: String {
-            "HAR.PageTiming { \(description) }"
+            "HAR.PageTiming { onContentLoad: \(onContentLoad ?? -1), onLoad: \(onLoad ?? -1) }"
         }
     }
 }

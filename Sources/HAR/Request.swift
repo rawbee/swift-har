@@ -129,16 +129,21 @@ extension HAR {
 
         /// A human-readable description for the data.
         public var description: String {
-            "\(method) \(url.absoluteString)"
+            if let postData = self.postData {
+                return [headerText, postData.description].joined()
+            } else {
+                return headerText
+            }
         }
 
         /// A human-readable debug description for the data.
         public var debugDescription: String {
-            "HAR.Request { \(description) }"
+            "HAR.Request { \(method) \(url.absoluteString) }"
         }
 
+        /// A curl-able description for the request.
         public var curlDescription: String {
-            String(describing: CurlCommand(request: self))
+            CurlCommand(request: self).description
         }
     }
 }

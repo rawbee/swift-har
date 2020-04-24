@@ -2,7 +2,7 @@ import Foundation
 
 extension HAR {
     /// This object describes posted data, if any (embedded in `Request` object).
-    public struct PostData: Equatable, Hashable, Codable {
+    public struct PostData: Equatable, Hashable, Codable, CustomStringConvertible {
         // MARK: Properties
 
         /// Mime type of posted data.
@@ -92,6 +92,11 @@ extension HAR {
             self.params = try container.decodeIfPresent(Params.self, forKey: .params) ?? []
             self.text = try container.decodeIfPresent(String.self, forKey: .text) ?? ""
             self.comment = try container.decodeIfPresent(String.self, forKey: .comment)
+        }
+
+        /// A human-readable description for the data.
+        public var description: String {
+            text
         }
     }
 }

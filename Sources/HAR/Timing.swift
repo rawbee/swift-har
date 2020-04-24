@@ -1,8 +1,7 @@
 extension HAR {
     /// This object describes various phases within request-response round trip. All
     /// times are specified in milliseconds.
-    public struct Timing: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    public struct Timing: Equatable, Hashable, Codable, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing
@@ -70,22 +69,19 @@ extension HAR {
 
         // MARK: Describing Timings
 
-        /// A human-readable description for the data.
-        public var description: String {
-            """
-            Blocked: \(blocked ?? -1)ms
-            DNS: \(dns ?? -1)ms
-            SSL/TLS: \(ssl ?? -1)ms
-            Connect: \(connect ?? -1)ms
-            Send: \(send)ms
-            Wait: \(wait)ms
-            Receive: \(receive)ms
-            """
-        }
-
         /// A human-readable debug description for the data.
         public var debugDescription: String {
-            "HAR.Timing {\n\(description)\n}"
+            """
+            HAR.Timing {
+                Blocked: \(blocked ?? -1)ms
+                DNS: \(dns ?? -1)ms
+                SSL/TLS: \(ssl ?? -1)ms
+                Connect: \(connect ?? -1)ms
+                Send: \(send)ms
+                Wait: \(wait)ms
+                Receive: \(receive)ms
+            }
+            """
         }
     }
 }

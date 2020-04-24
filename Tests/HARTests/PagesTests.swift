@@ -11,17 +11,6 @@ final class PagesTests: XCTestCase {
         return formatter
     }()
 
-    func testCustomStringConvertible() {
-        let page = HAR.Page(
-            startedDateTime: epoch, id: "page_0", title: "Title", pageTimings: HAR.PageTiming(onLoad: 245)
-        )
-
-        XCTAssertEqual(
-            String(describing: page),
-            "245.0ms  \(dateFormatter.string(from: epoch))  Title"
-        )
-    }
-
     func testCustomDebugStringConvertible() {
         let page = HAR.Page(
             startedDateTime: epoch, id: "page_0", title: "Title", pageTimings: HAR.PageTiming(onLoad: 245)
