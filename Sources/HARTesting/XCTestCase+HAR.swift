@@ -3,7 +3,7 @@ import HARNetworking
 import XCTest
 
 extension XCTestCase {
-    func awaitDataTask(
+    public func awaitDataTask(
         request: URLRequest,
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
         mockedWith pathURL: URL,
