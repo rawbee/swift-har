@@ -26,17 +26,17 @@ extension HAR {
             return URLSession(configuration: configuration)
         }
 
-        public override class func canInit(with request: URLRequest) -> Bool {
+        override public class func canInit(with request: URLRequest) -> Bool {
             true
         }
 
-        public override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        override public class func canonicalRequest(for request: URLRequest) -> URLRequest {
             request
         }
 
         private var dataTask: URLSessionDataTask!
 
-        public override func startLoading() {
+        override public func startLoading() {
             dataTask = URLSession.shared.dataTask(
                 with: request, completionHandler: didLoad
             )
@@ -59,7 +59,7 @@ extension HAR {
             }
         }
 
-        public override func stopLoading() {
+        override public func stopLoading() {
             dataTask.cancel()
         }
     }

@@ -7,6 +7,8 @@ import FoundationNetworking
 
 extension HAR {
     open class MockURLProtocol: URLProtocol {
+        public static var url: URL?
+
         public static var configuration: URLSessionConfiguration {
             let config = URLSessionConfiguration.ephemeral
             config.protocolClasses = [self]
@@ -19,16 +21,19 @@ extension HAR {
 
         // MARK: Instance Methods
 
-        public override class func canInit(with _: URLRequest) -> Bool {
+        override public class func canInit(with _: URLRequest) -> Bool {
             true
         }
 
-        public override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        override public class func canonicalRequest(for request: URLRequest) -> URLRequest {
             request
         }
 
-        open override func startLoading() {
-            fatalError("URLProtocol.startLoading must be implemented")
+        override open func startLoading() {
+            guard let url = Self.url else {
+                preconditionFailure("\(Self.self).url was not set")
+            }
+            startLoading(url: url)
         }
 
         public func startLoading(
@@ -42,6 +47,6 @@ extension HAR {
             }
         }
 
-        public override func stopLoading() {}
+        override public func stopLoading() {}
     }
 }
