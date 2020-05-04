@@ -2,6 +2,10 @@ import HAR
 import HARNetworking
 import XCTest
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 extension XCTestCase {
     public func awaitDataTask(
         request: URLRequest,
