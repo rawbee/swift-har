@@ -19,14 +19,20 @@ extension HAR {
             URLSession(configuration: configuration)
         }
 
-        // MARK: Instance Methods
-
         override public class func canInit(with _: URLRequest) -> Bool {
             true
         }
 
         override public class func canonicalRequest(for request: URLRequest) -> URLRequest {
             request
+        }
+
+        open func entry(for request: URLRequest, in log: HAR.Log) -> HAR.Entry {
+            log.firstEntry
+        }
+
+        open func transform(_ har: HAR) -> HAR {
+            har
         }
 
         override open func startLoading() {
@@ -36,13 +42,13 @@ extension HAR {
             startLoading(url: url)
         }
 
-        public func startLoading(
-            url: URL, transform: @escaping (HAR) -> HAR = { $0 },
-            entrySelector: @escaping (HAR.Log) -> HAR.Entry = { $0.firstEntry }
-        ) {
+        public func startLoading(url: URL) {
             HAR.load(contentsOf: url, orRecordRequest: request, transform: transform) { result in
                 self.client?.urlProtocol(
-                    self, didLoadEntryResult: result.map { har in entrySelector(har.log) }
+                    self,
+                    didLoadEntryResult: result.map { har in
+                        self.entry(for: self.request, in: har.log)
+                    }
                 )
             }
         }
