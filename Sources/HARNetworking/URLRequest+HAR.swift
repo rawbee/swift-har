@@ -57,7 +57,7 @@ extension URLRequest {
     }
 
     /// If body is represented as a stream, buffer it as Data on `httpBody`.
-    mutating func bufferHTTPBodyStream() {
+    public mutating func bufferHTTPBodyStream() {
         // Ensure non-GET and body is already set
         guard httpMethod != "GET", httpBody == nil else {
             return
