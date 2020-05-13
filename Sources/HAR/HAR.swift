@@ -28,6 +28,9 @@ public struct HAR: Equatable, Hashable, Codable {
 
     /// Writes the ecoded HAR to a location.
     public func write(to url: URL, options: Data.WritingOptions = []) throws {
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil
+        )
         try encoded().write(to: url, options: options)
     }
 
