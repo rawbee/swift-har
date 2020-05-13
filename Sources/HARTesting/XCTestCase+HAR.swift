@@ -12,18 +12,18 @@ extension XCTestCase {
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
         mockedWith pathURL: URL,
         timeout seconds: TimeInterval = .infinity
-    ) -> Result<(data: Data, response: URLResponse), URLError> {
+    ) -> Result<(data: Data, response: HTTPURLResponse), URLError> {
         mockProtocol.url = pathURL
         defer { mockProtocol.url = nil }
 
         let expectation = self.expectation(description: "Request")
-        var result: Result<(data: Data, response: URLResponse), URLError>?
+        var result: Result<(data: Data, response: HTTPURLResponse), URLError>?
 
         let task = mockProtocol.session.dataTask(with: request) { data, response, error in
             if let error = error {
                 let nserror = error as NSError
                 result = .failure(URLError(_nsError: nserror))
-            } else if let response = response, let data = data {
+            } else if let response = response as? HTTPURLResponse, let data = data {
                 result = .success((data, response))
             } else {
                 result = .failure(URLError(.unknown))

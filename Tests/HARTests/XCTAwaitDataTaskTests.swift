@@ -17,9 +17,7 @@ final class XCTAwaitDataTaskTests: XCTestCase {
         switch result {
         case .success((let data, let response)):
             XCTAssertEqual(data.count, 1256)
-
-            let httpResponse = try XCTUnwrap(response as? HTTPURLResponse)
-            XCTAssertEqual(httpResponse.statusCode, 200)
+            XCTAssertEqual(response.statusCode, 200)
         case .failure(let error):
             XCTFail(error.localizedDescription)
         }
