@@ -11,10 +11,16 @@ extension XCTestCase {
         request: URLRequest,
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
         mockedWith pathURL: URL,
-        timeout seconds: TimeInterval = .infinity
+        timeout seconds: TimeInterval = .infinity,
+        file: StaticString = #file,
+        line: UInt = #line
     ) -> Result<(data: Data, response: HTTPURLResponse), URLError> {
         mockProtocol.url = pathURL
-        defer { mockProtocol.url = nil }
+        mockProtocol.caller = (file: file, line: line)
+        defer {
+            mockProtocol.url = nil
+            mockProtocol.caller = nil
+        }
 
         let expectation = self.expectation(description: "Request")
         var result: Result<(data: Data, response: HTTPURLResponse), URLError>?
