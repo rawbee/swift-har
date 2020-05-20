@@ -5,14 +5,14 @@ import XCTest
 import FoundationNetworking
 #endif
 
-final class XCTAwaitDataTaskTests: XCTestCase {
-    func testAwaitDataTask() throws {
+final class XCTAwaitHTTPURLRequestTests: XCTestCase {
+    func testAwaitHTTPURLRequest() throws {
         let fileURL = fixtureURL.appendingPathComponent("example.com.har")
 
         let url = try XCTUnwrap(URL(string: "http://example.com"))
         let urlRequest = URLRequest(url: url)
 
-        let result = awaitDataTask(request: urlRequest, mockedWith: fileURL)
+        let result = awaitHTTPURLRequest(urlRequest, mockedWith: fileURL)
 
         switch result {
         case .success((let data, let response)):
