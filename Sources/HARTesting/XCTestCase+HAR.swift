@@ -7,6 +7,25 @@ import FoundationNetworking
 #endif
 
 extension XCTestCase {
+#if swift(>=5.3)
+    public func awaitHTTPURLRequest(
+        _ request: URLRequest,
+        mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
+        mockedWith pathURL: URL,
+        timeout seconds: TimeInterval = .infinity,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> Result<(data: Data, response: HTTPURLResponse), URLError> {
+        _awaitHTTPURLRequest(
+            request,
+            mockedProtocol: mockProtocol,
+            mockedWith: pathURL,
+            timeout: seconds,
+            file: file,
+            line: line
+        )
+    }
+#else
     public func awaitHTTPURLRequest(
         _ request: URLRequest,
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
@@ -14,6 +33,25 @@ extension XCTestCase {
         timeout seconds: TimeInterval = .infinity,
         file: StaticString = #file,
         line: UInt = #line
+    ) -> Result<(data: Data, response: HTTPURLResponse), URLError> {
+        _awaitHTTPURLRequest(
+            request,
+            mockedProtocol: mockProtocol,
+            mockedWith: pathURL,
+            timeout: seconds,
+            file: file,
+            line: line
+        )
+    }
+#endif
+
+    private func _awaitHTTPURLRequest(
+        _ request: URLRequest,
+        mockedProtocol mockProtocol: HAR.MockURLProtocol.Type,
+        mockedWith pathURL: URL,
+        timeout seconds: TimeInterval = .infinity,
+        file: StaticString,
+        line: UInt
     ) -> Result<(data: Data, response: HTTPURLResponse), URLError> {
         guard request.url?.scheme == "http" || request.url?.scheme == "https" else {
             XCTFail("request url must have a HTTP scheme", file: file, line: line)
