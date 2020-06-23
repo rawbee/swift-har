@@ -4,7 +4,11 @@ on: [push]
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-10.15]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
@@ -16,9 +20,13 @@ jobs:
         run: swift test --verbose
 
   build-linux:
+    strategy:
+      matrix:
+        image: [swift:5.2.4-bionic, swiftlang/swift:5.3-bionic]
+
     runs-on: ubuntu-latest
     container:
-      image: swift:latest
+      image: ${{ matrix.image }}
 
     steps:
       - uses: actions/checkout@v2
