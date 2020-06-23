@@ -22,7 +22,7 @@ jobs:
   build-linux:
     strategy:
       matrix:
-        image: [swift:5.2.4-bionic, swiftlang/swift:5.3-bionic]
+        image: ["swift:5.2.4-bionic", "swiftlang/swift:5.3-bionic"]
 
     runs-on: ubuntu-latest
     container:
