@@ -41,7 +41,9 @@ extension HAR {
 
     /// Perform URL Request, create HTTP archive and write encoded archive to file URL.
     public static func record(
-        request: URLRequest, to url: URL, transform: @escaping (Self) -> Self = { $0 },
+        request: URLRequest,
+        to url: URL,
+        transform: @escaping (Self) -> Self = { $0 },
         completionHandler: @escaping (RecordResult) -> Void
     ) {
         record(request: request) { result in
@@ -58,7 +60,8 @@ extension HAR {
     /// Attempt to load HAR from file system, otherwise perform request and
     /// write result to file system.
     public static func load(
-        contentsOf url: URL, orRecordRequest request: URLRequest,
+        contentsOf url: URL,
+        orRecordRequest request: URLRequest,
         transform: @escaping (Self) -> Self = { $0 },
         completionHandler: @escaping (RecordResult) -> Void
     ) {
@@ -75,7 +78,8 @@ extension HAR.Entry {
 
     /// Perform URL Request and create HTTP archive Entry of the request and response.
     public static func record(
-        request: URLRequest, completionHandler: @escaping (Result<Self, Error>) -> Void
+        request: URLRequest,
+        completionHandler: @escaping (Result<Self, Error>) -> Void
     ) {
         let session = URLSession(
             configuration: URLSessionConfiguration.ephemeral,
@@ -110,13 +114,17 @@ private class TaskDelegate: NSObject, URLSessionDataDelegate {
     // MARK: Instance Methods
 
     fileprivate func urlSession(
-        _ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data
+        _ session: URLSession,
+        dataTask: URLSessionDataTask,
+        didReceive data: Data
     ) {
         self.data.append(data)
     }
 
     fileprivate func urlSession(
-        _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?
+        _ session: URLSession,
+        task: URLSessionTask,
+        didCompleteWithError error: Error?
     ) {
         if let request = task.currentRequest, let response = task.response as? HTTPURLResponse {
             var entry = HAR.Entry(

@@ -23,7 +23,9 @@ extension HAR {
 
         /// Create cache.
         public init(
-            beforeRequest: CacheEntry? = nil, afterRequest: CacheEntry? = nil, comment: String? = nil
+            beforeRequest: CacheEntry? = nil,
+            afterRequest: CacheEntry? = nil,
+            comment: String? = nil
         ) {
             self.beforeRequest = beforeRequest
             self.afterRequest = afterRequest

@@ -28,7 +28,10 @@ extension HAR {
 
         /// Create page.
         public init(
-            startedDateTime: Date, id: String, title: String = "", pageTimings: PageTiming = .init(),
+            startedDateTime: Date,
+            id: String,
+            title: String = "",
+            pageTimings: PageTiming = .init(),
             comment: String? = nil
         ) {
             self.startedDateTime = startedDateTime

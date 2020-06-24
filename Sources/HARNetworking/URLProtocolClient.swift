@@ -13,7 +13,8 @@ extension URLProtocolClient {
 
     /// Tells the client that the protocol implementation has created a HAR Entry or Error for the request.
     public func urlProtocol(
-        _ protocol: URLProtocol, didLoadEntryResult result: Result<HAR.Entry, Error>
+        _ protocol: URLProtocol,
+        didLoadEntryResult result: Result<HAR.Entry, Error>
     ) {
         switch result {
         case .success(let entry):

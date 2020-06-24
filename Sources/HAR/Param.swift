@@ -25,7 +25,10 @@ extension HAR {
 
         /// Create param.
         public init(
-            name: String, value: String? = nil, fileName: String? = nil, contentType: String? = nil,
+            name: String,
+            value: String? = nil,
+            fileName: String? = nil,
+            contentType: String? = nil,
             comment: String? = nil
         ) {
             self.name = name

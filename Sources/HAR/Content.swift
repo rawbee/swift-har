@@ -63,8 +63,12 @@ extension HAR {
 
         /// Create content.
         public init(
-            size: Int, compression: Int? = nil, mimeType: String, text: String? = nil,
-            encoding: String? = nil, comment: String? = nil
+            size: Int,
+            compression: Int? = nil,
+            mimeType: String,
+            text: String? = nil,
+            encoding: String? = nil,
+            comment: String? = nil
         ) {
             self.size = size
             self.compression = compression

@@ -65,9 +65,15 @@ extension HAR {
 
         /// Create entry.
         public init(
-            pageref: String? = nil, startedDateTime: Date = .init(), time: Double = 0,
-            request: Request, response: Response, cache: Cache = .init(),
-            timings: Timing = .init(), serverIPAddress: String? = nil, connection: String? = nil,
+            pageref: String? = nil,
+            startedDateTime: Date = .init(),
+            time: Double = 0,
+            request: Request,
+            response: Response,
+            cache: Cache = .init(),
+            timings: Timing = .init(),
+            serverIPAddress: String? = nil,
+            connection: String? = nil,
             comment: String? = nil
         ) {
             self.pageref = pageref

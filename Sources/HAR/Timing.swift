@@ -54,8 +54,14 @@ extension HAR {
 
         /// Create timing.
         public init(
-            blocked: Double? = -1, dns: Double? = -1, connect: Double? = -1, send: Double = -1,
-            wait: Double = -1, receive: Double = -1, ssl: Double? = -1, comment: String? = nil
+            blocked: Double? = -1,
+            dns: Double? = -1,
+            connect: Double? = -1,
+            send: Double = -1,
+            wait: Double = -1,
+            receive: Double = -1,
+            ssl: Double? = -1,
+            comment: String? = nil
         ) {
             self.blocked = blocked
             self.dns = dns

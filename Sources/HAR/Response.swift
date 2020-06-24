@@ -77,9 +77,15 @@ extension HAR {
 
         /// Create response.
         public init(
-            status: Int = 200, statusText: String = "OK", httpVersion: String = "HTTP/1.1",
-            cookies: Cookies? = nil, headers: Headers = [], content: Content = .init(),
-            redirectURL: String = "", headersSize: Int? = nil, bodySize: Int? = nil,
+            status: Int = 200,
+            statusText: String = "OK",
+            httpVersion: String = "HTTP/1.1",
+            cookies: Cookies? = nil,
+            headers: Headers = [],
+            content: Content = .init(),
+            redirectURL: String = "",
+            headersSize: Int? = nil,
+            bodySize: Int? = nil,
             comment: String? = nil
         ) {
             self.status = status

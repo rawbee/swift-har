@@ -46,8 +46,12 @@ extension HAR {
 
         /// Create log.
         public init(
-            version: String = "1.2", creator: Creator = .default, browser: Browser? = nil,
-            pages: Pages? = nil, entries: Entries = [], comment: String? = nil
+            version: String = "1.2",
+            creator: Creator = .default,
+            browser: Browser? = nil,
+            pages: Pages? = nil,
+            entries: Entries = [],
+            comment: String? = nil
         ) {
             self.version = version
             self.creator = creator
