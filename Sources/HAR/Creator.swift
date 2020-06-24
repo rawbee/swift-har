@@ -5,7 +5,7 @@ extension HAR {
         // MARK: Static Properties
 
         /// Creator info used when this library creates a new HAR log.
-        public static let `default` = Self(name: "SwiftHAR", version: "0.1.0")
+        public static let `default`: Self = .init(name: "SwiftHAR", version: "0.1.0")
 
         // MARK: Properties
 

@@ -32,8 +32,8 @@ extension HAR {
         request: URLRequest,
         completionHandler: @escaping (RecordResult) -> Void
     ) {
-        Self.Entry.record(request: request) {
-            completionHandler($0.map { Self(log: Self.Log(entries: [$0])) })
+        Entry.record(request: request) {
+            completionHandler($0.map { .init(log: Log(entries: [$0])) })
         }
     }
 
