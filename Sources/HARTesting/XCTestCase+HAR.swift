@@ -1,10 +1,15 @@
 import HAR
+import HARNetworking
 import XCTest
 
 #if canImport(FoundationNetworking)
 import class FoundationNetworking.HTTPURLResponse
 import struct FoundationNetworking.URLRequest
 #endif
+
+extension HAR.MockURLProtocol {
+    public static var caller: (file: StaticString, line: UInt)?
+}
 
 extension XCTestCase {
 #if swift(>=5.3)
