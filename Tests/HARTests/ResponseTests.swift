@@ -2,7 +2,7 @@ import HAR
 import XCTest
 
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+import class FoundationNetworking.HTTPURLResponse
 #endif
 
 final class ResponseTests: XCTestCase {

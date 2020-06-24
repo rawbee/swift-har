@@ -2,7 +2,7 @@ import HARTesting
 import XCTest
 
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+import struct FoundationNetworking.URLRequest
 #endif
 
 final class XCTAwaitHTTPURLRequestTests: XCTestCase {

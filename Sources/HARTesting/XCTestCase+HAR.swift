@@ -3,7 +3,8 @@ import HARNetworking
 import XCTest
 
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+import class FoundationNetworking.HTTPURLResponse
+import struct FoundationNetworking.URLRequest
 #endif
 
 extension XCTestCase {
