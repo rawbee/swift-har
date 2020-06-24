@@ -1,4 +1,4 @@
-import Foundation
+import struct Foundation.URLQueryItem
 
 extension HAR {
     /// This object contains list of all parameters & values parsed from a query string,

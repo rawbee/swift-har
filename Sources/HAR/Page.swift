@@ -1,4 +1,5 @@
-import Foundation
+import struct Foundation.Date
+import class Foundation.DateFormatter
 
 extension HAR {
     /// This object represents list of exported pages.

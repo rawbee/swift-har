@@ -1,4 +1,4 @@
-import Foundation
+import struct Foundation.Data
 
 extension HAR {
     /// This object describes details about response content (embedded in `Response`

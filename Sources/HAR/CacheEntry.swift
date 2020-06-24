@@ -1,4 +1,4 @@
-import Foundation
+import struct Foundation.Date
 
 extension HAR {
     /// This objects contains cache entry state for the request.
@@ -26,7 +26,11 @@ extension HAR {
 
         /// Create cache entry.
         public init(
-            expires: Date? = nil, lastAccess: Date, eTag: String, hitCount: Int, comment: String? = nil
+            expires: Date? = nil,
+            lastAccess: Date,
+            eTag: String,
+            hitCount: Int,
+            comment: String? = nil
         ) {
             self.expires = expires
             self.lastAccess = lastAccess

@@ -1,4 +1,11 @@
-import Foundation
+import struct Foundation.Data
+import struct Foundation.Date
+import class Foundation.DateFormatter
+import class Foundation.FileManager
+import class Foundation.JSONDecoder
+import class Foundation.JSONEncoder
+import struct Foundation.TimeZone
+import struct Foundation.URL
 
 /// HTTP Archive
 /// - Version: 1.2

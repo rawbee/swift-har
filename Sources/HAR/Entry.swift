@@ -1,4 +1,4 @@
-import Foundation
+import struct Foundation.Date
 
 extension HAR {
     /// This object represents an array with all exported HTTP requests. Sorting entries

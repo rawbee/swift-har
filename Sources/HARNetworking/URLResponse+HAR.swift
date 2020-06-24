@@ -1,8 +1,12 @@
-import Foundation
 import HAR
 
+import struct Foundation.Data
+import struct Foundation.URL
+
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+import class FoundationNetworking.HTTPURLResponse
+#else
+import class Foundation.HTTPURLResponse
 #endif
 
 extension HAR.Response {

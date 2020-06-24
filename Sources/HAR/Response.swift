@@ -1,4 +1,5 @@
-import Foundation
+import class Foundation.ByteCountFormatter
+import struct Foundation.Data
 
 extension HAR {
     /// This object contains detailed info about the response.

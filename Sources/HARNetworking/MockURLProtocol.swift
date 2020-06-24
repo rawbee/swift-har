@@ -1,8 +1,17 @@
-import Foundation
 import HAR
 
+import struct Foundation.URL
+
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+import class FoundationNetworking.URLProtocol
+import struct FoundationNetworking.URLRequest
+import class FoundationNetworking.URLSession
+import class FoundationNetworking.URLSessionConfiguration
+#else
+import class Foundation.URLProtocol
+import struct Foundation.URLRequest
+import class Foundation.URLSession
+import class Foundation.URLSessionConfiguration
 #endif
 
 extension HAR {

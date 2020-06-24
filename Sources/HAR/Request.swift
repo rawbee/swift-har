@@ -1,4 +1,6 @@
-import Foundation
+import struct Foundation.Data
+import struct Foundation.URL
+import struct Foundation.URLComponents
 
 extension HAR {
     /// This object contains detailed info about performed request.

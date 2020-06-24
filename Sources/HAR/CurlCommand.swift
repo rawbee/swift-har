@@ -1,4 +1,4 @@
-import Foundation
+import struct Foundation.URL
 
 extension HAR {
     public struct CurlCommand: CustomStringConvertible {
@@ -8,7 +8,9 @@ extension HAR {
         var cookies: [(name: String, value: String)]
 
         public init(
-            url: URL, method: String = "GET", headers: [(name: String, value: String)] = [],
+            url: URL,
+            method: String = "GET",
+            headers: [(name: String, value: String)] = [],
             cookies: [(name: String, value: String)] = []
         ) {
             self.url = url

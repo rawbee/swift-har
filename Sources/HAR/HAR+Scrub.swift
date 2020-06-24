@@ -1,4 +1,4 @@
-import Foundation
+import class Foundation.NSRegularExpression
 
 // MARK: Redacting sensitive data
 

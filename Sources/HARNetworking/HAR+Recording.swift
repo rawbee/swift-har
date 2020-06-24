@@ -1,8 +1,25 @@
-import Foundation
 import HAR
 
+import struct Foundation.Data
+import class Foundation.NSObject
+import struct Foundation.URL
+
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+import class FoundationNetworking.HTTPURLResponse
+import struct FoundationNetworking.URLRequest
+import class FoundationNetworking.URLSession
+import class FoundationNetworking.URLSessionConfiguration
+import protocol FoundationNetworking.URLSessionDataDelegate
+import class FoundationNetworking.URLSessionDataTask
+import class FoundationNetworking.URLSessionTask
+#else
+import class Foundation.HTTPURLResponse
+import struct Foundation.URLRequest
+import class Foundation.URLSession
+import class Foundation.URLSessionConfiguration
+import protocol Foundation.URLSessionDataDelegate
+import class Foundation.URLSessionDataTask
+import class Foundation.URLSessionTask
 #endif
 
 extension HAR {
@@ -135,6 +152,9 @@ private class TaskDelegate: NSObject, URLSessionDataDelegate {
 }
 
 #if !os(Linux)
+import class Foundation.URLSessionTaskMetrics
+import class Foundation.URLSessionTaskTransactionMetrics
+
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
 extension TaskDelegate {
     // MARK: Instance Methods

@@ -1,4 +1,5 @@
-import Foundation
+import struct Foundation.Data
+import struct Foundation.URLComponents
 
 extension HAR {
     /// This object describes posted data, if any (embedded in `Request` object).

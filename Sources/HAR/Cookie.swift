@@ -1,4 +1,6 @@
-import Foundation
+import struct Foundation.Date
+import class Foundation.DateFormatter
+import struct Foundation.TimeZone
 
 extension HAR {
     /// This object contains list of all cookies (used in `Request` and `Response`
@@ -45,8 +47,15 @@ extension HAR {
 
         /// Create cookie.
         public init(
-            name: String, value: String, path: String? = nil, domain: String? = nil, expires: Date? = nil,
-            httpOnly: Bool? = nil, secure: Bool? = nil, comment: String? = nil, sameSite: String? = nil
+            name: String,
+            value: String,
+            path: String? = nil,
+            domain: String? = nil,
+            expires: Date? = nil,
+            httpOnly: Bool? = nil,
+            secure: Bool? = nil,
+            comment: String? = nil,
+            sameSite: String? = nil
         ) {
             self.name = name
             self.value = value

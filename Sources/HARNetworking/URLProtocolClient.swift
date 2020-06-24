@@ -1,8 +1,11 @@
-import Foundation
 import HAR
 
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+import class FoundationNetworking.URLProtocol
+import protocol FoundationNetworking.URLProtocolClient
+#else
+import class Foundation.URLProtocol
+import protocol Foundation.URLProtocolClient
 #endif
 
 extension URLProtocolClient {

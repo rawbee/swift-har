@@ -1,4 +1,5 @@
-import Foundation
+import struct Foundation.NSRange
+import class Foundation.NSRegularExpression
 
 extension HAR {
     /// This object contains list of all headers (used in `Request` and `Response`

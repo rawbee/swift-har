@@ -1,4 +1,5 @@
-import Foundation
+import struct Foundation.Data
+import class Foundation.InputStream
 
 extension Data {
     init(reading inputStream: InputStream, chunkSize: Int = 1024) throws {
