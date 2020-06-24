@@ -55,14 +55,25 @@ extension HAR {
             HAR.load(
                 contentsOf: url, orRecordRequest: request,
                 completionHandler: { result in
-                    self.client?.urlProtocol(
-                        self,
-                        didLoadEntryResult: result.map { har in
-                            self.entry(for: self.request, in: har.log)
-                        }
+                    self.didLoadEntry(
+                        result.map { self.entry(for: self.request, in: $0.log) }
                     )
                 }, transform: transform
             )
+        }
+
+        public func didLoadEntry(_ result: Result<HAR.Entry, Error>) {
+            guard let client = self.client else { return }
+
+            switch result {
+            case .success(let entry):
+                let (_, response, data) = entry.toURLMessage()
+                client.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+                client.urlProtocol(self, didLoad: data)
+                client.urlProtocolDidFinishLoading(self)
+            case .failure(let error):
+                client.urlProtocol(self, didFailWithError: error)
+            }
         }
 
         override public func stopLoading() {}
