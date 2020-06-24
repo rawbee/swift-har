@@ -52,14 +52,17 @@ extension HAR {
         }
 
         public func startLoading(url: URL) {
-            HAR.load(contentsOf: url, orRecordRequest: request, transform: transform) { result in
-                self.client?.urlProtocol(
-                    self,
-                    didLoadEntryResult: result.map { har in
-                        self.entry(for: self.request, in: har.log)
-                    }
-                )
-            }
+            HAR.load(
+                contentsOf: url, orRecordRequest: request,
+                completionHandler: { result in
+                    self.client?.urlProtocol(
+                        self,
+                        didLoadEntryResult: result.map { har in
+                            self.entry(for: self.request, in: har.log)
+                        }
+                    )
+                }, transform: transform
+            )
         }
 
         override public func stopLoading() {}

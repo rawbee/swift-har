@@ -29,22 +29,20 @@ extension HAR {
 
     /// Perform URL Request and create HTTP archive of the request and response.
     public static func record(
-        request: URLRequest, completionHandler: @escaping (RecordResult) -> Void
+        request: URLRequest,
+        completionHandler: @escaping (RecordResult) -> Void
     ) {
-        Self.Entry.record(
-            request: request,
-            completionHandler: {
-                completionHandler($0.map { Self(log: Self.Log(entries: [$0])) })
-            }
-        )
+        Self.Entry.record(request: request) {
+            completionHandler($0.map { Self(log: Self.Log(entries: [$0])) })
+        }
     }
 
     /// Perform URL Request, create HTTP archive and write encoded archive to file URL.
     public static func record(
         request: URLRequest,
         to url: URL,
-        transform: @escaping (Self) -> Self = { $0 },
-        completionHandler: @escaping (RecordResult) -> Void
+        completionHandler: @escaping (RecordResult) -> Void,
+        transform: @escaping (Self) -> Self = { $0 }
     ) {
         record(request: request) { result in
             do {
@@ -62,13 +60,13 @@ extension HAR {
     public static func load(
         contentsOf url: URL,
         orRecordRequest request: URLRequest,
-        transform: @escaping (Self) -> Self = { $0 },
-        completionHandler: @escaping (RecordResult) -> Void
+        completionHandler: @escaping (RecordResult) -> Void,
+        transform: @escaping (Self) -> Self = { $0 }
     ) {
         do {
             completionHandler(.success(try HAR(contentsOf: url)))
         } catch {
-            record(request: request, to: url, transform: transform, completionHandler: completionHandler)
+            record(request: request, to: url, completionHandler: completionHandler, transform: transform)
         }
     }
 }
