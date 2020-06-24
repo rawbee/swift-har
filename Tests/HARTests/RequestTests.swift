@@ -1,6 +1,5 @@
+import HAR
 import XCTest
-
-@testable import HAR
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking

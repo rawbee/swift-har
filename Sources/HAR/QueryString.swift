@@ -28,7 +28,7 @@ extension HAR {
         }
 
         /// Create QueryString item from `URLQueryItem`.
-        internal init(_ queryItem: URLQueryItem) {
+        public init(_ queryItem: URLQueryItem) {
             self.name = queryItem.name
             self.value = queryItem.value?.replacingOccurrences(of: "+", with: " ") ?? ""
         }

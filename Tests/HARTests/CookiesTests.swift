@@ -1,6 +1,5 @@
+import HAR
 import XCTest
-
-@testable import HAR
 
 final class CookiesTests: XCTestCase {
     func testInitFromCookieHeader() {

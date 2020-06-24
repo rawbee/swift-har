@@ -1,4 +1,5 @@
 #if !os(Linux)
+import HAR
 import HARTesting
 import XCTest
 

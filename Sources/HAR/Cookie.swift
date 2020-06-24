@@ -139,7 +139,7 @@ extension HAR.Cookies {
     // MARK: Initializers
 
     /// Create Cookies array from HTTP Request "Cookie:" header value.
-    internal init(fromCookieHeader header: String) {
+    public init(fromCookieHeader header: String) {
         self = HAR.Cookie.parseCookieAttributes(header).map {
             HAR.Cookie(name: $0.key, value: $0.value ?? "")
         }

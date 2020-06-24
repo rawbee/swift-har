@@ -7,7 +7,7 @@ extension HAR {
         var headers: [(name: String, value: String)]
         var cookies: [(name: String, value: String)]
 
-        init(
+        public init(
             url: URL, method: String = "GET", headers: [(name: String, value: String)] = [],
             cookies: [(name: String, value: String)] = []
         ) {
@@ -17,7 +17,7 @@ extension HAR {
             self.cookies = cookies
         }
 
-        init(request: Request) {
+        public init(request: Request) {
             self.url = request.url
             self.method = request.method
             self.headers = request.headers.removingAll(name: "Cookie").map {

@@ -1,6 +1,5 @@
+import HAR
 import XCTest
-
-@testable import HAR
 
 final class PagesTests: XCTestCase {
     let epoch = Date(timeIntervalSince1970: 0)
