@@ -1,4 +1,6 @@
+import struct Foundation.Data
 import struct Foundation.Date
+import struct Foundation.URL
 
 extension HAR {
     /// This object represents an array with all exported HTTP requests. Sorting entries
@@ -86,6 +88,12 @@ extension HAR {
             self.serverIPAddress = serverIPAddress
             self.connection = connection
             self.comment = comment
+        }
+
+        public func append(to url: URL, options: Data.WritingOptions = []) throws {
+            var har = try HAR(contentsOf: url)
+            har.log.entries.append(self)
+            try har.write(to: url, options: options)
         }
     }
 

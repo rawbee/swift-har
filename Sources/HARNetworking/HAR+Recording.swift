@@ -1,25 +1,13 @@
 import HAR
 
-import struct Foundation.Data
-import class Foundation.NSObject
 import struct Foundation.URL
 
 #if canImport(FoundationNetworking)
-import class FoundationNetworking.HTTPURLResponse
 import struct FoundationNetworking.URLRequest
 import class FoundationNetworking.URLSession
-import class FoundationNetworking.URLSessionConfiguration
-import protocol FoundationNetworking.URLSessionDataDelegate
-import class FoundationNetworking.URLSessionDataTask
-import class FoundationNetworking.URLSessionTask
 #else
-import class Foundation.HTTPURLResponse
 import struct Foundation.URLRequest
 import class Foundation.URLSession
-import class Foundation.URLSessionConfiguration
-import protocol Foundation.URLSessionDataDelegate
-import class Foundation.URLSessionDataTask
-import class Foundation.URLSessionTask
 #endif
 
 extension HAR {
@@ -30,29 +18,15 @@ extension HAR {
     /// Perform URL Request and create HTTP archive of the request and response.
     public static func record(
         request: URLRequest,
+        to url: URL? = nil,
+        transform: @escaping (HAR.Entry) -> HAR.Entry = { $0 },
         completionHandler: @escaping (RecordResult) -> Void
     ) {
-        Entry.record(request: request) {
-            completionHandler($0.map { .init(log: Log(entries: [$0])) })
+        let session = URLSession(configuration: .ephemeral)
+        let task = session.archiveTask(with: request, appendingTo: url, transform: transform) {
+            completionHandler($0.map { .init(entry: $0) })
         }
-    }
-
-    /// Perform URL Request, create HTTP archive and write encoded archive to file URL.
-    public static func record(
-        request: URLRequest,
-        to url: URL,
-        completionHandler: @escaping (RecordResult) -> Void,
-        transform: @escaping (Self) -> Self = { $0 }
-    ) {
-        record(request: request) { result in
-            do {
-                let har = transform(try result.get())
-                try har.write(to: url)
-                completionHandler(.success(har))
-            } catch {
-                completionHandler(.failure(error))
-            }
-        }
+        task.resume()
     }
 
     /// Attempt to load HAR from file system, otherwise perform request and
@@ -61,156 +35,17 @@ extension HAR {
         contentsOf url: URL,
         orRecordRequest request: URLRequest,
         completionHandler: @escaping (RecordResult) -> Void,
-        transform: @escaping (Self) -> Self = { $0 }
+        transform: @escaping (HAR.Entry) -> HAR.Entry = { $0 }
     ) {
         do {
             completionHandler(.success(try HAR(contentsOf: url)))
         } catch {
-            record(request: request, to: url, completionHandler: completionHandler, transform: transform)
-        }
-    }
-}
-
-extension HAR.Entry {
-    // MARK: Recording an Entry
-
-    /// Perform URL Request and create HTTP archive Entry of the request and response.
-    public static func record(
-        request: URLRequest,
-        completionHandler: @escaping (Result<Self, Error>) -> Void
-    ) {
-        let session = URLSession(
-            configuration: URLSessionConfiguration.ephemeral,
-            delegate: TaskDelegate(completionHandler),
-            delegateQueue: nil
-        )
-
-        var bufferedRequest = request
-        bufferedRequest.bufferHTTPBodyStream()
-        session.dataTask(with: bufferedRequest).resume()
-    }
-}
-
-private class TaskDelegate: NSObject, URLSessionDataDelegate {
-    // MARK: Type Aliases
-
-    fileprivate typealias CompletionHandler = (Result<HAR.Entry, Error>) -> Void
-
-    // MARK: Initializers
-
-    fileprivate init(_ completionHandler: @escaping CompletionHandler) {
-        self.completionHandler = completionHandler
-    }
-
-    // MARK: Instance Properties
-
-    private let completionHandler: CompletionHandler
-
-    private var data: Data = Data()
-    private var metric: AnyObject?
-
-    // MARK: Instance Methods
-
-    fileprivate func urlSession(
-        _ session: URLSession,
-        dataTask: URLSessionDataTask,
-        didReceive data: Data
-    ) {
-        self.data.append(data)
-    }
-
-    fileprivate func urlSession(
-        _ session: URLSession,
-        task: URLSessionTask,
-        didCompleteWithError error: Error?
-    ) {
-        if let request = task.currentRequest, let response = task.response as? HTTPURLResponse {
-            var entry = HAR.Entry(
-                request: HAR.Request(consuming: request),
-                response: HAR.Response(response: response, data: data)
+            record(
+                request: request,
+                to: url,
+                transform: transform,
+                completionHandler: completionHandler
             )
-
-#if !os(Linux)
-            if #available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *) {
-                if let metric = self.metric as? URLSessionTaskTransactionMetrics {
-                    entry.timings = HAR.Timing(metric: metric)
-                    entry.time = entry.timings.total
-
-                    switch metric.networkProtocolName {
-                    case "h2":
-                        entry.request.httpVersion = "HTTP/2"
-                        entry.response.httpVersion = "HTTP/2"
-                    case "http/1.1":
-                        entry.request.httpVersion = "HTTP/1.1"
-                        entry.response.httpVersion = "HTTP/1.1"
-                    default:
-                        break
-                    }
-                }
-            }
-#endif
-
-            completionHandler(.success(entry))
-        } else if let error = error {
-            completionHandler(.failure(error))
         }
     }
 }
-
-#if !os(Linux)
-import class Foundation.URLSessionTaskMetrics
-import class Foundation.URLSessionTaskTransactionMetrics
-
-@available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
-extension TaskDelegate {
-    // MARK: Instance Methods
-
-    fileprivate func urlSession(
-        _ session: URLSession, task: URLSessionTask,
-        didFinishCollecting metrics: URLSessionTaskMetrics
-    ) {
-        // Choose last metric, though there might be more accurate of handling
-        // multiple metrics.
-        metric = metrics.transactionMetrics.last
-    }
-}
-#endif
-
-#if !os(Linux)
-@available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
-extension HAR.Timing {
-    // MARK: Initializers
-
-    fileprivate init(metric: URLSessionTaskTransactionMetrics) {
-        self.init()
-
-        if let start = metric.fetchStartDate, let end = metric.domainLookupStartDate {
-            self.blocked = end.timeIntervalSince(start) * 1000
-        }
-
-        if let start = metric.domainLookupStartDate, let end = metric.domainLookupEndDate {
-            self.dns = end.timeIntervalSince(start) * 1000
-        }
-
-        if let start = metric.connectStartDate, let end = metric.connectEndDate {
-            self.connect = end.timeIntervalSince(start) * 1000
-        }
-
-        if let start = metric.requestStartDate, let end = metric.requestEndDate {
-            self.send = end.timeIntervalSince(start) * 1000
-        }
-
-        if let start = metric.requestEndDate, let end = metric.responseStartDate {
-            self.wait = end.timeIntervalSince(start) * 1000
-        }
-
-        if let start = metric.responseStartDate, let end = metric.responseEndDate {
-            self.receive = end.timeIntervalSince(start) * 1000
-        }
-
-        if let start = metric.secureConnectionStartDate, let end = metric.secureConnectionEndDate {
-            self.ssl = end.timeIntervalSince(start) * 1000
-        }
-    }
-}
-#endif

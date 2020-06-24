@@ -24,6 +24,11 @@ public struct HAR: Equatable, Hashable, Codable {
         self.log = log
     }
 
+    /// Create HAR from a single entry.
+    public init(entry: Entry) {
+        self.init(log: Log(entries: [entry]))
+    }
+
     // MARK: Encoding and Decoding
 
     /// Creates a `HAR` from the contents of a file URL.

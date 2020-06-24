@@ -40,8 +40,8 @@ extension HAR {
             log.firstEntry
         }
 
-        open func transform(_ har: HAR) -> HAR {
-            har
+        open func transform(_ entry: HAR.Entry) -> HAR.Entry {
+            entry
         }
 
         override open func startLoading() {
