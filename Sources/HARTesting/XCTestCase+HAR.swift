@@ -13,7 +13,7 @@ extension HAR.MockURLProtocol {
 
 extension XCTestCase {
 #if swift(>=5.3)
-    public func awaitHTTPURLRequest(
+    public func waitForHTTPURLRequest(
         _ request: URLRequest,
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
         mockedWith pathURL: URL,
@@ -21,7 +21,7 @@ extension XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> Result<(data: Data, response: HTTPURLResponse), URLError> {
-        _awaitHTTPURLRequest(
+        _waitForHTTPURLRequest(
             request,
             mockedProtocol: mockProtocol,
             mockedWith: pathURL,
@@ -31,7 +31,7 @@ extension XCTestCase {
         )
     }
 #else
-    public func awaitHTTPURLRequest(
+    public func waitForHTTPURLRequest(
         _ request: URLRequest,
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
         mockedWith pathURL: URL,
@@ -39,7 +39,7 @@ extension XCTestCase {
         file: StaticString = #file,
         line: UInt = #line
     ) -> Result<(data: Data, response: HTTPURLResponse), URLError> {
-        _awaitHTTPURLRequest(
+        _waitForHTTPURLRequest(
             request,
             mockedProtocol: mockProtocol,
             mockedWith: pathURL,
@@ -50,7 +50,7 @@ extension XCTestCase {
     }
 #endif
 
-    private func _awaitHTTPURLRequest(
+    private func _waitForHTTPURLRequest(
         _ request: URLRequest,
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type,
         mockedWith pathURL: URL,

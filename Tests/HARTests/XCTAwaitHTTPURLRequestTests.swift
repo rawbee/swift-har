@@ -12,7 +12,7 @@ final class XCTAwaitHTTPURLRequestTests: XCTestCase {
         let url = try XCTUnwrap(URL(string: "http://example.com"))
         let urlRequest = URLRequest(url: url)
 
-        let result = awaitHTTPURLRequest(urlRequest, mockedWith: fileURL)
+        let result = waitForHTTPURLRequest(urlRequest, mockedWith: fileURL)
 
         switch result {
         case .success((let data, let response)):
