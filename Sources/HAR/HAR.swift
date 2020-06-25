@@ -19,6 +19,11 @@ public struct HAR: Equatable, Hashable, Codable {
 
     // MARK: Initializers
 
+    /// Create empty HAR.
+    public init() {
+        self.log = .init()
+    }
+
     /// Create HAR.
     public init(log: Log) {
         self.log = log

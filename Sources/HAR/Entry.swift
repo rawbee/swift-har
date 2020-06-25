@@ -91,7 +91,7 @@ extension HAR {
         }
 
         public func append(to url: URL, options: Data.WritingOptions = []) throws {
-            var har = try HAR(contentsOf: url)
+            var har = (try? HAR(contentsOf: url)) ?? HAR()
             har.log.entries.append(self)
             try har.write(to: url, options: options)
         }
