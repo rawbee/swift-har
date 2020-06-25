@@ -32,7 +32,7 @@ let request = URLRequest(url: url)
 
 HAR.record(request: request) { (result: Result<HAR, Error>) in
     let archive = try! result.get()
-    print(archive.log.entries[0].request.url)
+    print(archive.log.entries[0].response.status)
 }
 ```
 
@@ -52,7 +52,7 @@ final class FooTests: XCTestCase {
         let urlRequest = URLRequest(url: url)
 
         // If example.har exists, load it offline. Otherwise make an online request and save it as an archive.
-        let result = awaitHTTPURLRequest(urlRequest, mockedWith: archiveFileURL)
+        let result = waitForHTTPURLRequest(urlRequest, mockedWith: archiveFileURL)
 
         let (data, response) = try result.get()
         XCTAssertEqual(response.statusCode, 200)
