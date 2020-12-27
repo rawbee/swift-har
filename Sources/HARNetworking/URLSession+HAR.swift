@@ -135,7 +135,7 @@ import class Foundation.URLSessionTaskMetrics
 import class Foundation.URLSessionTaskTransactionMetrics
 
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
-fileprivate extension TaskDelegate {
+extension TaskDelegate {
     // MARK: Instance Methods
 
     func urlSession(
