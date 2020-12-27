@@ -2,12 +2,12 @@ import struct Foundation.Data
 import struct Foundation.Date
 import struct Foundation.URL
 
-extension HAR {
+public extension HAR {
     /// This object represents an array with all exported HTTP requests. Sorting entries
     /// by `startedDateTime` (starting from the oldest) is preferred way how to export
     /// data since it can make importing faster. However the reader application should
     /// always make sure the array is sorted (if required for the import).
-    public struct Entry: Equatable, Hashable, Codable {
+    struct Entry: Equatable, Hashable, Codable {
         // MARK: Properties
 
         /// Reference to the parent page. Leave out this field if the application does
@@ -98,5 +98,5 @@ extension HAR {
     }
 
     /// Array of Entry objects.
-    public typealias Entries = [Entry]
+    typealias Entries = [Entry]
 }

@@ -78,10 +78,10 @@ private func splitCookieValue(_ cookies: String) -> [String] {
     return values
 }
 
-extension HAR.Headers {
+public extension HAR.Headers {
     // MARK: Initializers
 
-    public init(_ fields: [AnyHashable: Any]) {
+    init(_ fields: [AnyHashable: Any]) {
         self = fields.flatMap { (name, value) -> Self in
             guard let name = name as? String, let value = value as? String else {
                 return []

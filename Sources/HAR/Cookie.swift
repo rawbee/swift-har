@@ -2,10 +2,10 @@ import struct Foundation.Date
 import class Foundation.DateFormatter
 import struct Foundation.TimeZone
 
-extension HAR {
+public extension HAR {
     /// This object contains list of all cookies (used in `Request` and `Response`
     /// objects).
-    public struct Cookie: Equatable, Hashable, Codable {
+    struct Cookie: Equatable, Hashable, Codable {
         // MARK: Properties
 
         /// The name of the cookie.
@@ -127,7 +127,8 @@ extension HAR {
         // MARK: Static Methods
 
         /// Parse cookie style attribute pairs seperated by `;` and `=`
-        internal static func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)] {
+        internal static func parseCookieAttributes(_ string: String) -> [(key: String, value: String?)]
+        {
             string.split(separator: ";").compactMap {
                 let parts = $0.split(separator: "=", maxSplits: 1)
                 let key = String(parts[0])
@@ -141,14 +142,14 @@ extension HAR {
     }
 
     /// Array of Cookie objects.
-    public typealias Cookies = [Cookie]
+    typealias Cookies = [Cookie]
 }
 
-extension HAR.Cookies {
+public extension HAR.Cookies {
     // MARK: Initializers
 
     /// Create Cookies array from HTTP Request "Cookie:" header value.
-    public init(fromCookieHeader header: String) {
+    init(fromCookieHeader header: String) {
         self = HAR.Cookie.parseCookieAttributes(header).map {
             HAR.Cookie(name: $0.key, value: $0.value ?? "")
         }

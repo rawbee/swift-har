@@ -1,9 +1,9 @@
 import struct Foundation.Data
 import struct Foundation.URLComponents
 
-extension HAR {
+public extension HAR {
     /// This object describes posted data, if any (embedded in `Request` object).
-    public struct PostData: Equatable, Hashable, Codable, CustomStringConvertible {
+    struct PostData: Equatable, Hashable, Codable, CustomStringConvertible {
         // MARK: Properties
 
         /// Mime type of posted data.

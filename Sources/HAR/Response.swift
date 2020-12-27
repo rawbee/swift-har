@@ -1,10 +1,11 @@
 import class Foundation.ByteCountFormatter
 import struct Foundation.Data
 
-extension HAR {
+public extension HAR {
     /// This object contains detailed info about the response.
-    public struct Response: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    struct Response: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible
+    {
         // MARK: Properties
 
         /// Response status.

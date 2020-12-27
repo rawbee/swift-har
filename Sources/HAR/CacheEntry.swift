@@ -1,8 +1,8 @@
 import struct Foundation.Date
 
-extension HAR {
+public extension HAR {
     /// This objects contains cache entry state for the request.
-    public struct CacheEntry: Equatable, Hashable, Codable {
+    struct CacheEntry: Equatable, Hashable, Codable {
         // MARK: Properties
 
         /// Expiration time of the cache entry.

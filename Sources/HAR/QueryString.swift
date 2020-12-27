@@ -1,10 +1,11 @@
 import struct Foundation.URLQueryItem
 
-extension HAR {
+public extension HAR {
     /// This object contains list of all parameters & values parsed from a query string,
     /// if any (embedded in `Request` object).
-    public struct QueryString: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    struct QueryString: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible
+    {
         // MARK: Properties
 
         /// The query parameter name.
@@ -47,5 +48,5 @@ extension HAR {
     }
 
     /// Array of QueryString objects.
-    public typealias QueryStrings = [QueryString]
+    typealias QueryStrings = [QueryString]
 }

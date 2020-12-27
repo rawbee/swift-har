@@ -1,7 +1,8 @@
-extension HAR {
+public extension HAR {
     /// List of posted parameters, if any (embedded in `PostData` object).
-    public struct Param: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    struct Param: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible
+    {
         // MARK: Properties
 
         /// Name of a posted parameter.
@@ -78,5 +79,5 @@ extension HAR {
     }
 
     /// Array of Param objects.
-    public typealias Params = [Param]
+    typealias Params = [Param]
 }

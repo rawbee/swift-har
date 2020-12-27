@@ -10,13 +10,13 @@ import struct Foundation.URLRequest
 import class Foundation.URLSession
 #endif
 
-extension HAR {
+public extension HAR {
     // MARK: Recording an HAR
 
-    public typealias RecordResult = Result<Self, Error>
+    typealias RecordResult = Result<Self, Error>
 
     /// Perform URL Request and create HTTP archive of the request and response.
-    public static func record(
+    static func record(
         request: URLRequest,
         to url: URL? = nil,
         transform: @escaping (HAR.Entry) -> HAR.Entry = { $0 },
@@ -31,7 +31,7 @@ extension HAR {
 
     /// Attempt to load HAR from file system, otherwise perform request and
     /// write result to file system.
-    public static func load(
+    static func load(
         contentsOf url: URL,
         orRecordRequest request: URLRequest,
         completionHandler: @escaping (RecordResult) -> Void,

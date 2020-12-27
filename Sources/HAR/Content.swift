@@ -1,9 +1,9 @@
 import struct Foundation.Data
 
-extension HAR {
+public extension HAR {
     /// This object describes details about response content (embedded in `Response`
     /// object).
-    public struct Content: Equatable, Hashable, Codable, CustomStringConvertible {
+    struct Content: Equatable, Hashable, Codable, CustomStringConvertible {
         // MARK: Properties
 
         /// Length of the returned content in bytes. Should be equal to

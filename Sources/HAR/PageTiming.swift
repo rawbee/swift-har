@@ -1,11 +1,11 @@
-extension HAR {
+public extension HAR {
     /// This object describes timings for various events (states) fired during the page
     /// load. All times are specified in milliseconds. If a time info is not available
     /// appropriate field is set to -1.
     ///
     /// Depending on the browser, onContentLoad property represents `DOMContentLoad`
     /// event or `document.readyState == interactive`.
-    public struct PageTiming: Equatable, Hashable, Codable, CustomDebugStringConvertible {
+    struct PageTiming: Equatable, Hashable, Codable, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Content of the page loaded. Number of milliseconds since page load started

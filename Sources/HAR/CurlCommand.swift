@@ -1,7 +1,7 @@
 import struct Foundation.URL
 
-extension HAR {
-    public struct CurlCommand: CustomStringConvertible {
+public extension HAR {
+    struct CurlCommand: CustomStringConvertible {
         var url: URL
         var method: String
         var headers: [(name: String, value: String)]

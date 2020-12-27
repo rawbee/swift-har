@@ -1,7 +1,7 @@
-extension HAR {
+public extension HAR {
     /// This object describes various phases within request-response round trip. All
     /// times are specified in milliseconds.
-    public struct Timing: Equatable, Hashable, Codable, CustomDebugStringConvertible {
+    struct Timing: Equatable, Hashable, Codable, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Time spent in a queue waiting for a network connection. Use -1 if the timing

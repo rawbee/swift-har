@@ -1,7 +1,8 @@
-extension HAR {
+public extension HAR {
     /// This object represents the web browser used.
-    public struct Browser: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    struct Browser: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible
+    {
         // MARK: Properties
 
         /// Name of the application/browser used to export the log.

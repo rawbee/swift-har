@@ -1,9 +1,9 @@
 import struct Foundation.Date
 import class Foundation.DateFormatter
 
-extension HAR {
+public extension HAR {
     /// This object represents list of exported pages.
-    public struct Page: Equatable, Hashable, Codable, CustomDebugStringConvertible {
+    struct Page: Equatable, Hashable, Codable, CustomDebugStringConvertible {
         // MARK: Properties
 
         /// Date and time stamp for the beginning of the page load.
@@ -79,5 +79,5 @@ extension HAR {
     }
 
     /// Array of Page objects.
-    public typealias Pages = [Page]
+    typealias Pages = [Page]
 }

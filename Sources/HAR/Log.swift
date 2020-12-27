@@ -1,11 +1,11 @@
-extension HAR {
+public extension HAR {
     /// This object represents the root of exported data.
     ///
     /// There is one `Page` object for every exported web page and one `Entry` object
     /// for every HTTP request. In case when an HTTP trace tool isn't able to group
     /// requests by a page, the `pages` object is empty and individual requests doesn't
     /// have a parent page.
-    public struct Log: Equatable, Hashable, Codable {
+    struct Log: Equatable, Hashable, Codable {
         // MARK: Properties
 
         /// Version number of the format. If empty, string "1.1" is assumed by default.

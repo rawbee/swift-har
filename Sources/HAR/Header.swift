@@ -1,11 +1,12 @@
 import struct Foundation.NSRange
 import class Foundation.NSRegularExpression
 
-extension HAR {
+public extension HAR {
     /// This object contains list of all headers (used in `Request` and `Response`
     /// objects).
-    public struct Header: Equatable, Comparable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    struct Header: Equatable, Comparable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible
+    {
         // MARK: Properties
 
         /// The header name.
@@ -112,13 +113,13 @@ extension HAR {
     }
 
     /// Array of Header objects.
-    public typealias Headers = [Header]
+    typealias Headers = [Header]
 }
 
-extension HAR.Headers {
+public extension HAR.Headers {
     // MARK: Computed Properties
 
-    public var headersAsDictionary: [String: String] {
+    var headersAsDictionary: [String: String] {
         reduce(into: [:]) { result, header in
             if result[header.name] == nil {
                 result[header.name] = header.value
@@ -135,7 +136,7 @@ extension HAR.Headers {
     /// Header names are case-insensitive.
     ///
     /// - Parameter name: The HTTP Header name.
-    public func values(forName name: String) -> [String] {
+    func values(forName name: String) -> [String] {
         filter { $0.isNamed(name) }.map { $0.value }
     }
 
@@ -144,7 +145,7 @@ extension HAR.Headers {
     /// Header names are case-insensitive.
     ///
     /// - Parameter name: The HTTP Header name.
-    public func value(forName name: String) -> String? {
+    func value(forName name: String) -> String? {
         values(forName: name).first
     }
 }

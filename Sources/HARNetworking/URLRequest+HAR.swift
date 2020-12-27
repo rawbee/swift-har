@@ -9,11 +9,11 @@ import struct FoundationNetworking.URLRequest
 import struct Foundation.URLRequest
 #endif
 
-extension HAR.Request {
+public extension HAR.Request {
     /// Creates a HAR Request from a URL Request.
     ///
     /// - Parameter request: A URL Request.
-    public init(request: URLRequest, data: Data? = nil) {
+    init(request: URLRequest, data: Data? = nil) {
         /// - Invariant: `URLRequest.httpMethod` defaults to `"GET"`
         let method = request.httpMethod ?? "GET"
 
@@ -38,20 +38,20 @@ extension HAR.Request {
     /// Create a HAR Request from a URL Request consuming it's httpBodyStream.
     ///
     /// - Parameter request: A URL Request.
-    public init(consuming request: URLRequest) {
+    init(consuming request: URLRequest) {
         var bufferedRequest = request
         bufferedRequest.bufferHTTPBodyStream()
         self.init(request: bufferedRequest)
     }
 }
 
-extension URLRequest {
+public extension URLRequest {
     // MARK: Initializers
 
     /// Creates a URL Request from a `HAR.Request`.
     ///
     /// - Parameter request: A `HAR.Request`.
-    public init(request: HAR.Request) {
+    init(request: HAR.Request) {
         self.init(url: request.url)
         httpMethod = request.method
         for header in request.headers {
@@ -61,7 +61,7 @@ extension URLRequest {
     }
 
     /// If body is represented as a stream, buffer it as Data on `httpBody`.
-    public mutating func bufferHTTPBodyStream() {
+    mutating func bufferHTTPBodyStream() {
         // Ensure non-GET and body is already set
         guard httpMethod != "GET", httpBody == nil else {
             return

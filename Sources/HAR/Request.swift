@@ -2,10 +2,11 @@ import struct Foundation.Data
 import struct Foundation.URL
 import struct Foundation.URLComponents
 
-extension HAR {
+public extension HAR {
     /// This object contains detailed info about performed request.
-    public struct Request: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    struct Request: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible
+    {
         // MARK: Properties
 
         /// Request method.

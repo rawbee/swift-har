@@ -36,14 +36,14 @@ extension HAR.Response {
     }
 }
 
-extension HTTPURLResponse {
+public extension HTTPURLResponse {
     // MARK: Initializers
 
     /// Creates a HTTP URL Request from a `HAR.Response`.
     ///
     /// - Parameter url: The URL from which the response was generated.
     /// - Parameter response: The HAR Response to reconstruct.
-    public convenience init(url: URL, response: HAR.Response) {
+    convenience init(url: URL, response: HAR.Response) {
         /// - Remark: initializer doesn't appear to have any failure cases
         self.init(
             url: url,

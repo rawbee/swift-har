@@ -7,13 +7,13 @@ import class FoundationNetworking.HTTPURLResponse
 import struct FoundationNetworking.URLRequest
 #endif
 
-extension HAR.MockURLProtocol {
-    public static var caller: (file: StaticString, line: UInt)?
+public extension HAR.MockURLProtocol {
+    static var caller: (file: StaticString, line: UInt)?
 }
 
-extension XCTestCase {
+public extension XCTestCase {
 #if swift(>=5.3)
-    public func waitForHTTPURLRequest(
+    func waitForHTTPURLRequest(
         _ request: URLRequest,
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
         mockedWith pathURL: URL,
@@ -31,7 +31,7 @@ extension XCTestCase {
         )
     }
 #else
-    public func waitForHTTPURLRequest(
+    func waitForHTTPURLRequest(
         _ request: URLRequest,
         mockedProtocol mockProtocol: HAR.MockURLProtocol.Type = HAR.MockURLProtocol.self,
         mockedWith pathURL: URL,

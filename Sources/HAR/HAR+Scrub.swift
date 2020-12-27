@@ -2,13 +2,13 @@ import class Foundation.NSRegularExpression
 
 // MARK: Redacting sensitive data
 
-extension HAR {
-    public static let sensitiveHeaders = try! NSRegularExpression(
+public extension HAR {
+    static let sensitiveHeaders = try! NSRegularExpression(
         pattern: #"auth|cookie|key|passsword|secret|token"#,
         options: .caseInsensitive
     )
 
-    public enum ScrubOperation {
+    enum ScrubOperation {
         case redactHeader(name: String, placeholder: String)
         case redactHeaderMatching(pattern: NSRegularExpression, placeholder: String)
         case removeHeader(name: String)
@@ -16,19 +16,19 @@ extension HAR {
         case stripTimmings
     }
 
-    public mutating func scrub(_ operations: [ScrubOperation]) {
+    mutating func scrub(_ operations: [ScrubOperation]) {
         log.scrub(operations)
     }
 
-    public func scrubbing(_ operations: [ScrubOperation]) -> Self {
+    func scrubbing(_ operations: [ScrubOperation]) -> Self {
         var copy = self
         copy.scrub(operations)
         return copy
     }
 }
 
-extension HAR.Entry {
-    public mutating func scrub(_ operations: [HAR.ScrubOperation]) {
+public extension HAR.Entry {
+    mutating func scrub(_ operations: [HAR.ScrubOperation]) {
         for operation in operations {
             switch operation {
             case .stripTimmings:
@@ -43,15 +43,15 @@ extension HAR.Entry {
         response.scrub(operations)
     }
 
-    public func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
+    func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
         var copy = self
         copy.scrub(operations)
         return copy
     }
 }
 
-extension HAR.Log {
-    public mutating func scrub(_ operations: [HAR.ScrubOperation]) {
+public extension HAR.Log {
+    mutating func scrub(_ operations: [HAR.ScrubOperation]) {
         if var pages = pages {
             for index in pages.indices {
                 pages[index].scrub(operations)
@@ -64,15 +64,15 @@ extension HAR.Log {
         }
     }
 
-    public func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
+    func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
         var copy = self
         copy.scrub(operations)
         return copy
     }
 }
 
-extension HAR.Page {
-    public mutating func scrub(_ operations: [HAR.ScrubOperation]) {
+public extension HAR.Page {
+    mutating func scrub(_ operations: [HAR.ScrubOperation]) {
         for operation in operations {
             switch operation {
             case .stripTimmings:
@@ -83,15 +83,15 @@ extension HAR.Page {
         }
     }
 
-    public func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
+    func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
         var copy = self
         copy.scrub(operations)
         return copy
     }
 }
 
-extension HAR.Request {
-    public mutating func scrub(_ operations: [HAR.ScrubOperation]) {
+public extension HAR.Request {
+    mutating func scrub(_ operations: [HAR.ScrubOperation]) {
         let oldCookieValue = headers.value(forName: "Cookie")
 
         headers.scrub(operations)
@@ -103,46 +103,47 @@ extension HAR.Request {
         }
     }
 
-    public func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
+    func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
         var copy = self
         copy.scrub(operations)
         return copy
     }
 }
 
-extension HAR.Response {
-    public mutating func scrub(_ operations: [HAR.ScrubOperation]) {
+public extension HAR.Response {
+    mutating func scrub(_ operations: [HAR.ScrubOperation]) {
         let oldSetCookieValue = headers.value(forName: "Set-Cookie")
 
         headers.scrub(operations)
 
         if let newSetCookieValue = headers.value(forName: "Set-Cookie"),
-            newSetCookieValue != oldSetCookieValue {
+           newSetCookieValue != oldSetCookieValue
+        {
             for index in cookies.indices {
                 cookies[index].value = newSetCookieValue
             }
         }
     }
 
-    public func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
+    func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
         var copy = self
         copy.scrub(operations)
         return copy
     }
 }
 
-extension HAR.Headers {
-    public mutating func removeAll(name: String) {
+public extension HAR.Headers {
+    mutating func removeAll(name: String) {
         removeAll(where: { $0.isNamed(name) })
     }
 
-    public func removingAll(name: String) -> Self {
+    func removingAll(name: String) -> Self {
         var copy = self
         copy.removeAll(name: name)
         return copy
     }
 
-    public mutating func scrub(_ operations: [HAR.ScrubOperation]) {
+    mutating func scrub(_ operations: [HAR.ScrubOperation]) {
         for operation in operations {
             switch operation {
             case .redactHeader(let name, let placeholder):
@@ -167,7 +168,7 @@ extension HAR.Headers {
         }
     }
 
-    public func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
+    func scrubbing(_ operations: [HAR.ScrubOperation]) -> Self {
         var copy = self
         copy.scrub(operations)
         return copy

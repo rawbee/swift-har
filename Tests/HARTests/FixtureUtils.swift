@@ -15,9 +15,9 @@ let fixtureData: [String: Data] = {
         }
 }()
 
-extension FileManager {
+private extension FileManager {
     /// - Bug: Reading directories seems buggy under Xcode's XCTest. Try a few times 🤷🏻‍♂️
-    fileprivate func contentsOfDirectory(at url: URL, tries: Int = 3) throws -> [URL] {
+    func contentsOfDirectory(at url: URL, tries: Int = 3) throws -> [URL] {
         do {
             return try contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [])
         } catch {

@@ -1,7 +1,8 @@
-extension HAR {
+public extension HAR {
     /// This object represents the log creator application.
-    public struct Creator: Equatable, Hashable, Codable, CustomStringConvertible,
-        CustomDebugStringConvertible {
+    struct Creator: Equatable, Hashable, Codable, CustomStringConvertible,
+        CustomDebugStringConvertible
+    {
         // MARK: Static Properties
 
         /// Creator info used when this library creates a new HAR log.

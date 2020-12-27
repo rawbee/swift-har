@@ -1,6 +1,6 @@
-extension HAR {
+public extension HAR {
     /// This objects contains info about a request coming from browser cache.
-    public struct Cache: Equatable, Hashable, Codable {
+    struct Cache: Equatable, Hashable, Codable {
         // MARK: Properties
 
         /// State of a cache entry before the request. Leave out this field if the

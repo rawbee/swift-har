@@ -22,11 +22,11 @@ import class Foundation.URLSessionTask
 
 public typealias URLSessionArchiveTask = URLSessionDataTask
 
-extension URLSession {
+public extension URLSession {
     // MARK: Recording an Entry
 
     /// Perform URL Request and create HTTP archive Entry of the request and response.
-    public func archiveTask(
+    func archiveTask(
         with request: URLRequest,
         appendingTo fileURL: URL? = nil,
         transform: @escaping (HAR.Entry) -> HAR.Entry = { $0 },
@@ -69,7 +69,7 @@ private class TaskDelegate: NSObject, URLSessionDataDelegate {
     private let transform: Transform
     private let completionHandler: CompletionHandler
 
-    private var data: Data = Data()
+    private var data = Data()
     private var metric: AnyObject?
 
     // MARK: Instance Methods
@@ -135,10 +135,10 @@ import class Foundation.URLSessionTaskMetrics
 import class Foundation.URLSessionTaskTransactionMetrics
 
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
-extension TaskDelegate {
+fileprivate extension TaskDelegate {
     // MARK: Instance Methods
 
-    fileprivate func urlSession(
+    func urlSession(
         _ session: URLSession,
         task: URLSessionTask,
         didFinishCollecting metrics: URLSessionTaskMetrics
@@ -152,10 +152,10 @@ extension TaskDelegate {
 
 #if !os(Linux)
 @available(iOS 10, macOS 10.12, tvOS 10.0, watchOS 3.0, *)
-extension HAR.Timing {
+fileprivate extension HAR.Timing {
     // MARK: Initializers
 
-    fileprivate init(metric: URLSessionTaskTransactionMetrics) {
+    init(metric: URLSessionTaskTransactionMetrics) {
         self.init()
 
         if let start = metric.fetchStartDate, let end = metric.domainLookupStartDate {
