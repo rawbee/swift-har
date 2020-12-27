@@ -28,7 +28,7 @@ jobs:
         container:
           - "swift:5.1"
           - "swift:5.2"
-          - "swiftlang/swift:nightly-5.3-bionic"
+          - "swift:5.3"
 
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
