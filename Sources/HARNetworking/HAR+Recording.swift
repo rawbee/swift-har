@@ -29,6 +29,19 @@ public extension HAR {
         task.resume()
     }
 
+    static func recordWithSession(
+        request: URLRequest,
+        session: URLSession,
+        to url: URL? = nil,
+        transform: @escaping (HAR.Entry) -> HAR.Entry = { $0 },
+        completionHandler: @escaping (RecordResult) -> Void
+    ) {
+        let task = session.archiveTask(with: request, appendingTo: url, transform: transform) {
+            completionHandler($0.map { .init(entry: $0) })
+        }
+        task.resume()
+    }
+
     /// Attempt to load HAR from file system, otherwise perform request and
     /// write result to file system.
     static func load(
